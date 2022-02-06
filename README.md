@@ -14,8 +14,8 @@ instead, so i decided to make this public.
 
 ## invite
 
-this bot works without any special permissions and roles. just invite it and start jamming. you can find all commands
-using the help command.\
+**this bot works without any special permissions and roles. just invite it and start jamming. you can find all commands
+using the help command.**\
 invitation
 link: [discord.com/api/oauth2/authorize?client_id=891760327522394183&permissions=274881136640&scope=bot](https://discord.com/api/oauth2/authorize?client_id=891760327522394183&permissions=274881136640&scope=bot)
 
