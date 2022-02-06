@@ -10,13 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import java.sql.SQLException;
 import java.util.Objects;
 
-public class HelpCommand implements Command {
-
-    private final SettingsManager settingsManager;
-
-    public HelpCommand(SettingsManager settingsManager) {
-        this.settingsManager = settingsManager;
-    }
+public record HelpCommand(SettingsManager settingsManager) implements Command {
 
     @Override
     public void action(String[] args, @NotNull MessageReceivedEvent event) {
@@ -36,7 +30,7 @@ public class HelpCommand implements Command {
                 "%prefix%shuffle - Shuffles the queue. `(Alias: %prefix%sh)`\n" +
                 "%prefix%skip [amount] - Skips [amount] of songs in the queue. `(Alias: %prefix%s)`\n" +
                 "%prefix%stop - Stops the playback.\n" +
-                "%prefix%prefix - Change the prefix for this bot.`\n";
+                "%prefix%prefix - Change the prefix for this bot.\n";
 
         var serverId = event.getGuild().getIdLong();
         String prefix = "";

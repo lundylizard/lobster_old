@@ -24,25 +24,19 @@ public class ShuffleCommand implements Command {
 
         assert memberVoiceState != null;
         if (!memberVoiceState.inVoiceChannel()) {
-
             channel.sendMessage(":warning: You are not in a voice channel.").queue();
             return;
-
         }
 
         assert selfVoiceState != null;
         if (!Objects.equals(memberVoiceState.getChannel(), selfVoiceState.getChannel())) {
-
             channel.sendMessage(":warning: You need to be in the same voice channel as me.").queue();
             return;
-
         }
 
         if (queue.isEmpty()) {
-
             channel.sendMessage(":warning: The queue is currently empty.").queue();
             return;
-
         }
 
         var trackList = new LinkedList<>(queue);

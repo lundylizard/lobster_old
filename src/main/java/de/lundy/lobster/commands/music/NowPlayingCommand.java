@@ -20,10 +20,8 @@ public class NowPlayingCommand implements Command {
 
         assert selfVoiceState != null;
         if (!selfVoiceState.inVoiceChannel()) {
-
             channel.sendMessage(":warning: I am not playing anything.").queue();
             return;
-
         }
 
         var member = event.getMember();
@@ -31,34 +29,30 @@ public class NowPlayingCommand implements Command {
 
         assert memberVoiceState != null;
         if (!memberVoiceState.inVoiceChannel()) {
-
             channel.sendMessage(":warning: You are not in a voice channel.").queue();
             return;
-
         }
 
         if (!Objects.equals(memberVoiceState.getChannel(), selfVoiceState.getChannel())) {
-
             channel.sendMessage(":warning: You need to be in the same voice channel as me.").queue();
             return;
-
         }
 
         var musicManager = PlayerManager.getInstance().getMusicManager(event.getGuild());
         var audioPlayer = musicManager.audioPlayer;
 
         if (audioPlayer.getPlayingTrack() == null) {
-
             channel.sendMessage(":warning: There is currently no track playing.").queue();
             return;
-
         }
 
         var trackInfo = audioPlayer.getPlayingTrack().getInfo();
         var nowPlaying = new StringBuilder();
         nowPlaying.append(":notes: **NOW PLAYING:** ").append(trackInfo.title).append("\n`by ").append(trackInfo.author).append("` [`").append(ChatUtils.trackPosition(audioPlayer.getPlayingTrack())).append("`]");
-        var embedColor = Objects.requireNonNull(event.getGuild().getMember(event.getJDA().getSelfUser())).getColor();
-        channel.sendMessage(new EmbedBuilder().setDescription(nowPlaying).setColor(embedColor).build()).queue();
+        channel.sendMessage(new EmbedBuilder()
+                .setDescription(nowPlaying)
+                .setColor(Objects.requireNonNull(event.getGuild().getMember(event.getJDA().getSelfUser())).getColor())
+                .build()).queue();
 
     }
 }

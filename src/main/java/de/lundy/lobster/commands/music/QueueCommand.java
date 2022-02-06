@@ -25,25 +25,19 @@ public class QueueCommand implements Command {
 
         assert memberVoiceState != null;
         if (!memberVoiceState.inVoiceChannel()) {
-
             channel.sendMessage(":warning: You are not in a voice channel.").queue();
             return;
-
         }
 
         assert selfVoiceState != null;
         if (!Objects.equals(memberVoiceState.getChannel(), selfVoiceState.getChannel())) {
-
             channel.sendMessage(":warning: You need to be in the same voice channel as me.").queue();
             return;
-
         }
 
         if (queue.isEmpty() && musicManager.audioPlayer.getPlayingTrack() == null) {
-
             channel.sendMessage(":warning: The queue is currently empty and there is no song playing.").queue();
             return;
-
         }
 
         if (queue.isEmpty() && musicManager.audioPlayer.getPlayingTrack() != null) {

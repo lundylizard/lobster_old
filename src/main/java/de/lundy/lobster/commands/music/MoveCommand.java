@@ -20,10 +20,8 @@ public class MoveCommand implements Command {
 
         assert selfVoiceState != null;
         if (!selfVoiceState.inVoiceChannel()) {
-
             channel.sendMessage(":warning: I am not playing anything.").queue();
             return;
-
         }
 
         var member = event.getMember();
@@ -31,17 +29,13 @@ public class MoveCommand implements Command {
 
         assert memberVoiceState != null;
         if (!memberVoiceState.inVoiceChannel()) {
-
             channel.sendMessage(":warning: You are not in a voice channel.").queue();
             return;
-
         }
 
         if (!Objects.equals(memberVoiceState.getChannel(), selfVoiceState.getChannel())) {
-
             channel.sendMessage(":warning: You need to be in the same voice channel as me.").queue();
             return;
-
         }
 
         if (args.length == 2) {
@@ -50,17 +44,13 @@ public class MoveCommand implements Command {
             var queue = musicManager.scheduler.queue;
 
             if (ChatUtils.checkIfNumber(args[0])) {
-
                 event.getTextChannel().sendMessage(":x: " + args[0] + " is not a valid number.").queue();
                 return;
-
             }
 
             if (ChatUtils.checkIfNumber(args[1])) {
-
                 event.getTextChannel().sendMessage(":x: " + args[1] + " is not a valid number.").queue();
                 return;
-
             }
 
             var currentTrackPos = Integer.parseInt(args[0]);

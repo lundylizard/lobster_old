@@ -8,15 +8,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.sql.SQLException;
 import java.util.Objects;
-import java.util.Set;
 
-public class PrefixCommand implements Command {
-
-    private final SettingsManager settingsManager;
-
-    public PrefixCommand(SettingsManager settingsManager) {
-        this.settingsManager = settingsManager;
-    }
+public record PrefixCommand(SettingsManager settingsManager) implements Command {
 
     @Override
     public void action(String[] args, @NotNull MessageReceivedEvent event) {
@@ -35,7 +28,7 @@ public class PrefixCommand implements Command {
 
                 } else if (args.length == 1) {
 
-                    if (args[0].length() > 10) {
+                    if (args[0].length() <= 10) {
 
                         settingsManager.setPrefix(serverId, args[0]);
                         event.getTextChannel().sendMessage("Successfully set prefix for this server to `" + args[0] + "`").queue();
@@ -48,7 +41,6 @@ public class PrefixCommand implements Command {
             } else {
                 event.getTextChannel().sendMessage("Only administrators can change the prefix.").queue();
             }
-
 
         } catch (SQLException e) {
             e.printStackTrace();

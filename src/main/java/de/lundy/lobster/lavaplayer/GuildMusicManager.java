@@ -11,12 +11,10 @@ public class GuildMusicManager {
     private final AudioPlayerSendHandler sendHandler;
 
     public GuildMusicManager(@NotNull AudioPlayerManager manager) {
-
         this.audioPlayer = manager.createPlayer();
         this.scheduler = new TrackScheduler(this.audioPlayer);
         this.audioPlayer.addListener(this.scheduler);
         this.sendHandler = new AudioPlayerSendHandler(this.audioPlayer);
-
     }
 
     public AudioPlayerSendHandler getSendHandler() {

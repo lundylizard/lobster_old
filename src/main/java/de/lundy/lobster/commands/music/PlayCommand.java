@@ -27,48 +27,38 @@ public class PlayCommand implements Command {
 
         assert memberVoiceState != null;
         if (!memberVoiceState.inVoiceChannel()) {
-
             channel.sendMessage(":warning: You are not in a voice channel.").queue();
             return;
-
         }
 
         assert selfVoiceState != null;
         if (!selfVoiceState.inVoiceChannel()) {
-
             var audioManager = event.getGuild().getAudioManager();
             var memberChannel = Objects.requireNonNull(event.getMember().getVoiceState()).getChannel();
             audioManager.openAudioConnection(memberChannel);
             assert memberChannel != null;
             event.getChannel().sendMessage(":loud_sound: Connecting to voice channel `\uD83D\uDD0A " + memberChannel.getName() + "`").queue();
-
         }
 
-            for (var arg : args) {
-                link.append(arg).append(" ");
-            }
+        for (var arg : args) {
+            link.append(arg).append(" ");
+        }
 
-            link.delete(link.length(), link.length() - 1); // Remove the last whitespace
-
-            if (!isUrl(link.toString())) {
-                link.insert(0, "ytsearch:");
-            }
+        if (!isUrl(link.toString())) {
+            link.insert(0, "ytsearch:");
+        }
 
         if (!event.getMessage().getAttachments().isEmpty()) {
-
             link.delete(0, link.length());
             link.append(event.getMessage().getAttachments().get(0).getUrl());
-
         }
 
         if (link.isEmpty()) {
-
             channel.sendMessage(":warning: Please provide a file or an URL.").queue();
             return;
-
         }
 
-        //Spotify doesn't allow direct playback from their api, so it's getting the data from the song and searches it on youtube
+        //Spotify doesn't allow direct playback from their API, so it's getting the data from the song and searches it on YouTube
         if (spotify.isSpotifyLink(link.toString())) {
 
             var spotifyId = spotify.getSpotifyIdFromLink(link.toString());
@@ -80,13 +70,13 @@ public class PlayCommand implements Command {
                 e.printStackTrace();
             }
 
-            if (new Random().nextInt(100) < 20) {
-                event.getTextChannel().sendMessage(":information_source: Due to spotifys API limitations the bot is looking up the song on YouTube. If it can't find the song requested, please search for it or put a link from YouTube.").queue();
+            if (new Random().nextInt(100) < 10) {
+                event.getTextChannel().sendMessage(":information_source: Due to Spotify's API limitations the bot is looking up the song on YouTube. If it can't find the song requested, please request it manually using a search term or a link from YouTube.").queue();
             }
 
         }
 
-        PlayerManager.getInstance().loadAndPlay(event, link.toString());
+        PlayerManager.getInstance().loadAndPlay(event, link.toString().trim());
 
     }
 
@@ -97,6 +87,6 @@ public class PlayCommand implements Command {
         } catch (Exception ex) {
             return false;
         }
-    }
 
+    }
 }

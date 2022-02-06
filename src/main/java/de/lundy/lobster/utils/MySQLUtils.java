@@ -17,8 +17,8 @@ public class MySQLUtils {
         if (properties == null) {
 
             properties = new Properties();
-            properties.setProperty("user", "root");
-            properties.setProperty("password", Secrets.DATABASE_PASSWORD.getValue());
+            properties.setProperty("user", Secrets.DATABASE_USER);
+            properties.setProperty("password", Secrets.DATABASE_PASSWORD);
             properties.setProperty("MaxPooledStatements", "250");
 
         }
@@ -32,7 +32,7 @@ public class MySQLUtils {
         if (connection == null) {
             try {
 
-                connection = DriverManager.getConnection(Secrets.DATABASE_URL.getValue(), getProperties());
+                connection = DriverManager.getConnection(Secrets.DATABASE_URL, getProperties());
 
             } catch (SQLException e) {
                 e.printStackTrace();

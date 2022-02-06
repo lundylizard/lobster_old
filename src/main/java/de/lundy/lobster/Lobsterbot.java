@@ -32,11 +32,9 @@ import java.util.concurrent.TimeUnit;
  */
 public class Lobsterbot {
 
+    // Please note: The Secrets class is not publicly available, because I did not intend this to be built from others.
     private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(0);
     private static SettingsManager settingsManager;
-    // Please note: The Secrets class is not publicly available, because I did not intend this to be built from others.
-    public static final String SPOTIFY_CLIENT_ID = Secrets.SPOTIFY_CLIENT_ID.getValue();
-    public static final String SPOTIFY_CLIENT_SECRET = Secrets.SPOTIFY_CLIENT_TOKEN.getValue();
 
     public static void main(String @NotNull [] args) throws SQLException, LoginException {
 

@@ -24,41 +24,31 @@ public class RemoveCommand implements Command {
 
         assert memberVoiceState != null;
         if (!memberVoiceState.inVoiceChannel()) {
-
             channel.sendMessage(":warning: You are not in a voice channel.").queue();
             return;
-
         }
 
         assert selfVoiceState != null;
         if (!Objects.equals(memberVoiceState.getChannel(), selfVoiceState.getChannel())) {
-
             channel.sendMessage(":warning: You need to be in the same voice channel as me.").queue();
             return;
-
         }
 
         if (queue.isEmpty()) {
-
             channel.sendMessage(":warning: The queue is currently empty.").queue();
             return;
-
         }
 
         if (ChatUtils.checkIfNumber(args[0])) {
-
             channel.sendMessage(":warning: `" + args[0] + "` is not a valid value.").queue();
             return;
-
         }
 
         var index = Integer.parseInt(args[0]);
 
         if (index < 1 && index < queue.size()) {
-
             channel.sendMessage(":warning: Track `#" + args[0] + "` is not in the queue.").queue();
             return;
-
         }
 
         var trackList = new ArrayList<>(queue);

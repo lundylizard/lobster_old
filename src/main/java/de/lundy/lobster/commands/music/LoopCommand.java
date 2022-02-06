@@ -18,10 +18,8 @@ public class LoopCommand implements Command {
 
         assert selfVoiceState != null;
         if (!selfVoiceState.inVoiceChannel()) {
-
             channel.sendMessage(":warning: I am not playing anything.").queue();
             return;
-
         }
 
         var member = event.getMember();
@@ -29,17 +27,13 @@ public class LoopCommand implements Command {
 
         assert memberVoiceState != null;
         if (!memberVoiceState.inVoiceChannel()) {
-
             channel.sendMessage(":warning: You are not in a voice channel.").queue();
             return;
-
         }
 
         if (!Objects.equals(memberVoiceState.getChannel(), selfVoiceState.getChannel())) {
-
             channel.sendMessage(":warning: You need to be in the same voice channel as me.").queue();
             return;
-
         }
 
         var musicManager = PlayerManager.getInstance().getMusicManager(event.getGuild());

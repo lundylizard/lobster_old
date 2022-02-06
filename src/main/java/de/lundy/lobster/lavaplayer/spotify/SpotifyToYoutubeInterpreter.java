@@ -1,6 +1,7 @@
 package de.lundy.lobster.lavaplayer.spotify;
 
 import de.lundy.lobster.Lobsterbot;
+import de.lundy.lobster.Secrets;
 import org.apache.hc.core5.http.ParseException;
 import org.jetbrains.annotations.NotNull;
 import se.michaelthelin.spotify.SpotifyApi;
@@ -26,8 +27,8 @@ public class SpotifyToYoutubeInterpreter {
     private void initSpotify() throws ParseException, SpotifyWebApiException, IOException {
 
         this.spotifyApi = new SpotifyApi.Builder()
-                .setClientId(Lobsterbot.SPOTIFY_CLIENT_ID)
-                .setClientSecret(Lobsterbot.SPOTIFY_CLIENT_SECRET)
+                .setClientId(Secrets.SPOTIFY_CLIENT_ID)
+                .setClientSecret(Secrets.SPOTIFY_CLIENT_SECRET)
                 .build();
         var request = new ClientCredentialsRequest.Builder(spotifyApi.getClientId(), spotifyApi.getClientSecret());
         var creds = request.grant_type("client_credentials").build().execute();
@@ -53,10 +54,8 @@ public class SpotifyToYoutubeInterpreter {
 
     //Returns the song name from a spotify track id
     public String getSongNameFromSpotify(String spotifyId) throws IOException, ParseException, SpotifyWebApiException {
-
         var trackRequest = spotifyApi.getTrack(spotifyId).build();
         return trackRequest.execute().getName();
-
     }
 
     public boolean isSpotifyLink(@NotNull String link) {
