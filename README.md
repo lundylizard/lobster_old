@@ -1,7 +1,7 @@
 # lobster
 
 a discord bot to play music, officially supports youtube, spotify and mp3/mp4-files. everything is handled by
-lavaplayer, so for more information check that out.\shoutout to the lobster gang, where the bot name originated from and
+lavaplayer, so for more information check that out.\ shoutout to the lobster gang, where the bot name originated from and
 this bot originally was planned on being used on. i had big plans for this, but i wanted to focus on something else
 instead, so i decided to make this public.
 
