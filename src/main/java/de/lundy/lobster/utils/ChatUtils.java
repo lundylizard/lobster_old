@@ -6,6 +6,8 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.management.ManagementFactory;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 public class ChatUtils {
@@ -52,6 +54,21 @@ public class ChatUtils {
 
         return (current[0].toString().length() == 1 ? "0" + current[0] : current[0]) + ":" + (current[1].toString().length() == 1 ? "0" + current[1] : current[1])
                 + " / " + (durationSong[0].toString().length() == 1 ? "0" + durationSong[0] : durationSong[0]) + ":" + (durationSong[1].toString().length() == 1 ? "0" + durationSong[1] : durationSong[1]);
+
+    }
+
+    public static String randomFooter() {
+
+        var messages = new ArrayList<String>();
+        messages.add("\uD83E\uDD9E Do you enjoy this bot? Please share it with your friends: !invite");
+        messages.add("\uD83E\uDD9E Did you know lobsters used to be prison food?");
+        messages.add("\uD83E\uDD9E Please consider donating if you enjoy this bot to keep this bot up: !donate");
+        messages.add("\uD83E\uDD9E lundy would never eat a lobster.");
+        messages.add("\uD83E\uDD9E Shoutout to the Lobster Gang");
+        messages.add("\uD83E\uDD9E Found a bug? Have a feature request? Create an issue on GitHub!");
+        messages.add("\uD83E\uDD9E Lobsters smell with their legs.");
+
+        return messages.get(new Random().nextInt(messages.size()));
 
     }
 

@@ -11,7 +11,7 @@ public class ReadyListener extends ListenerAdapter {
 
         //Prints every server this bot is running on in the console
 
-        System.out.println("Bot is running on:\n");
+        System.out.println("Bot is running on:");
 
         for (var guild : event.getJDA().getGuilds()) {
             System.out.println(guild.getName() + " (" + guild.getMembers().size() + ") -- ID: " + guild.getId());

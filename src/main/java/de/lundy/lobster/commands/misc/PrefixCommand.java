@@ -1,4 +1,4 @@
-package de.lundy.lobster.commands.music;
+package de.lundy.lobster.commands.misc;
 
 import de.lundy.lobster.commands.impl.Command;
 import de.lundy.lobster.utils.mysql.SettingsManager;
@@ -24,22 +24,22 @@ public record PrefixCommand(SettingsManager settingsManager) implements Command 
                 if (args.length == 0) {
 
                     var currentPrefix = settingsManager.getPrefix(serverId);
-                    event.getTextChannel().sendMessage("» Prefix on this server is `" + currentPrefix + "`").queue();
+                    event.getTextChannel().sendMessage(":information_source: Prefix on this server is `" + currentPrefix + "`").queue();
 
                 } else if (args.length == 1) {
 
-                    if (args[0].length() <= 10) {
+                    if (args[0].length() <= 10) { // Why would you even do this?
 
                         settingsManager.setPrefix(serverId, args[0]);
-                        event.getTextChannel().sendMessage("Successfully set prefix for this server to `" + args[0] + "`").queue();
+                        event.getTextChannel().sendMessage(":white_check_mark: Successfully set prefix for this server to `" + args[0] + "`").queue();
 
                     } else {
-                        event.getTextChannel().sendMessage("Prefix is not allowed to be longer than 10 characters.").queue();
+                        event.getTextChannel().sendMessage(":warning: Prefix is not allowed to be longer than 10 characters.").queue();
                     }
                 }
 
             } else {
-                event.getTextChannel().sendMessage("Only administrators can change the prefix.").queue();
+                event.getTextChannel().sendMessage(":warning: Only server administrators can change the prefix.").queue();
             }
 
         } catch (SQLException e) {

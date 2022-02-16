@@ -20,7 +20,7 @@ public class CommandHandler {
 
         if (commands.containsKey(cmd.invoke)) {
             commands.get(cmd.invoke).action(cmd.args, cmd.event);
-            ChatUtils.print("COMMAND: " + cmd.event.getAuthor().getName() + "#" + cmd.event.getAuthor().getDiscriminator() + " executed command: [" + cmd.invoke + "] with args: " + Arrays.toString(cmd.args));
+            ChatUtils.print("COMMAND: (" + cmd.event.getGuild().getName() + ") " + cmd.event.getAuthor().getName() + "#" + cmd.event.getAuthor().getDiscriminator() + " executed command: [" + cmd.invoke + "] with args: " + Arrays.toString(cmd.args));
         }
     }
 

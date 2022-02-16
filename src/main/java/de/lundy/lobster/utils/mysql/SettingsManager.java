@@ -8,7 +8,7 @@ import java.util.ArrayList;
 public class SettingsManager {
 
     //Creates a table in the mysql database to store the prefix for each server
-    public void generateSettingsDatabase() throws SQLException {
+    public void generateSettingsTable() throws SQLException {
 
         MySQLUtils.connect();
         var statement = MySQLUtils.connection.createStatement();
@@ -17,7 +17,7 @@ public class SettingsManager {
     }
 
     //Check if there's already an entry for the server
-    public boolean serverInDatabase(long serverDiscordId) throws SQLException {
+    public boolean serverInSettingsTable(long serverDiscordId) throws SQLException {
 
         MySQLUtils.connect();
         var statement = MySQLUtils.connection.createStatement();
@@ -33,7 +33,7 @@ public class SettingsManager {
     }
 
     //Create an entry for the server in the settings table with a default prefix
-    public void putServerIntoDatabase(long serverId, String defaultPrefix) throws SQLException {
+    public void putServerIntoSettingsTable(long serverId, String defaultPrefix) throws SQLException {
 
         MySQLUtils.connect();
         var statement = MySQLUtils.connection.createStatement();

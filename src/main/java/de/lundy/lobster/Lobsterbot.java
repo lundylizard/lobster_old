@@ -1,11 +1,19 @@
 package de.lundy.lobster;
 
+import de.lundy.lobster.commands.admin.AdminCommand;
 import de.lundy.lobster.commands.impl.CommandHandler;
+import de.lundy.lobster.commands.misc.DonateCommand;
+import de.lundy.lobster.commands.misc.HelpCommand;
+import de.lundy.lobster.commands.misc.InviteCommand;
+import de.lundy.lobster.commands.misc.PrefixCommand;
 import de.lundy.lobster.commands.music.*;
 import de.lundy.lobster.lavaplayer.PlayerManager;
+import de.lundy.lobster.listeners.JoinListener;
 import de.lundy.lobster.listeners.MessageCommandListener;
 import de.lundy.lobster.listeners.ReadyListener;
+import de.lundy.lobster.listeners.VCJoinListener;
 import de.lundy.lobster.utils.ChatUtils;
+import de.lundy.lobster.utils.mysql.BlacklistManager;
 import de.lundy.lobster.utils.mysql.SettingsManager;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -33,16 +41,24 @@ import java.util.concurrent.TimeUnit;
 public class Lobsterbot {
 
     // Please note: The Secrets class is not publicly available, because I did not intend this to be built from others.
-    private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(0);
+    private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private static SettingsManager settingsManager;
+    public static boolean DEBUG = false; // Activate this for debug mode (changes database creds + output)
+    private static BlacklistManager blacklistManager;
 
     public static void main(String @NotNull [] args) throws SQLException, LoginException {
 
+        if (DEBUG)
+            args[0] = Secrets.DEBUG_DISCORD_TOKEN; // Hacky way to change the discord token when launched in debug mode
         var jdaBuilder = JDABuilder.create(args[0], EnumSet.allOf(GatewayIntent.class));
         settingsManager = new SettingsManager();
-        settingsManager.generateSettingsDatabase();
-        jdaBuilder.addEventListeners(new MessageCommandListener(settingsManager));
+        blacklistManager = new BlacklistManager();
+        settingsManager.generateSettingsTable();
+        blacklistManager.generateBlacklistTable();
+        jdaBuilder.addEventListeners(new MessageCommandListener(settingsManager, blacklistManager));
         jdaBuilder.addEventListeners(new ReadyListener());
+        jdaBuilder.addEventListeners(new JoinListener(settingsManager));
+        jdaBuilder.addEventListeners(new VCJoinListener());
 
         //Register commands, I know there's prettier ways to do this.
         CommandHandler.addCommand(new String[]{"join"}, new JoinCommand());
@@ -62,6 +78,11 @@ public class Lobsterbot {
         CommandHandler.addCommand(new String[]{"pause"}, new PauseCommand());
         CommandHandler.addCommand(new String[]{"resume", "unpause"}, new ResumeCommand());
         CommandHandler.addCommand(new String[]{"prefix"}, new PrefixCommand(settingsManager));
+        CommandHandler.addCommand(new String[]{"invite"}, new InviteCommand());
+        CommandHandler.addCommand(new String[]{"donate"}, new DonateCommand());
+        CommandHandler.addCommand(new String[]{"lobster", "admin"}, new AdminCommand(blacklistManager, settingsManager));
+
+        if (DEBUG) ChatUtils.print("Loaded " + (CommandHandler.commands.size() + 1) + " commands.");
 
         var jda = jdaBuilder.build();
         tick(jda); //This gets executed every 10 seconds
@@ -80,9 +101,9 @@ public class Lobsterbot {
                 try {
 
                     //Create a new entry in the settings table if the server does not exist in there
-                    if (!settingsManager.serverInDatabase(guilds.getIdLong())) {
+                    if (!settingsManager.serverInSettingsTable(guilds.getIdLong())) {
                         ChatUtils.print("DATABASE: " + guilds.getName() + " is not in the database yet. Creating...");
-                        settingsManager.putServerIntoDatabase(guilds.getIdLong(), "!");
+                        settingsManager.putServerIntoSettingsTable(guilds.getIdLong(), "!");
                     }
 
                     //Checks if Lobster is connected to a vc
@@ -91,13 +112,14 @@ public class Lobsterbot {
                         var musicManager = PlayerManager.getInstance().getMusicManager(guilds);
                         var audioPlayer = musicManager.audioPlayer;
 
-                        //If there is no other undeafened member or bot in vc stop playing music
+                        //If there is no other undeafened member or bot in vc stop playing music and leave vc
                         if (Objects.requireNonNull(guilds.getAudioManager().getConnectedChannel()).getMembers().stream()
                                 .noneMatch(x -> !Objects.requireNonNull(x.getVoiceState()).isDeafened() && !x.getUser().isBot())) {
 
                             guilds.getAudioManager().closeAudioConnection();
                             audioPlayer.stopTrack();
                             musicManager.scheduler.queue.clear();
+                            if (DEBUG) ChatUtils.print("Left VC in " + guilds.getName());
 
                         }
                     }
