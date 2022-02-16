@@ -19,7 +19,7 @@ public class CommandParser {
      */
     public CommandContainer parse(@NotNull String raw, @NotNull MessageReceivedEvent event, @NotNull SettingsManager settingsManager) throws SQLException {
 
-        var beheaded = raw.replaceFirst(settingsManager.getPrefix(event.getGuild().getIdLong()), "");
+        var beheaded = raw.replace(settingsManager.getPrefix(event.getGuild().getIdLong()), "");
         var splitBeheaded = beheaded.split(" ");
         var invoke = splitBeheaded[0].toLowerCase();
         var split = new ArrayList<String>();
