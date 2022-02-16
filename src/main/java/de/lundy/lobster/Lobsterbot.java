@@ -43,8 +43,8 @@ public class Lobsterbot {
     // Please note: The Secrets class is not publicly available, because I did not intend this to be built from others.
     private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private static SettingsManager settingsManager;
-    public static boolean DEBUG = false; // Activate this for debug mode (changes database creds + output)
     private static BlacklistManager blacklistManager;
+    public static boolean DEBUG = false; // Activate this for debug mode (changes database credentials + more output)
 
     public static void main(String @NotNull [] args) throws SQLException, LoginException {
 

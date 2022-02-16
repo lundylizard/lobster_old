@@ -16,7 +16,7 @@ public record HelpCommand(SettingsManager settingsManager) implements Command {
     public void action(String[] args, @NotNull MessageReceivedEvent event) {
 
         var helpContent = "**LOBSTER MUSIC BOT**\n\n" +
-                "Made by lundylizard » [Twitch](https://twitch.tv/Iundylizard) - [Twitter](https://twitter.com/lundylizard) - [GitHub](https://github.com/lundylizard/lobster) - [Invite]()\n" +
+                "Made by lundylizard » [Twitch](https://twitch.tv/Iundylizard) - [Twitter](https://twitter.com/lundylizard) - [GitHub](https://github.com/lundylizard/lobster)\n" +
                 "Uptime: " + ChatUtils.getBotUptime() + " | Made in Java using [JDA](https://github.com/DV8FromTheWorld/JDA) & [LavaPlayer](https://github.com/sedmelluq/lavaplayer)\n\n" +
                 "%prefix%join - Join the voice channel.\n" +
                 "%prefix%leave - Leave the voice channel.\n" +

@@ -19,6 +19,8 @@ public class JoinListener extends ListenerAdapter {
     @Override
     public void onGuildJoin(@NotNull GuildJoinEvent event) {
 
+        ChatUtils.print("+ " + event.getGuild().getName());
+
         try {
 
             // Create guild database on join

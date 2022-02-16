@@ -53,10 +53,7 @@ public record AdminCommand(BlacklistManager blacklistManager,
                     }
 
                 }
-
         }
-
     }
-
 }
 

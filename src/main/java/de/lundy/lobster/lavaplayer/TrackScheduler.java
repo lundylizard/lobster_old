@@ -6,24 +6,28 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.LinkedBlockingDeque;
 
 public class TrackScheduler extends AudioEventAdapter {
 
     public final AudioPlayer player;
-    public final BlockingQueue<AudioTrack> queue;
+    public final BlockingDeque<AudioTrack> queue;
     public boolean repeating = false;
 
     public TrackScheduler(AudioPlayer player) {
         this.player = player;
-        this.queue = new LinkedBlockingQueue<>();
+        this.queue = new LinkedBlockingDeque<>(500);
     }
 
-    public void queue(AudioTrack track) {
+    public void queue(AudioTrack track, boolean top) {
 
         if (!this.player.startTrack(track, true)) {
-            this.queue.offer(track);
+            if (top) {
+                this.queue.addFirst(track);
+            } else {
+                this.queue.offer(track);
+            }
         }
 
     }

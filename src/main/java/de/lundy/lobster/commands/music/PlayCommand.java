@@ -10,7 +10,6 @@ import se.michaelthelin.spotify.exceptions.SpotifyWebApiException;
 
 import java.io.IOException;
 import java.util.Objects;
-import java.util.Random;
 
 public class PlayCommand implements Command {
 
@@ -24,6 +23,7 @@ public class PlayCommand implements Command {
         var member = event.getMember();
         var memberVoiceState = member.getVoiceState();
         var spotify = new SpotifyToYoutubeInterpreter();
+        var top = false;
 
         assert memberVoiceState != null;
         if (!memberVoiceState.inVoiceChannel()) {
@@ -40,8 +40,12 @@ public class PlayCommand implements Command {
             event.getChannel().sendMessage(":loud_sound: Connecting to voice channel `\uD83D\uDD0A " + memberChannel.getName() + "`").queue();
         }
 
-        for (var arg : args) {
-            link.append(arg).append(" ");
+        if (args[0].equalsIgnoreCase("top")) {
+            top = true;
+        }
+
+        for (var i = top ? 1 : 0; i < args.length; i++) {
+            link.append(args[i]).append(" ");
         }
 
         if (!isUrl(link.toString())) {
@@ -70,13 +74,9 @@ public class PlayCommand implements Command {
                 e.printStackTrace();
             }
 
-            if (new Random().nextInt(100) < 10) {
-                event.getTextChannel().sendMessage(":information_source: Due to Spotify's API limitations the bot is looking up the song on YouTube. If it can't find the song requested, please request it manually using a search term or a link from YouTube.").queue();
-            }
-
         }
 
-        PlayerManager.getInstance().loadAndPlay(event, link.toString().trim());
+        PlayerManager.getInstance().loadAndPlay(event, link.toString().trim(), top);
 
     }
 
