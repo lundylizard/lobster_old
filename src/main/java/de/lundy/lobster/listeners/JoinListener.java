@@ -19,7 +19,7 @@ public class JoinListener extends ListenerAdapter {
     @Override
     public void onGuildJoin(@NotNull GuildJoinEvent event) {
 
-        ChatUtils.print("+ " + event.getGuild().getName());
+        ChatUtils.print("JOIN: +" + event.getGuild().getName());
 
         try {
 

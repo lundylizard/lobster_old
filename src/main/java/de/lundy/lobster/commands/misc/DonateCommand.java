@@ -5,7 +5,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.*;
+import java.util.Objects;
 
 public class DonateCommand implements Command {
 
@@ -17,10 +17,9 @@ public class DonateCommand implements Command {
                         **DONATING**
 
                         Donating is not really necessary. I currently spend `9.79€` a month to keep the bot up. However, if you feel generous and want to support me and my work, you can do that here:
-                                                        
                         - [paypal.me](https://paypal.me/lukkyz1337)
                         - [Streamlabs Tips](https://streamlabs.com/iundylizard/tip)""")
-                .setColor(Color.RED)
+                .setColor(Objects.requireNonNull(event.getGuild().getMember(event.getJDA().getSelfUser())).getColor())
                 .build()).queue();
 
     }

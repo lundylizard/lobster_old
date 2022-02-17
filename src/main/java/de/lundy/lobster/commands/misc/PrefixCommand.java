@@ -24,7 +24,7 @@ public record PrefixCommand(SettingsManager settingsManager) implements Command 
                 if (args.length == 0) {
 
                     var currentPrefix = settingsManager.getPrefix(serverId);
-                    event.getTextChannel().sendMessage(":information_source: Prefix on this server is `" + currentPrefix + "`").queue();
+                    event.getTextChannel().sendMessage(":information_source: The current prefix on this server is `" + currentPrefix + "`").queue();
 
                 } else if (args.length == 1) {
 

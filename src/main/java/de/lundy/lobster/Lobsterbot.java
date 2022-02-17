@@ -8,13 +8,11 @@ import de.lundy.lobster.commands.misc.InviteCommand;
 import de.lundy.lobster.commands.misc.PrefixCommand;
 import de.lundy.lobster.commands.music.*;
 import de.lundy.lobster.lavaplayer.PlayerManager;
-import de.lundy.lobster.listeners.JoinListener;
-import de.lundy.lobster.listeners.MessageCommandListener;
-import de.lundy.lobster.listeners.ReadyListener;
-import de.lundy.lobster.listeners.VCJoinListener;
+import de.lundy.lobster.listeners.*;
 import de.lundy.lobster.utils.ChatUtils;
 import de.lundy.lobster.utils.mysql.BlacklistManager;
 import de.lundy.lobster.utils.mysql.SettingsManager;
+import de.lundy.lobster.utils.mysql.StatsManager;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
@@ -31,9 +29,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
- * A discord bot to play music, officially supports youtube, spotify and mp3/mp4-files.
+ * A discord bot to play music, officially supports YouTube, Spotify and mp3/mp4-files.
  * Everything is handled by LavaPlayer, so for more information check that out.
- * Shoutout to the Lobster Gang, where the bot name originated from and this bot originally was planned on being used.
+ * Shoutouts to the Lobster Gang, where the bot name originated from and this bot originally was planned on being used.
  * I had big plans for this, but I wanted to focus on something else, so I decided to make this public instead.
  *
  * @author lundylizard
@@ -44,21 +42,23 @@ public class Lobsterbot {
     private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private static SettingsManager settingsManager;
     private static BlacklistManager blacklistManager;
-    public static boolean DEBUG = false; // Activate this for debug mode (changes database credentials + more output)
+    public static boolean DEBUG = true; // Activate this for debug mode (changes database credentials + more output)
+    private static StatsManager statsManager;
 
     public static void main(String @NotNull [] args) throws SQLException, LoginException {
 
-        if (DEBUG)
-            args[0] = Secrets.DEBUG_DISCORD_TOKEN; // Hacky way to change the discord token when launched in debug mode
-        var jdaBuilder = JDABuilder.create(args[0], EnumSet.allOf(GatewayIntent.class));
+        var jdaBuilder = JDABuilder.create(DEBUG ? Secrets.DEBUG_DISCORD_TOKEN : args[0], EnumSet.allOf(GatewayIntent.class));
         settingsManager = new SettingsManager();
         blacklistManager = new BlacklistManager();
+        statsManager = new StatsManager();
         settingsManager.generateSettingsTable();
         blacklistManager.generateBlacklistTable();
-        jdaBuilder.addEventListeners(new MessageCommandListener(settingsManager, blacklistManager));
+        statsManager.generateStatsTable();
+        jdaBuilder.addEventListeners(new MessageCommandListener(settingsManager, blacklistManager, statsManager));
         jdaBuilder.addEventListeners(new ReadyListener());
         jdaBuilder.addEventListeners(new JoinListener(settingsManager));
-        jdaBuilder.addEventListeners(new VCJoinListener());
+        jdaBuilder.addEventListeners(new VCJoinListener(statsManager));
+        jdaBuilder.addEventListeners(new VCLeaveListener(statsManager));
 
         //Register commands, I know there's prettier ways to do this.
         CommandHandler.addCommand(new String[]{"join"}, new JoinCommand());
@@ -80,9 +80,9 @@ public class Lobsterbot {
         CommandHandler.addCommand(new String[]{"prefix"}, new PrefixCommand(settingsManager));
         CommandHandler.addCommand(new String[]{"invite"}, new InviteCommand());
         CommandHandler.addCommand(new String[]{"donate"}, new DonateCommand());
-        CommandHandler.addCommand(new String[]{"lobster", "admin"}, new AdminCommand(blacklistManager, settingsManager));
+        CommandHandler.addCommand(new String[]{"admin"}, new AdminCommand(blacklistManager, settingsManager, statsManager));
 
-        if (DEBUG) ChatUtils.print("Loaded " + (CommandHandler.commands.size() + 1) + " commands.");
+        if (DEBUG) ChatUtils.print("INFO: Loaded " + (CommandHandler.commands.size() + 1) + " commands.");
 
         var jda = jdaBuilder.build();
         tick(jda); //This gets executed every 10 seconds
@@ -102,8 +102,14 @@ public class Lobsterbot {
 
                     //Create a new entry in the settings table if the server does not exist in there
                     if (!settingsManager.serverInSettingsTable(guilds.getIdLong())) {
-                        ChatUtils.print("DATABASE: " + guilds.getName() + " is not in the database yet. Creating...");
+                        ChatUtils.print("DATABASE: " + guilds.getName() + " is not in the settings database yet. Creating...");
                         settingsManager.putServerIntoSettingsTable(guilds.getIdLong(), "!");
+                    }
+
+                    //Create a new entry in the stats table if the server does not exist in there
+                    if (!statsManager.serverInStatsTable(guilds.getIdLong())) {
+                        ChatUtils.print("DATABASE: " + guilds.getName() + " is not in the stats database yet. Creating...");
+                        statsManager.putServerIntoStatsTable(guilds.getIdLong());
                     }
 
                     //Checks if Lobster is connected to a vc
@@ -119,7 +125,6 @@ public class Lobsterbot {
                             guilds.getAudioManager().closeAudioConnection();
                             audioPlayer.stopTrack();
                             musicManager.scheduler.queue.clear();
-                            if (DEBUG) ChatUtils.print("Left VC in " + guilds.getName());
 
                         }
                     }
