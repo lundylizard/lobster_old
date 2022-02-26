@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class VCJoinListener extends ListenerAdapter {
 
-    private StatsManager statsManager;
+    private final StatsManager statsManager;
 
     public VCJoinListener(StatsManager statsManager) {
         this.statsManager = statsManager;

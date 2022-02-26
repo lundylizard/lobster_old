@@ -45,12 +45,12 @@ public class SeekCommand implements Command {
             return;
         }
 
-        if (ChatUtils.checkIfNumber(args[0].split(":")[0])) {
+        if (!ChatUtils.checkIfValidNumber(args[0].split(":")[0])) {
             channel.sendMessage(":warning: `" + args[0] + "` is not a valid timestamp.").queue();
             return;
         }
 
-        if (ChatUtils.checkIfNumber(args[0].split(":")[1])) {
+        if (!ChatUtils.checkIfValidNumber(args[0].split(":")[1])) {
             channel.sendMessage(":warning: `" + args[0] + "` is not a valid timestamp.").queue();
             return;
         }

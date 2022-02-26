@@ -31,7 +31,7 @@ public class ChatUtils {
     }
 
     //Checks if string is number using regex
-    public static boolean checkIfNumber(@NotNull String string) {
+    public static boolean checkIfValidNumber(@NotNull String string) {
         return string.matches("[0-9]+");
     }
 

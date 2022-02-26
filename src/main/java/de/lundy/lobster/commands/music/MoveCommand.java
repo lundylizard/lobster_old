@@ -43,12 +43,12 @@ public class MoveCommand implements Command {
             var musicManager = PlayerManager.getInstance().getMusicManager(event.getGuild());
             var queue = musicManager.scheduler.queue;
 
-            if (ChatUtils.checkIfNumber(args[0])) {
+            if (!ChatUtils.checkIfValidNumber(args[0])) {
                 event.getTextChannel().sendMessage(":x: " + args[0] + " is not a valid number.").queue();
                 return;
             }
 
-            if (ChatUtils.checkIfNumber(args[1])) {
+            if (!ChatUtils.checkIfValidNumber(args[1])) {
                 event.getTextChannel().sendMessage(":x: " + args[1] + " is not a valid number.").queue();
                 return;
             }

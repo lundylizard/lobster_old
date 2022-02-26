@@ -46,7 +46,8 @@ public class SkipCommand implements Command {
         }
 
         if (args.length != 0) {
-            if (ChatUtils.checkIfNumber(args[0])) {
+
+            if (!ChatUtils.checkIfValidNumber(args[0])) {
                 channel.sendMessage(":warning: `" + args[0] + "` is not a valid number.").queue();
                 return;
             }

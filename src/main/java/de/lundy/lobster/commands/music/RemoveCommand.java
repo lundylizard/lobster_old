@@ -39,7 +39,7 @@ public class RemoveCommand implements Command {
             return;
         }
 
-        if (ChatUtils.checkIfNumber(args[0])) {
+        if (!ChatUtils.checkIfValidNumber(args[0])) {
             channel.sendMessage(":warning: `" + args[0] + "` is not a valid value.").queue();
             return;
         }
