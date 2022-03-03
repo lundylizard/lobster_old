@@ -56,32 +56,38 @@ public class QueueCommand implements Command {
         var messageAction = new StringBuilder("**CURRENT QUEUE:**\n\n");
         var trackInfo = musicManager.audioPlayer.getPlayingTrack().getInfo();
 
-        messageAction.append("*Current Song: ").append(trackInfo.title).append("*\n\n");
+        messageAction.append("*Current Song: ")
+                .append(trackInfo.title)
+                .append("* [`").append(ChatUtils.formatTime(musicManager.audioPlayer.getPlayingTrack().getDuration()))
+                .append("`]\n\n");
 
-            for (var i = 0; i < trackCount; i++) {
+        for (var i = 0; i < trackCount; i++) {
 
-                var track = trackList.get(i);
-                var info = track.getInfo();
+            var track = trackList.get(i);
+            var info = track.getInfo();
 
-                messageAction.append('#')
-                        .append(i + 1)
-                        .append(" ")
-                        .append(info.title)
+            messageAction.append('#')
+                    .append(i + 1)
+                    .append(" ")
+                    .append(info.title)
                         .append("\n`by ")
                         .append(info.author)
                         .append("` [`")
                         .append(ChatUtils.formatTime(track.getDuration()))
-                        .append("`]\n");
+                    .append("`]\n");
 
-            }
+        }
 
-            if (trackList.size() > trackCount) {
-                messageAction.append("\nand ")
-                        .append(trackList.size() - trackCount)
-                        .append(" more...");
-            }
+        if (trackList.size() > trackCount) {
+            messageAction.append("\nand ")
+                    .append(trackList.size() - trackCount)
+                    .append(" more...");
+        }
 
-            channel.sendMessage(new EmbedBuilder().setColor(Objects.requireNonNull(event.getGuild().getMember(event.getJDA().getSelfUser())).getColor()).setDescription(messageAction.toString()).build()).queue();
+        channel.sendMessage(new EmbedBuilder()
+                .setColor(Objects.requireNonNull(event.getGuild().getMember(event.getJDA().getSelfUser())).getColor())
+                .setDescription(messageAction.toString())
+                .build()).queue();
 
     }
 }

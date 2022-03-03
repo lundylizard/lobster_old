@@ -1,12 +1,14 @@
 package de.lundy.lobster.lavaplayer.spotify;
 
-import de.lundy.lobster.Lobsterbot;
 import de.lundy.lobster.Secrets;
 import org.apache.hc.core5.http.ParseException;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import se.michaelthelin.spotify.SpotifyApi;
 import se.michaelthelin.spotify.exceptions.SpotifyWebApiException;
+import se.michaelthelin.spotify.model_objects.specification.Playlist;
 import se.michaelthelin.spotify.requests.authorization.client_credentials.ClientCredentialsRequest;
+import se.michaelthelin.spotify.requests.data.playlists.GetPlaylistRequest;
 
 import java.io.IOException;
 
@@ -58,12 +60,23 @@ public class SpotifyToYoutubeInterpreter {
         return trackRequest.execute().getName();
     }
 
+    @Contract("_ -> new")
+    private @NotNull GetPlaylistRequest getPlaylistRequest(String spotifyId) {
+        return spotifyApi.getPlaylist(spotifyId).build();
+    }
+
+    public Playlist getSpotifyPlaylist(String spotifyId) throws IOException, ParseException, SpotifyWebApiException {
+
+        return getPlaylistRequest(spotifyId).execute();
+
+    }
+
     public boolean isSpotifyLink(@NotNull String link) {
         return link.toLowerCase().startsWith("https://open.spotify.com/");
     }
 
     public boolean isSpotifyPlaylist(@NotNull String link) {
-        return link.replace("\\?si=.*$", "").replace("https://open.spotify.com/", "").equalsIgnoreCase("playlist/");
+        return link.replace("\\?si=.*$", "").replace("https://open.spotify.com/", "").startsWith("playlist/");
     }
 
     public String getSpotifyIdFromLink(@NotNull String link) {

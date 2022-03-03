@@ -39,7 +39,8 @@ public class PlayerManager {
 
     }
 
-    public void loadAndPlay(@NotNull MessageReceivedEvent event, String trackUrl, boolean top) {
+    //TODO fix spotify playlist hack                                                                    vvvvvvvvvvvvvvv
+    public void loadAndPlay(@NotNull MessageReceivedEvent event, String trackUrl, boolean top, boolean spotifyPlaylist) {
 
         var musicManager = this.getMusicManager(event.getGuild());
         this.audioPlayerManager.loadItemOrdered(musicManager, trackUrl, new AudioLoadResultHandler() {
@@ -48,7 +49,9 @@ public class PlayerManager {
             public void trackLoaded(AudioTrack audioTrack) {
 
                 musicManager.scheduler.queue(audioTrack, top);
-                event.getChannel().sendMessage(":arrow_forward: Added to the queue: " + audioTrack.getInfo().title + ", by " + audioTrack.getInfo().author).queue();
+                // vvvvvvvvvvvvvvvvvv
+                if (!spotifyPlaylist)
+                    event.getChannel().sendMessage(":arrow_forward: Added to the queue: " + audioTrack.getInfo().title + ", by " + audioTrack.getInfo().author).queue();
 
             }
 
@@ -58,7 +61,9 @@ public class PlayerManager {
                 if (audioPlaylist.isSearchResult()) {
 
                     var track = audioPlaylist.getTracks().get(0);
-                    event.getChannel().sendMessage(":arrow_forward: Added to the queue: " + track.getInfo().title + ", by " + track.getInfo().author).queue();
+                    // vvvvvvvvvvvvvvvvvv
+                    if (!spotifyPlaylist)
+                        event.getChannel().sendMessage(":arrow_forward: Added to the queue: " + track.getInfo().title + ", by " + track.getInfo().author).queue();
                     musicManager.scheduler.queue(track, top);
 
                 } else {

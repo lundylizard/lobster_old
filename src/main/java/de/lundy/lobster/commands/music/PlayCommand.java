@@ -1,5 +1,6 @@
 package de.lundy.lobster.commands.music;
 
+import de.lundy.lobster.Lobsterbot;
 import de.lundy.lobster.commands.impl.Command;
 import de.lundy.lobster.lavaplayer.PlayerManager;
 import de.lundy.lobster.lavaplayer.spotify.SpotifyToYoutubeInterpreter;
@@ -7,6 +8,8 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.apache.hc.core5.http.ParseException;
 import org.jetbrains.annotations.NotNull;
 import se.michaelthelin.spotify.exceptions.SpotifyWebApiException;
+import se.michaelthelin.spotify.model_objects.specification.Playlist;
+import se.michaelthelin.spotify.model_objects.specification.PlaylistTrack;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -65,18 +68,61 @@ public class PlayCommand implements Command {
         //Spotify doesn't allow direct playback from their API, so it's getting the data from the song and searches it on YouTube
         if (spotify.isSpotifyLink(link.toString())) {
 
-            var spotifyId = spotify.getSpotifyIdFromLink(link.toString());
-            link.delete(0, link.length());
+            if (Lobsterbot.DEBUG) System.out.println(spotify.isSpotifyPlaylist(link.toString()));
+            if (Lobsterbot.DEBUG)
+                System.out.println(link.toString().replace("\\?si=.*$", "").replace("https://open.spotify.com/", ""));
 
-            try {
-                link.append("ytsearch:").append(spotify.getArtistFromSpotify(spotifyId)).append(" ").append(spotify.getSongNameFromSpotify(spotifyId));
-            } catch (IOException | ParseException | SpotifyWebApiException e) {
-                e.printStackTrace();
+            if (!spotify.isSpotifyPlaylist(link.toString())) {
+
+                var spotifyId = spotify.getSpotifyIdFromLink(link.toString());
+                link.delete(0, link.length());
+
+                try {
+                    link.append("ytsearch:").append(spotify.getArtistFromSpotify(spotifyId))
+                            .append(" ")
+                            .append(spotify.getSongNameFromSpotify(spotifyId));
+                } catch (IOException | ParseException | SpotifyWebApiException e) {
+                    e.printStackTrace();
+                }
+
+            } else {
+
+                channel.sendMessage("Spotify Playlists may be a little buggy, gonna fix that sooner or later.").queue();
+                var spotifyId = spotify.getSpotifyIdFromLink(link.toString());
+                Playlist playlist = null;
+
+                try {
+                    playlist = spotify.getSpotifyPlaylist(spotifyId);
+                } catch (IOException | ParseException | SpotifyWebApiException e) {
+                    e.printStackTrace();
+                }
+
+                assert playlist != null;
+                for (PlaylistTrack playlistTrack : playlist.getTracks().getItems()) {
+
+                    try {
+
+                        if (playlistTrack.getTrack().getId() != null) {
+
+                            PlayerManager.getInstance().loadAndPlay(event, ("ytsearch:" +
+                                    spotify.getArtistFromSpotify(playlistTrack.getTrack().getId()) + " " +
+                                    spotify.getSongNameFromSpotify(playlistTrack.getTrack().getId())).trim(), top, true);
+
+                        }
+
+                    } catch (IOException | SpotifyWebApiException | ParseException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+
+                event.getChannel().sendMessage(":arrow_forward: Added " + playlist.getTracks().getTotal() + " songs to the queue.").queue();
+
             }
 
         }
 
-        PlayerManager.getInstance().loadAndPlay(event, link.toString().trim(), top);
+        PlayerManager.getInstance().loadAndPlay(event, link.toString().trim(), top, false);
 
     }
 

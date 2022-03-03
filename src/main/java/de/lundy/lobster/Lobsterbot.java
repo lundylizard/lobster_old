@@ -55,7 +55,7 @@ public class Lobsterbot {
         statsManager.generateStatsTable();
         jdaBuilder.addEventListeners(new MessageCommandListener(settingsManager, blacklistManager, statsManager));
         jdaBuilder.addEventListeners(new ReadyListener());
-        jdaBuilder.addEventListeners(new JoinListener(settingsManager));
+        jdaBuilder.addEventListeners(new JoinListener(settingsManager, statsManager));
         jdaBuilder.addEventListeners(new VCJoinListener(statsManager));
         jdaBuilder.addEventListeners(new VCLeaveListener(statsManager));
 
@@ -111,7 +111,7 @@ public class Lobsterbot {
                         statsManager.putServerIntoStatsTable(guilds.getIdLong());
                     }
 
-                    //Checks if Lobster is connected to a vc
+                    //Checks if lobster is connected to a vc
                     if (guilds.getAudioManager().isConnected()) {
 
                         var musicManager = PlayerManager.getInstance().getMusicManager(guilds);
