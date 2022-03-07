@@ -56,7 +56,8 @@ public class PlayCommand implements Command {
         }
 
         if (!event.getMessage().getAttachments().isEmpty()) {
-            link.delete(0, link.length());
+            if (link.length() != 0)
+                link.delete(0, link.length()); // Clear link if there's anything idk why there would tho
             link.append(event.getMessage().getAttachments().get(0).getUrl());
         }
 
@@ -87,7 +88,7 @@ public class PlayCommand implements Command {
 
             } else {
 
-                channel.sendMessage("Spotify Playlists may be a little buggy, gonna fix that sooner or later.").queue();
+                channel.sendMessage(":warning: Spotify Playlists may be a little buggy, gonna fix that sooner or later.").queue();
                 var spotifyId = spotify.getSpotifyIdFromLink(link.toString());
                 Playlist playlist = null;
 
