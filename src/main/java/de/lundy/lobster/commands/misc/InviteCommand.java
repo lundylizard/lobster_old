@@ -19,10 +19,12 @@ public class InviteCommand implements Command {
         permissions.add(Permission.MESSAGE_WRITE);          // Permission to send messages
         permissions.add(Permission.MESSAGE_EMBED_LINKS);    // Permission to embed links
         permissions.add(Permission.MESSAGE_HISTORY);        // Actually not sure if you need this - Permission to see messages from the past
-        permissions.add(Permission.MESSAGE_READ);           // Permission to read / receive messages
-        permissions.add(Permission.VIEW_CHANNEL);           // Permission to see the text / voice-channels
-        permissions.add(Permission.VOICE_CONNECT);          // Permission to be able to connect to vc
-        permissions.add(Permission.VOICE_SPEAK);            // Permission to send music to the vc / "to speak in vc"
+        permissions.add(Permission.MESSAGE_READ);           // Receive messages to process commands
+        permissions.add(Permission.VIEW_CHANNEL);           // See text/voice-channels
+        permissions.add(Permission.VOICE_CONNECT);          // Connect to VC
+        permissions.add(Permission.VOICE_SPEAK);            // Send music
+        permissions.add(Permission.MANAGE_CHANNEL);         // Modify voice channel size
+        permissions.add(Permission.VOICE_MOVE_OTHERS);      // Join full channel
 
         var inviteUrl = event.getJDA().getInviteUrl(permissions);
 

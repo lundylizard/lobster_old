@@ -41,18 +41,22 @@ public class Lobsterbot {
     // Please note: The Secrets class is not publicly available, because I did not intend this to be built from others.
     private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private static SettingsManager settingsManager;
-    public static boolean DEBUG = false; // Activate this for debug mode (changes database credentials + more output)
     private static StatsManager statsManager;
+    public static boolean DEBUG = false; // Activate this for debug mode (changes database credentials + more output)
+    private static BlacklistManager blacklistManager;
 
     public static void main(String @NotNull [] args) throws SQLException, LoginException {
 
         var jdaBuilder = JDABuilder.create(DEBUG ? Secrets.DEBUG_DISCORD_TOKEN : args[0], EnumSet.allOf(GatewayIntent.class));
+
         settingsManager = new SettingsManager();
-        BlacklistManager blacklistManager = new BlacklistManager();
+        blacklistManager = new BlacklistManager();
         statsManager = new StatsManager();
+
         settingsManager.generateSettingsTable();
         blacklistManager.generateBlacklistTable();
         statsManager.generateStatsTable();
+
         jdaBuilder.addEventListeners(new MessageCommandListener(settingsManager, blacklistManager, statsManager));
         jdaBuilder.addEventListeners(new ReadyListener());
         jdaBuilder.addEventListeners(new JoinListener(settingsManager, statsManager));

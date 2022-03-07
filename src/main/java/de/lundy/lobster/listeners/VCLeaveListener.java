@@ -23,6 +23,12 @@ public class VCLeaveListener extends ListenerAdapter {
 
         if (event.getMember().getIdLong() == event.getJDA().getSelfUser().getIdLong()) {
 
+            // When bot leaves vc lower the user limit again
+            if (VCJoinListener.vcSizeChanged.contains(event.getChannelLeft().getIdLong())) {
+                event.getChannelLeft().getManager().setUserLimit(event.getChannelLeft().getUserLimit() - 1).queue();
+                VCJoinListener.vcSizeChanged.remove(event.getChannelLeft().getIdLong());
+            }
+
             var timePlayed = statsManager.calculateTimePlayed(serverId); // putting it in a var for consistency
 
             ChatUtils.print("VCUPDATE: (" + event.getGuild().getName() + ") Left VC after " + timePlayed + " seconds.");
