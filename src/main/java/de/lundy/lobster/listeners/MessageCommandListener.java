@@ -4,6 +4,7 @@ import de.lundy.lobster.commands.impl.CommandHandler;
 import de.lundy.lobster.utils.mysql.BlacklistManager;
 import de.lundy.lobster.utils.mysql.SettingsManager;
 import de.lundy.lobster.utils.mysql.StatsManager;
+import net.dv8tion.jda.api.entities.ChannelType;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
@@ -28,6 +29,11 @@ public class MessageCommandListener extends ListenerAdapter {
         var message = event.getMessage();
         var commandHandler = new CommandHandler();
         var serverId = event.getGuild().getIdLong();
+
+        // Avoid private messages
+        if (event.getChannelType() == ChannelType.PRIVATE) {
+            return;
+        }
 
         try {
             //If the message starts with the prefix and is not from a bot
