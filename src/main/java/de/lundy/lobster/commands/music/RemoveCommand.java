@@ -52,7 +52,7 @@ public class RemoveCommand implements Command {
         }
 
         var trackList = new ArrayList<>(queue);
-        queue.remove(trackList.get(index - 1));
+        queue.removeFirstOccurrence(trackList.get(index - 1));
         event.getChannel().sendMessage(":white_check_mark: Successfully removed track `#" + index + "`").queue();
 
     }

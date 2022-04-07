@@ -4,7 +4,6 @@ import de.lundy.lobster.utils.mysql.SettingsManager;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.jetbrains.annotations.NotNull;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -13,11 +12,11 @@ public class CommandParser {
     /**
      * Parses the event and raw input to a command container
      *
-     * @param raw       Raw content from event
-     * @param event     Event used to get
-     * @return          Command container from parsed raw string and event
+     * @param raw   Raw content from event
+     * @param event Event used to get
+     * @return Command container from parsed raw string and event
      */
-    public CommandContainer parse(@NotNull String raw, @NotNull MessageReceivedEvent event, @NotNull SettingsManager settingsManager) throws SQLException {
+    public CommandContainer parse(@NotNull String raw, @NotNull MessageReceivedEvent event, @NotNull SettingsManager settingsManager) {
 
         var beheaded = raw.replace(settingsManager.getPrefix(event.getGuild().getIdLong()), "");
         var splitBeheaded = beheaded.split(" ");

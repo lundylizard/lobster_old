@@ -6,6 +6,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import se.michaelthelin.spotify.SpotifyApi;
 import se.michaelthelin.spotify.exceptions.SpotifyWebApiException;
+import se.michaelthelin.spotify.model_objects.credentials.ClientCredentials;
 import se.michaelthelin.spotify.model_objects.specification.Playlist;
 import se.michaelthelin.spotify.requests.authorization.client_credentials.ClientCredentialsRequest;
 import se.michaelthelin.spotify.requests.data.playlists.GetPlaylistRequest;
@@ -17,23 +18,27 @@ public class SpotifyToYoutubeInterpreter {
     private SpotifyApi spotifyApi;
 
     public SpotifyToYoutubeInterpreter() {
-
-        try {
-            initSpotify();
-        } catch (ParseException | SpotifyWebApiException | IOException e) {
-            e.printStackTrace();
-        }
+        initSpotify();
     }
 
     //Initializes the spotify api
-    private void initSpotify() throws ParseException, SpotifyWebApiException, IOException {
+    private void initSpotify() {
 
         this.spotifyApi = new SpotifyApi.Builder()
                 .setClientId(Secrets.SPOTIFY_CLIENT_ID)
                 .setClientSecret(Secrets.SPOTIFY_CLIENT_SECRET)
                 .build();
+
         var request = new ClientCredentialsRequest.Builder(spotifyApi.getClientId(), spotifyApi.getClientSecret());
-        var creds = request.grant_type("client_credentials").build().execute();
+        ClientCredentials creds = null;
+
+        try {
+            creds = request.grant_type("client_credentials").build().execute();
+        } catch (IOException | SpotifyWebApiException | ParseException e) {
+            e.printStackTrace();
+        }
+
+        assert creds != null;
         spotifyApi.setAccessToken(creds.getAccessToken());
 
     }

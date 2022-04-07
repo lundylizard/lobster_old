@@ -11,13 +11,10 @@ public class ReadyListener extends ListenerAdapter {
     public void onReady(@NotNull ReadyEvent event) {
 
         //Prints every server this bot is running on in the console
-
         ChatUtils.print("INFO: Bot is running on:");
-
         for (var guild : event.getJDA().getGuilds()) {
             ChatUtils.print("INFO: " + guild.getName() + " -- ID: " + guild.getId());
         }
 
     }
-
 }

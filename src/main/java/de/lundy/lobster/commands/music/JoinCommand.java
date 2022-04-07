@@ -40,8 +40,8 @@ public class JoinCommand implements Command {
             channel.sendMessage(":loud_sound: Connecting to `\uD83D\uDD0A " + memberChannel.getName() + "`").queue();
 
         } catch (InsufficientPermissionException e) {
-            e.printStackTrace();
             event.getChannel().sendMessage(":warning: I do not have enough permissions to join that channel.").queue();
+            e.printStackTrace();
         }
 
     }

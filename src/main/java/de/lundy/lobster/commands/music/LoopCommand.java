@@ -37,9 +37,8 @@ public class LoopCommand implements Command {
         }
 
         var musicManager = PlayerManager.getInstance().getMusicManager(event.getGuild());
-        boolean newRepeating = !musicManager.scheduler.repeating;
-        musicManager.scheduler.repeating = newRepeating;
-        channel.sendMessage((newRepeating ? ":white_check_mark: Now" : ":x: No longer") + " looping current song.").queue();
+        musicManager.scheduler.setRepeating(!musicManager.scheduler.isRepeating());
+        channel.sendMessage((musicManager.scheduler.isRepeating() ? ":white_check_mark: Now" : ":x: No longer") + " looping current song.").queue();
 
     }
 }

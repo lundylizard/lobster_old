@@ -7,7 +7,6 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.jetbrains.annotations.NotNull;
 
-import java.sql.SQLException;
 import java.util.Objects;
 
 public record HelpCommand(SettingsManager settingsManager) implements Command {
@@ -36,13 +35,7 @@ public record HelpCommand(SettingsManager settingsManager) implements Command {
                 "%prefix%donate - Information about donating.\n";
 
         var serverId = event.getGuild().getIdLong();
-        var prefix = "";
-
-        try {
-            prefix = settingsManager.getPrefix(serverId);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        var prefix = settingsManager.getPrefix(serverId);
 
         event.getChannel().sendMessage(new EmbedBuilder()
                 .setColor(Objects.requireNonNull(event.getGuild().getMember(event.getJDA().getSelfUser())).getColor())

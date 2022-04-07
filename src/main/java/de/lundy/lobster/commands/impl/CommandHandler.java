@@ -5,11 +5,12 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 
 public class CommandHandler {
 
     public static final CommandParser parser = new CommandParser();
-    public static final HashMap<String, Command> commands = new HashMap<>();
+    protected static final Map<String, Command> commands = new HashMap<>();
 
     /**
      * Executes action() from command from given command container if it was registered in commands Map on bootup

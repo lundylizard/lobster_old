@@ -1,6 +1,5 @@
 package de.lundy.lobster.commands.music;
 
-import de.lundy.lobster.Lobsterbot;
 import de.lundy.lobster.commands.impl.Command;
 import de.lundy.lobster.lavaplayer.PlayerManager;
 import de.lundy.lobster.lavaplayer.spotify.SpotifyToYoutubeInterpreter;
@@ -68,10 +67,6 @@ public class PlayCommand implements Command {
 
         //Spotify doesn't allow direct playback from their API, so it's getting the data from the song and searches it on YouTube
         if (spotify.isSpotifyLink(link.toString())) {
-
-            if (Lobsterbot.DEBUG) System.out.println(spotify.isSpotifyPlaylist(link.toString()));
-            if (Lobsterbot.DEBUG)
-                System.out.println(link.toString().replace("\\?si=.*$", "").replace("https://open.spotify.com/", ""));
 
             if (!spotify.isSpotifyPlaylist(link.toString())) {
 

@@ -31,7 +31,7 @@ public class PlayerManager {
 
     public GuildMusicManager getMusicManager(@NotNull Guild guild) {
 
-        return this.musicManagers.computeIfAbsent(guild.getIdLong(), (guildId) -> {
+        return this.musicManagers.computeIfAbsent(guild.getIdLong(), guildId -> {
             var guildMusicManager = new GuildMusicManager(this.audioPlayerManager);
             guild.getAudioManager().setSendingHandler(guildMusicManager.getSendHandler());
             return guildMusicManager;
@@ -39,7 +39,6 @@ public class PlayerManager {
 
     }
 
-    //TODO fix spotify playlist hack                                                                    vvvvvvvvvvvvvvv
     public void loadAndPlay(@NotNull MessageReceivedEvent event, String trackUrl, boolean top, boolean spotifyPlaylist) {
 
         var musicManager = this.getMusicManager(event.getGuild());
@@ -48,8 +47,7 @@ public class PlayerManager {
             @Override
             public void trackLoaded(AudioTrack audioTrack) {
 
-                musicManager.scheduler.queue(audioTrack, top);
-                // vvvvvvvvvvvvvvvvvv
+                musicManager.scheduler.queueSong(audioTrack, top);
                 if (!spotifyPlaylist)
                     event.getChannel().sendMessage(":arrow_forward: Added to the queue: " + audioTrack.getInfo().title + ", by " + audioTrack.getInfo().author).queue();
 
@@ -61,10 +59,10 @@ public class PlayerManager {
                 if (audioPlaylist.isSearchResult()) {
 
                     var track = audioPlaylist.getTracks().get(0);
-                    // vvvvvvvvvvvvvvvvvv
+
                     if (!spotifyPlaylist)
                         event.getChannel().sendMessage(":arrow_forward: Added to the queue: " + track.getInfo().title + ", by " + track.getInfo().author).queue();
-                    musicManager.scheduler.queue(track, top);
+                    musicManager.scheduler.queueSong(track, top);
 
                 } else {
 
@@ -72,7 +70,7 @@ public class PlayerManager {
                     event.getChannel().sendMessage(":arrow_forward: Added " + trackList.size() + " songs to the queue.").queue();
 
                     for (var track : trackList) {
-                        musicManager.scheduler.queue(track, top);
+                        musicManager.scheduler.queueSong(track, top);
                     }
 
                 }
@@ -86,6 +84,7 @@ public class PlayerManager {
             @Override
             public void loadFailed(FriendlyException e) {
                 event.getChannel().sendMessage(":warning: Could not load specified song.").queue();
+                e.printStackTrace();
             }
         });
 

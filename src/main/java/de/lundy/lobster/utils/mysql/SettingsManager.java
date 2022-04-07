@@ -7,49 +7,78 @@ import java.util.ArrayList;
 
 public class SettingsManager {
 
-    //Creates a table in the mysql database to store the prefix for each server
-    public void generateSettingsTable() throws SQLException {
+    private final MySQLUtils database;
 
-        MySQLUtils.connect();
-        var statement = MySQLUtils.connection.createStatement();
-        statement.execute("create table if not exists settings (discord_id bigint(20), prefix text)");
+    public SettingsManager(MySQLUtils database) {
+        this.database = database;
+        generateSettingsTable();
+    }
+
+    //Creates a table in the mysql database to store the prefix for each server
+    private void generateSettingsTable() {
+
+        try {
+
+            var statement = database.getConnection().createStatement();
+            statement.execute("create table if not exists settings (discord_id bigint(20), prefix text)");
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
     }
 
     //Check if there's already an entry for the server
-    public boolean serverInSettingsTable(long serverDiscordId) throws SQLException {
+    public boolean serverInSettingsTable(long discordId) {
 
-        MySQLUtils.connect();
-        var statement = MySQLUtils.connection.createStatement();
-        var results = statement.executeQuery("select discord_id from settings");
-        var ids = new ArrayList<Long>();
+        try {
 
-        while (results.next()) {
-            ids.add(results.getLong("discord_id"));
+            var statement = database.getConnection().createStatement();
+            var results = statement.executeQuery("select discord_id from settings");
+            var ids = new ArrayList<Long>();
+
+            while (results.next()) {
+                ids.add(results.getLong("discord_id"));
+            }
+
+            return ids.contains(discordId);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
 
-        return ids.contains(serverDiscordId);
+        return false;
 
     }
 
     //Create an entry for the server in the settings table with a default prefix
-    public void putServerIntoSettingsTable(long serverId, String defaultPrefix) throws SQLException {
+    public void putServerIntoSettingsTable(long discordId, String defaultPrefix) {
 
-        MySQLUtils.connect();
-        var statement = MySQLUtils.connection.createStatement();
-        statement.executeUpdate("insert into settings values (" + serverId + ", \"" + defaultPrefix + "\")");
+        try {
+
+            var statement = database.getConnection().createStatement();
+            statement.executeUpdate("insert into settings values (" + discordId + ", \"" + defaultPrefix + "\")");
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
     }
 
     //Returns the prefix from a server from the mysql database
-    public String getPrefix(long serverId) throws SQLException {
+    public String getPrefix(long discordId) {
 
-        MySQLUtils.connect();
-        var statement = MySQLUtils.connection.createStatement();
-        var results = statement.executeQuery("select prefix from settings where discord_id = " + serverId);
+        try {
 
-        while (results.next()) {
-            return results.getString("prefix");
+            var statement = database.getConnection().createStatement();
+            var results = statement.executeQuery("select prefix from settings where discord_id = " + discordId);
+
+            while (results.next()) {
+                return results.getString("prefix");
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
 
         return null;
@@ -57,11 +86,16 @@ public class SettingsManager {
     }
 
     //Updates the entry for the prefix for a server in the mysql database
-    public void setPrefix(long serverId, String newPrefix) throws SQLException {
+    public void setPrefix(long discordId, String newPrefix) {
 
-        MySQLUtils.connect();
-        var statement = MySQLUtils.connection.createStatement();
-        statement.executeUpdate("update settings set prefix = \"" + newPrefix + "\" where discord_id = " + serverId);
+        try {
+
+            var statement = database.getConnection().createStatement();
+            statement.executeUpdate("update settings set prefix = \"" + newPrefix + "\" where discord_id = " + discordId);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
 
     }
 

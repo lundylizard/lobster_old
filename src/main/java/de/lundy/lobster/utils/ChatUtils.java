@@ -12,6 +12,10 @@ import java.util.concurrent.TimeUnit;
 
 public class ChatUtils {
 
+    private ChatUtils() {
+        throw new IllegalStateException("Utility class");
+    }
+
     //Formats the milliseconds to a hh:mm:ss format
     public static String formatTime(long timeInMillis) {
 
