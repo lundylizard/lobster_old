@@ -40,7 +40,7 @@ public class LeaveCommand implements Command {
         musicManager.scheduler.queue.clear();
         musicManager.audioPlayer.stopTrack();
         event.getGuild().getAudioManager().closeAudioConnection();
-        channel.sendMessage(":leaves: Left the voice channel").queue();
+        channel.sendMessage("Left the voice channel.").queue();
 
     }
 }

@@ -1,9 +1,9 @@
 package de.lundy.lobster.utils;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
+import de.lundy.lobster.utils.mysql.SettingsManager;
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -21,14 +21,6 @@ public class ChatUtils {
         var minutes = timeInMillis / TimeUnit.MINUTES.toMillis(1);
         var seconds = timeInMillis % TimeUnit.MINUTES.toMillis(1) / TimeUnit.SECONDS.toMillis(1);
         return String.format("%02d:%02d:%02d", hours, minutes, seconds);
-
-    }
-
-    //Returns a time embed string for discord for the uptime of the bot
-    public static @NotNull String getBotUptime() {
-
-        var duration = (System.currentTimeMillis() / 1000) - (ManagementFactory.getRuntimeMXBean().getUptime() / 1000);
-        return "<t:" + duration + ":R>";
 
     }
 
@@ -50,18 +42,17 @@ public class ChatUtils {
 
     }
 
-    public static String randomFooter() {
+    public static @NotNull String randomFooter(long discordId, @NotNull SettingsManager settings) {
 
         var messages = new ArrayList<String>();
-        messages.add("\uD83E\uDD9E Do you enjoy this bot? Please share it with your friends: !invite");
+        messages.add("\uD83E\uDD9E Do you enjoy this bot? Please share it with your friends: %prefix%invite");
         messages.add("\uD83E\uDD9E Did you know lobsters used to be prison food?");
-        messages.add("\uD83E\uDD9E Please consider donating if you enjoy this bot to keep this bot up: !donate");
         messages.add("\uD83E\uDD9E lundy would never eat a lobster.");
-        messages.add("\uD83E\uDD9E Shoutout to the Lobster Gang");
+        messages.add("\uD83E\uDD9E Shoutout to the Lobster Gang!");
         messages.add("\uD83E\uDD9E Found a bug? Have a feature request? Create an issue on GitHub!");
         messages.add("\uD83E\uDD9E Lobsters smell with their legs.");
 
-        return messages.get(new Random().nextInt(messages.size()));
+        return messages.get(new Random().nextInt(messages.size())).replace("%prefix%", settings.getPrefix(discordId));
 
     }
 

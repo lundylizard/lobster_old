@@ -83,7 +83,6 @@ public class PlayCommand implements Command {
 
             } else {
 
-                channel.sendMessage(":warning: Spotify Playlists may be a little buggy, gonna fix that sooner or later.").queue();
                 var spotifyId = spotify.getSpotifyIdFromLink(link.toString());
                 Playlist playlist = null;
 
@@ -112,7 +111,7 @@ public class PlayCommand implements Command {
 
                 }
 
-                event.getChannel().sendMessage(":arrow_forward: Added " + playlist.getTracks().getTotal() + " songs to the queue.").queue();
+                event.getChannel().sendMessage("Added " + playlist.getTracks().getTotal() + " songs to the queue.").queue();
 
             }
 

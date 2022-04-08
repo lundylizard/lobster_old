@@ -44,12 +44,12 @@ public class MoveCommand implements Command {
             var queue = musicManager.scheduler.queue;
 
             if (!ChatUtils.checkIfValidNumber(args[0])) {
-                event.getTextChannel().sendMessage(":x: " + args[0] + " is not a valid number.").queue();
+                event.getTextChannel().sendMessage(":warning: `" + args[0] + "` is not a valid number.").queue();
                 return;
             }
 
             if (!ChatUtils.checkIfValidNumber(args[1])) {
-                event.getTextChannel().sendMessage(":x: " + args[1] + " is not a valid number.").queue();
+                event.getTextChannel().sendMessage(":warning: `" + args[1] + "` is not a valid number.").queue();
                 return;
             }
 
@@ -60,10 +60,10 @@ public class MoveCommand implements Command {
             trackList.remove(currentTrackPos + 1);
             queue.clear();
             queue.addAll(trackList);
-            channel.sendMessage(":white_check_mark: Moved track `#" + args[0] + "` to position `#" + args[1] + "`").queue();
+            channel.sendMessage("Moved track `#" + args[0] + "` to position `#" + args[1] + "`").queue();
 
         } else {
-            event.getTextChannel().sendMessage(":x: Invalid arguments, please use `move [pos1] [pos2]`").queue();
+            event.getTextChannel().sendMessage(":warning: Invalid arguments, please use `move [from] [to]`").queue();
         }
 
     }

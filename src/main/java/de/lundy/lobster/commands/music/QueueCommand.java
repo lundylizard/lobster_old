@@ -3,6 +3,7 @@ package de.lundy.lobster.commands.music;
 import de.lundy.lobster.commands.impl.Command;
 import de.lundy.lobster.lavaplayer.PlayerManager;
 import de.lundy.lobster.utils.ChatUtils;
+import de.lundy.lobster.utils.mysql.SettingsManager;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.jetbrains.annotations.NotNull;
@@ -11,6 +12,12 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 public class QueueCommand implements Command {
+
+    private final SettingsManager settingsManager;
+
+    public QueueCommand(SettingsManager settingsManager) {
+        this.settingsManager = settingsManager;
+    }
 
     @Override
     public void action(String[] args, @NotNull MessageReceivedEvent event) {
@@ -44,7 +51,7 @@ public class QueueCommand implements Command {
 
             var trackInfo = musicManager.audioPlayer.getPlayingTrack().getInfo();
             channel.sendMessage(new EmbedBuilder()
-                    .setDescription(":warning: The queue is currently empty.\n\n:notes: **NOW PLAYING:** " + trackInfo.title + "\n`by " + trackInfo.author + "` [`" + ChatUtils.trackPosition(musicManager.audioPlayer.getPlayingTrack()) + "`]")
+                    .setDescription(":warning: The queue is currently empty.\n\n:notes: **NOW PLAYING:** " + trackInfo.title + " `by " + trackInfo.author + "` [`" + ChatUtils.trackPosition(musicManager.audioPlayer.getPlayingTrack()) + "`]")
                     .setColor(Objects.requireNonNull(event.getGuild().getMember(event.getJDA().getSelfUser())).getColor())
                     .build()).queue();
             return;
@@ -70,7 +77,7 @@ public class QueueCommand implements Command {
                     .append(i + 1)
                     .append(" ")
                     .append(info.title)
-                        .append("\n`by ")
+                    .append(" `by ")
                         .append(info.author)
                         .append("` [`")
                         .append(ChatUtils.formatTime(track.getDuration()))
@@ -87,6 +94,7 @@ public class QueueCommand implements Command {
         channel.sendMessage(new EmbedBuilder()
                 .setColor(Objects.requireNonNull(event.getGuild().getMember(event.getJDA().getSelfUser())).getColor())
                 .setDescription(messageAction.toString())
+                .setFooter(ChatUtils.randomFooter(event.getGuild().getIdLong(), settingsManager))
                 .build()).queue();
 
     }

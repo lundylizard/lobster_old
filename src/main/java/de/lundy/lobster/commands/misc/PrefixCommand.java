@@ -28,7 +28,7 @@ public record PrefixCommand(SettingsManager settingsManager) implements Command 
 
                     Lobsterbot.LOGGER.info("Changed prefix in {} from {} to {}", serverId, settingsManager.getPrefix(serverId), args[0]);
                     settingsManager.setPrefix(serverId, args[0]);
-                    event.getTextChannel().sendMessage(":white_check_mark: Successfully set prefix for this server to `" + args[0] + "`").queue();
+                    event.getTextChannel().sendMessage("Successfully set prefix for this server to `" + args[0] + "`").queue();
 
                 } else {
                     event.getTextChannel().sendMessage(":warning: Prefix is not allowed to be longer than 10 characters.").queue();

@@ -21,7 +21,7 @@ public class JoinListener extends ListenerAdapter {
 
         // Create guild tables on join
         if (!settingsManager.serverInSettingsTable(event.getGuild().getIdLong())) {
-            Lobsterbot.LOGGER.info("DATABASE: {} is not in the database yet. Creating...", event.getGuild().getName());
+            Lobsterbot.LOGGER.info("{} is not in the database yet. Creating...", event.getGuild().getName());
             settingsManager.putServerIntoSettingsTable(event.getGuild().getIdLong(), "!");
         }
 

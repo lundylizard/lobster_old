@@ -64,12 +64,12 @@ public class SkipCommand implements Command {
                 musicManager.scheduler.nextTrack();
             }
 
-            channel.sendMessage(":white_check_mark: Skipped `" + amount + "` songs from the queue.").queue();
+            channel.sendMessage("Skipped `" + amount + "` songs from the queue.").queue();
 
         } else {
 
             var trackInfo = audioPlayer.getPlayingTrack().getInfo();
-            channel.sendMessage(":white_check_mark: Skipped `" + trackInfo.title + "`").queue();
+            channel.sendMessage("Skipped `" + trackInfo.title + "`").queue();
             musicManager.scheduler.nextTrack();
 
         }

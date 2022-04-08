@@ -76,7 +76,7 @@ public class SeekCommand implements Command {
         }
 
         audioPlayer.getPlayingTrack().setPosition(seekPos);
-        channel.sendMessage(":fast_forward: Set song position to `" + mins + ":" + (String.valueOf(secs).length() == 0 ? args[0].split(":")[1] + "0" : args[0].split(":")[1]) + "`").queue();
+        channel.sendMessage("Set song position to `" + mins + ":" + (String.valueOf(secs).length() == 0 ? args[0].split(":")[1] + "0" : args[0].split(":")[1]) + "`").queue();
 
     }
 }

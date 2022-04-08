@@ -7,6 +7,7 @@ import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
+import de.lundy.lobster.Lobsterbot;
 import de.lundy.lobster.lavaplayer.spotify.SpotifyToYoutubeInterpreter;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -49,7 +50,7 @@ public class PlayerManager {
 
                 musicManager.scheduler.queueSong(audioTrack, top);
                 if (!spotifyPlaylist)
-                    event.getChannel().sendMessage(":arrow_forward: Added to the queue: " + audioTrack.getInfo().title + ", by " + audioTrack.getInfo().author).queue();
+                    event.getChannel().sendMessage("Added to the queue: `" + audioTrack.getInfo().title + "` by `" + audioTrack.getInfo().author + "`").queue();
 
             }
 
@@ -61,13 +62,13 @@ public class PlayerManager {
                     var track = audioPlaylist.getTracks().get(0);
 
                     if (!spotifyPlaylist)
-                        event.getChannel().sendMessage(":arrow_forward: Added to the queue: " + track.getInfo().title + ", by " + track.getInfo().author).queue();
+                        event.getChannel().sendMessage("Added to the queue: `" + track.getInfo().title + "` by `" + track.getInfo().author + "`").queue();
                     musicManager.scheduler.queueSong(track, top);
 
                 } else {
 
                     var trackList = audioPlaylist.getTracks();
-                    event.getChannel().sendMessage(":arrow_forward: Added " + trackList.size() + " songs to the queue.").queue();
+                    event.getChannel().sendMessage("Added `" + trackList.size() + "` songs to the queue.").queue();
 
                     for (var track : trackList) {
                         musicManager.scheduler.queueSong(track, top);
@@ -84,7 +85,7 @@ public class PlayerManager {
             @Override
             public void loadFailed(FriendlyException e) {
                 event.getChannel().sendMessage(":warning: Could not load specified song.").queue();
-                e.printStackTrace();
+                Lobsterbot.LOGGER.trace("Could not load specified song", e);
             }
         });
 

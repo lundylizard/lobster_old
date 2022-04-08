@@ -43,7 +43,7 @@ public class ShuffleCommand implements Command {
         Collections.shuffle(trackList); //Shoutout to this
         queue.clear();
         queue.addAll(trackList);
-        channel.sendMessage(":twisted_rightwards_arrows: Successfully shuffled the queue.").queue();
+        channel.sendMessage("Successfully shuffled the queue.").queue();
 
     }
 }

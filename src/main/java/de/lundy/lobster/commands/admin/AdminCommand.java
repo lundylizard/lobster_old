@@ -30,12 +30,12 @@ public class AdminCommand implements Command {
                 }
 
                 blacklistManager.putServerInBlacklistTable(Long.parseLong(args[2]), reason.toString().trim());
-                event.getChannel().sendMessage(":white_check_mark: Added `" + args[2] + "` to the blacklist with reason `" + reason.toString().trim() + "`").queue();
+                event.getChannel().sendMessage("Added `" + args[2] + "` to the blacklist. Reason: `" + reason.toString().trim() + "`").queue();
 
             } else if (args[1].equalsIgnoreCase("remove")) {
 
                 blacklistManager.removeServerFromBlacklistTable(Long.parseLong(args[2]));
-                event.getChannel().sendMessage(":white_check_mark: Removed `" + args[2] + "` from the blacklist").queue();
+                event.getChannel().sendMessage("Removed `" + args[2] + "` from the blacklist").queue();
 
             }
         }

@@ -2,6 +2,7 @@ package de.lundy.lobster.commands.misc;
 
 import de.lundy.lobster.commands.impl.Command;
 import de.lundy.lobster.utils.ChatUtils;
+import de.lundy.lobster.utils.mysql.SettingsManager;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -11,6 +12,12 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 public class InviteCommand implements Command {
+
+    private final SettingsManager settingsManager;
+
+    public InviteCommand(SettingsManager settingsManager) {
+        this.settingsManager = settingsManager;
+    }
 
     @Override
     public void action(String[] args, @NotNull MessageReceivedEvent event) {
@@ -29,7 +36,7 @@ public class InviteCommand implements Command {
         var inviteUrl = event.getJDA().getInviteUrl(permissions);
 
         event.getTextChannel().sendMessage(new EmbedBuilder()
-                .setFooter(ChatUtils.randomFooter())
+                .setFooter(ChatUtils.randomFooter(event.getGuild().getIdLong(), settingsManager))
                 .setDescription("**INVITE LOBSTER BOT**\n\n[Click here](" + inviteUrl + ") to invite this bot to your server.")
                 .setColor(Objects.requireNonNull(event.getGuild().getMember(event.getJDA().getSelfUser())).getColor())
                 .build()).queue();
