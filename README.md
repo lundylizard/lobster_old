@@ -33,5 +33,5 @@ Supports **YouTube**, **SoundCloud**, **Spotify** and many more.
 
 ## Contact:
 
-| [Twitter](https://twitter.com/lundylizard) | [Twitch](https://twitch.tv/iundylizard) | [Discord]() |
-|:------------------------------------------:|:---------------------------------------:|:-----------:|
+| [Twitter](https://twitter.com/lundylizard) | [Twitch](https://twitch.tv/iundylizard) | [Discord](https://discord.gg/Hk5YP5AWhW) |
+|:------------------------------------------:|:---------------------------------------:|:----------------------------------------:|
