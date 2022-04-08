@@ -2,7 +2,6 @@ package de.lundy.lobster;
 
 import de.lundy.lobster.commands.admin.AdminCommand;
 import de.lundy.lobster.commands.impl.CommandHandler;
-import de.lundy.lobster.commands.misc.DonateCommand;
 import de.lundy.lobster.commands.misc.HelpCommand;
 import de.lundy.lobster.commands.misc.InviteCommand;
 import de.lundy.lobster.commands.misc.PrefixCommand;
@@ -33,7 +32,7 @@ public class Lobsterbot {
     // Please note: The Secrets class is not publicly available, because I did not intend this to be built from others.
     private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     public static final Logger LOGGER = LoggerFactory.getLogger(Lobsterbot.class);
-    public static final boolean DEBUG = true;
+    public static final boolean DEBUG = false;
 
     public static void main(String @NotNull [] args) {
 
@@ -55,7 +54,7 @@ public class Lobsterbot {
         CommandHandler.addCommand(new String[]{"nowplaying", "np"}, new NowPlayingCommand());
         CommandHandler.addCommand(new String[]{"skip", "s"}, new SkipCommand());
         CommandHandler.addCommand(new String[]{"stop"}, new StopCommand());
-        CommandHandler.addCommand(new String[]{"queue", "q"}, new QueueCommand());
+        CommandHandler.addCommand(new String[]{"queue", "q"}, new QueueCommand(settingsManager));
         CommandHandler.addCommand(new String[]{"disconnect", "leave", "dc"}, new LeaveCommand());
         CommandHandler.addCommand(new String[]{"remove", "rm"}, new RemoveCommand());
         CommandHandler.addCommand(new String[]{"shuffle"}, new ShuffleCommand());
@@ -67,8 +66,7 @@ public class Lobsterbot {
         CommandHandler.addCommand(new String[]{"pause"}, new PauseCommand());
         CommandHandler.addCommand(new String[]{"resume", "unpause"}, new ResumeCommand());
         CommandHandler.addCommand(new String[]{"prefix"}, new PrefixCommand(settingsManager));
-        CommandHandler.addCommand(new String[]{"invite"}, new InviteCommand());
-        CommandHandler.addCommand(new String[]{"donate"}, new DonateCommand());
+        CommandHandler.addCommand(new String[]{"invite"}, new InviteCommand(settingsManager));
         CommandHandler.addCommand(new String[]{"admin"}, new AdminCommand(blacklistManager));
 
         JDA jda = null;
