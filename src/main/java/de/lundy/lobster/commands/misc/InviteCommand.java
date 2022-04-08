@@ -18,7 +18,7 @@ public class InviteCommand implements Command {
         var permissions = new ArrayList<Permission>();
         permissions.add(Permission.MESSAGE_WRITE);          // Permission to send messages
         permissions.add(Permission.MESSAGE_EMBED_LINKS);    // Permission to embed links
-        permissions.add(Permission.MESSAGE_HISTORY);        // Actually not sure if you need this - Permission to see messages from the past
+        //permissions.add(Permission.MESSAGE_HISTORY);        // Actually not sure if you need this - Permission to see messages from the past
         permissions.add(Permission.MESSAGE_READ);           // Receive messages to process commands
         permissions.add(Permission.VIEW_CHANNEL);           // See text/voice-channels
         permissions.add(Permission.VOICE_CONNECT);          // Connect to VC
