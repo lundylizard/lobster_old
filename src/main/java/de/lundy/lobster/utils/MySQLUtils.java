@@ -18,7 +18,7 @@ public class MySQLUtils {
         if (properties == null) {
             properties = new Properties();
             properties.setProperty("user", Lobsterbot.DEBUG ? "root" : Secrets.DATABASE_USER);
-            properties.setProperty("password", Lobsterbot.DEBUG ? "root" : Secrets.DATABASE_PASSWORD);
+            properties.setProperty("password", Lobsterbot.DEBUG ? "" : Secrets.DATABASE_PASSWORD);
             properties.setProperty("MaxPooledStatements", "250");
         }
 

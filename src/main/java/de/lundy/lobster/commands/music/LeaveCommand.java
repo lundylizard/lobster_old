@@ -1,9 +1,7 @@
 package de.lundy.lobster.commands.music;
 
-import de.lundy.lobster.Lobsterbot;
 import de.lundy.lobster.commands.impl.Command;
 import de.lundy.lobster.lavaplayer.PlayerManager;
-import de.lundy.lobster.utils.ChatUtils;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.jetbrains.annotations.NotNull;
 
@@ -43,7 +41,6 @@ public class LeaveCommand implements Command {
         musicManager.audioPlayer.stopTrack();
         event.getGuild().getAudioManager().closeAudioConnection();
         channel.sendMessage(":leaves: Left the voice channel").queue();
-        if (Lobsterbot.DEBUG) ChatUtils.print("Left VC in " + event.getGuild().getName());
 
     }
 }

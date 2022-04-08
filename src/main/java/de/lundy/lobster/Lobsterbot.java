@@ -9,7 +9,6 @@ import de.lundy.lobster.commands.misc.PrefixCommand;
 import de.lundy.lobster.commands.music.*;
 import de.lundy.lobster.lavaplayer.PlayerManager;
 import de.lundy.lobster.listeners.*;
-import de.lundy.lobster.utils.ChatUtils;
 import de.lundy.lobster.utils.MySQLUtils;
 import de.lundy.lobster.utils.mysql.BlacklistManager;
 import de.lundy.lobster.utils.mysql.SettingsManager;
@@ -19,6 +18,8 @@ import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.security.auth.login.LoginException;
 import java.util.EnumSet;
@@ -31,7 +32,8 @@ public class Lobsterbot {
 
     // Please note: The Secrets class is not publicly available, because I did not intend this to be built from others.
     private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-    public static final boolean DEBUG = false;
+    public static final Logger LOGGER = LoggerFactory.getLogger(Lobsterbot.class);
+    public static final boolean DEBUG = true;
 
     public static void main(String @NotNull [] args) {
 
@@ -47,7 +49,7 @@ public class Lobsterbot {
         jdaBuilder.addEventListeners(new VCJoinListener());
         jdaBuilder.addEventListeners(new VCLeaveListener());
 
-        //Register commands, I know there's prettier ways to do this.
+        // Register commands, I know there's prettier ways to do this.
         CommandHandler.addCommand(new String[]{"join"}, new JoinCommand());
         CommandHandler.addCommand(new String[]{"play", "p", "sr"}, new PlayCommand());
         CommandHandler.addCommand(new String[]{"nowplaying", "np"}, new NowPlayingCommand());
@@ -69,8 +71,6 @@ public class Lobsterbot {
         CommandHandler.addCommand(new String[]{"donate"}, new DonateCommand());
         CommandHandler.addCommand(new String[]{"admin"}, new AdminCommand(blacklistManager));
 
-        if (DEBUG) ChatUtils.print("INFO: Loaded " + (CommandHandler.commands.size() + 1) + " commands.");
-
         JDA jda = null;
 
         try {
@@ -79,7 +79,7 @@ public class Lobsterbot {
             e.printStackTrace();
         }
 
-        tick(jda); //This gets executed every 30 seconds
+        tick(jda); // This gets executed every 60 seconds
 
     }
 
@@ -87,30 +87,34 @@ public class Lobsterbot {
 
         scheduler.scheduleWithFixedDelay(() -> {
 
+            var serverCount = jda.getGuilds().size();
+
+            // Update activity to show how many servers this bot is on
+            jda.getPresence().setPresence(OnlineStatus.ONLINE, Activity.playing("on " + serverCount + " servers."));
+
             for (var guilds : jda.getGuilds()) {
 
-                //Update activity to show how many servers this bot is on
-                jda.getPresence().setPresence(OnlineStatus.ONLINE, Activity.playing("on " + jda.getGuilds().size() + " servers."));
-
-                //Checks if lobster is connected to a vc
+                // Checks if lobster is connected to a vc
                 if (guilds.getAudioManager().isConnected()) {
 
                     var musicManager = PlayerManager.getInstance().getMusicManager(guilds);
                     var audioPlayer = musicManager.audioPlayer;
 
-                    //If there is no other undeafened member or bot in vc stop playing music and leave vc
+                    // If there is no other undeafened member or bot in vc stop playing music and leave vc
                     if (Objects.requireNonNull(guilds.getAudioManager().getConnectedChannel()).getMembers().stream()
                             .noneMatch(x -> !Objects.requireNonNull(x.getVoiceState()).isDeafened() && !x.getUser().isBot())) {
 
                         guilds.getAudioManager().closeAudioConnection();
                         audioPlayer.stopTrack();
                         musicManager.scheduler.queue.clear();
+                        LOGGER.info("Left Voice Channel in {} ({}) due to inactivity.", guilds.getName(), guilds.getAudioManager().getConnectedChannel().getName());
 
                     }
                 }
             }
 
-        }, 0, 30, TimeUnit.SECONDS);
+        }, 0, 60, TimeUnit.SECONDS);
 
     }
+
 }

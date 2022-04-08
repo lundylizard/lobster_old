@@ -1,5 +1,6 @@
 package de.lundy.lobster.commands.misc;
 
+import de.lundy.lobster.Lobsterbot;
 import de.lundy.lobster.commands.impl.Command;
 import de.lundy.lobster.utils.mysql.SettingsManager;
 import net.dv8tion.jda.api.Permission;
@@ -25,6 +26,7 @@ public record PrefixCommand(SettingsManager settingsManager) implements Command 
             } else if (args.length == 1) {
                 if (args[0].length() <= 10) { // Why would you even do this?
 
+                    Lobsterbot.LOGGER.info("Changed prefix in {} from {} to {}", serverId, settingsManager.getPrefix(serverId), args[0]);
                     settingsManager.setPrefix(serverId, args[0]);
                     event.getTextChannel().sendMessage(":white_check_mark: Successfully set prefix for this server to `" + args[0] + "`").queue();
 

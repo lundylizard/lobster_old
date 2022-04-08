@@ -4,8 +4,6 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.management.ManagementFactory;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -37,15 +35,6 @@ public class ChatUtils {
     //Checks if string is number using regex
     public static boolean checkIfValidNumber(@NotNull String string) {
         return string.matches("[0-9]+");
-    }
-
-    //Print function for this bot to print with a time stamp into console
-    public static void print(String out) {
-
-        var dateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
-        var time = LocalDateTime.now();
-        System.out.println("[" + dateTimeFormatter.format(time) + "] " + out);
-
     }
 
     //Returns a formatted string with the track position, I am aware this looks ugly and could be done better

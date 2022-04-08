@@ -1,6 +1,6 @@
 package de.lundy.lobster.listeners;
 
-import de.lundy.lobster.utils.ChatUtils;
+import de.lundy.lobster.Lobsterbot;
 import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
@@ -11,10 +11,14 @@ public class ReadyListener extends ListenerAdapter {
     public void onReady(@NotNull ReadyEvent event) {
 
         //Prints every server this bot is running on in the console
-        ChatUtils.print("INFO: Bot is running on:");
+
+        Lobsterbot.LOGGER.info("___________ Bot is running on: ___________");
+
         for (var guild : event.getJDA().getGuilds()) {
-            ChatUtils.print("INFO: " + guild.getName() + " -- ID: " + guild.getId());
+            Lobsterbot.LOGGER.info("{} ({}) -- {}", guild.getName(), guild.getMemberCount(), guild.getIdLong());
         }
+
+        Lobsterbot.LOGGER.info("------------------------------------------");
 
     }
 }
