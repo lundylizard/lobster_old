@@ -16,7 +16,7 @@ public record HelpCommand(SettingsManager settingsManager) implements Command {
 
         var helpContent = "**LOBSTER MUSIC BOT**\n\n" +
 
-                "Made by lundylizard » [Twitch](https://twitch.tv/Iundylizard) - [Twitter](https://twitter.com/lundylizard) - [GitHub](https://github.com/lundylizard/lobster)- [Discord](https://discord.gg/Hk5YP5AWhW)\n\n" +
+                "Made by lundylizard » [Twitch](https://twitch.tv/Iundylizard) - [Twitter](https://twitter.com/lundylizard) - [GitHub](https://github.com/lundylizard/lobster) - [Discord](https://discord.gg/Hk5YP5AWhW)\n\n" +
 
                 "`%prefix%play <top> [link]` - Adds a song to the queue <at the top>.\n" +
                 "`%prefix%move [from] [to]` - Move songs in the queue.\n" +
