@@ -30,10 +30,11 @@ public class CommandHandler {
 
     /**
      * Puts class to the registered command map
-     * @param invokes   Command invokes (with aliases)
-     * @param command   Command class
+     *
+     * @param invokes Command invokes (with aliases)
+     * @param command Command class
      */
-    public static void addCommand(String @NotNull [] invokes, Command command) {
+    public static void addCommand(Command command, String... invokes) {
 
         for (var aliases : invokes) {
             commands.put(aliases, command);

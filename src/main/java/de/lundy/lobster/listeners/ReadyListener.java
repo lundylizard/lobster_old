@@ -12,13 +12,11 @@ public class ReadyListener extends ListenerAdapter {
 
         //Prints every server this bot is running on in the console
 
-        Lobsterbot.LOGGER.info("___________ Bot is running on: ___________");
+        Lobsterbot.LOGGER.info("Bot is running on:");
 
         for (var guild : event.getJDA().getGuilds()) {
             Lobsterbot.LOGGER.info("{} ({}) -- {}", guild.getName(), guild.getMemberCount(), guild.getIdLong());
         }
-
-        Lobsterbot.LOGGER.info("------------------------------------------");
 
     }
 }

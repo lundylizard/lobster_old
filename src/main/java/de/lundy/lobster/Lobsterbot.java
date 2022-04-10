@@ -2,7 +2,6 @@ package de.lundy.lobster;
 
 import de.lundy.lobster.commands.admin.AdminCommand;
 import de.lundy.lobster.commands.impl.CommandHandler;
-import de.lundy.lobster.commands.misc.HelpCommand;
 import de.lundy.lobster.commands.misc.InviteCommand;
 import de.lundy.lobster.commands.misc.PrefixCommand;
 import de.lundy.lobster.commands.music.*;
@@ -43,31 +42,30 @@ public class Lobsterbot {
         var blacklistManager = new BlacklistManager(database);
 
         jdaBuilder.addEventListeners(new MessageCommandListener(settingsManager, blacklistManager));
-        jdaBuilder.addEventListeners(new ReadyListener());
         jdaBuilder.addEventListeners(new JoinListener(settingsManager));
-        jdaBuilder.addEventListeners(new VCJoinListener());
         jdaBuilder.addEventListeners(new VCLeaveListener());
+        jdaBuilder.addEventListeners(new VCJoinListener());
+        jdaBuilder.addEventListeners(new ReadyListener());
 
         // Register commands, I know there's prettier ways to do this.
-        CommandHandler.addCommand(new String[]{"join"}, new JoinCommand());
-        CommandHandler.addCommand(new String[]{"play", "p", "sr"}, new PlayCommand());
-        CommandHandler.addCommand(new String[]{"nowplaying", "np"}, new NowPlayingCommand());
-        CommandHandler.addCommand(new String[]{"skip", "s"}, new SkipCommand());
-        CommandHandler.addCommand(new String[]{"stop"}, new StopCommand());
-        CommandHandler.addCommand(new String[]{"queue", "q"}, new QueueCommand(settingsManager));
-        CommandHandler.addCommand(new String[]{"disconnect", "leave", "dc"}, new LeaveCommand());
-        CommandHandler.addCommand(new String[]{"remove", "rm"}, new RemoveCommand());
-        CommandHandler.addCommand(new String[]{"shuffle"}, new ShuffleCommand());
-        CommandHandler.addCommand(new String[]{"loop", "repeat"}, new LoopCommand());
-        CommandHandler.addCommand(new String[]{"link", "url"}, new LinkCommand());
-        CommandHandler.addCommand(new String[]{"help"}, new HelpCommand(settingsManager));
-        CommandHandler.addCommand(new String[]{"seek"}, new SeekCommand());
-        CommandHandler.addCommand(new String[]{"move", "mv"}, new MoveCommand());
-        CommandHandler.addCommand(new String[]{"pause"}, new PauseCommand());
-        CommandHandler.addCommand(new String[]{"resume", "unpause"}, new ResumeCommand());
-        CommandHandler.addCommand(new String[]{"prefix"}, new PrefixCommand(settingsManager));
-        CommandHandler.addCommand(new String[]{"invite"}, new InviteCommand(settingsManager));
-        CommandHandler.addCommand(new String[]{"admin"}, new AdminCommand(blacklistManager));
+        CommandHandler.addCommand(new LeaveCommand(), "dc", "disconnect", "leave");
+        CommandHandler.addCommand(new QueueCommand(settingsManager), "queue", "q");
+        CommandHandler.addCommand(new PrefixCommand(settingsManager), "prefix");
+        CommandHandler.addCommand(new InviteCommand(settingsManager), "invite");
+        CommandHandler.addCommand(new AdminCommand(blacklistManager), "admin");
+        CommandHandler.addCommand(new ResumeCommand(), "resume", "unpause");
+        CommandHandler.addCommand(new MoveCommand(), "move", "mv", "m");
+        CommandHandler.addCommand(new PlayCommand(), "play", "p", "sr");
+        CommandHandler.addCommand(new RemoveCommand(), "remove", "rm");
+        CommandHandler.addCommand(new ShuffleCommand(), "shuffle");
+        CommandHandler.addCommand(new SkipCommand(), "skip", "s");
+        CommandHandler.addCommand(new NowPlayingCommand(), "np");
+        CommandHandler.addCommand(new PauseCommand(), "pause");
+        CommandHandler.addCommand(new JoinCommand(), "join");
+        CommandHandler.addCommand(new SeekCommand(), "seek");
+        CommandHandler.addCommand(new LoopCommand(), "loop");
+        CommandHandler.addCommand(new LinkCommand(), "link");
+        CommandHandler.addCommand(new StopCommand(), "stop");
 
         JDA jda = null;
 
@@ -105,7 +103,6 @@ public class Lobsterbot {
                         guilds.getAudioManager().closeAudioConnection();
                         audioPlayer.stopTrack();
                         musicManager.scheduler.queue.clear();
-                        LOGGER.info("Left Voice Channel in {} ({}) due to inactivity.", guilds.getName(), guilds.getAudioManager().getConnectedChannel().getName());
 
                     }
                 }
