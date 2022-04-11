@@ -2,7 +2,6 @@ package de.lundy.lobster.commands.music;
 
 import de.lundy.lobster.commands.impl.Command;
 import de.lundy.lobster.lavaplayer.PlayerManager;
-import de.lundy.lobster.utils.ChatUtils;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.jetbrains.annotations.NotNull;
 
@@ -15,8 +14,6 @@ public class RemoveCommand implements Command {
     public void action(String[] args, @NotNull MessageReceivedEvent event) {
 
         var channel = event.getTextChannel();
-        var musicManager = PlayerManager.getInstance().getMusicManager(event.getGuild());
-        var queue = musicManager.scheduler.queue;
         var self = Objects.requireNonNull(event.getMember()).getGuild().getSelfMember();
         var member = event.getMember();
         var memberVoiceState = member.getVoiceState();
@@ -34,27 +31,67 @@ public class RemoveCommand implements Command {
             return;
         }
 
+        var musicManager = PlayerManager.getInstance().getMusicManager(event.getGuild());
+        var queue = musicManager.scheduler.queue;
+
         if (queue.isEmpty()) {
             channel.sendMessage(":warning: The queue is currently empty.").queue();
             return;
         }
 
-        if (!ChatUtils.checkIfValidNumber(args[0])) {
-            channel.sendMessage(":warning: `" + args[0] + "` is not a valid value.").queue();
-            return;
+        int index = 0;
+        if (!isRange(args[0])) {
+            try {
+                index = Integer.parseInt(args[0]);
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+                return;
+            }
         }
 
-        var index = Integer.parseInt(args[0]);
+        if (args[0].contains("-") && isRange(args[0])) {
 
-        if (index < 1 && index < queue.size()) {
-            channel.sendMessage(":warning: Track `#" + args[0] + "` is not in the queue.").queue();
-            return;
+            var indexRange = new int[]{Integer.parseInt(args[0].split("-")[0]), Integer.parseInt(args[0].split("-")[1])};
+
+            if (!(isValidIndex(indexRange[0]) && isValidIndex(indexRange[1]))) {
+                event.getTextChannel().sendMessage(":warning: Invalid range").queue();
+                return;
+            }
+
+            var highest = Math.max(indexRange[0], indexRange[1]);
+            var lowest = Math.min(indexRange[0], indexRange[1]);
+
+            if (queue.size() < highest) {
+                event.getTextChannel().sendMessage(":warning: Provided range is too high. Not enough songs in queue.").queue();
+                return;
+            }
+
+            var trackList = new ArrayList<>(queue);
+            trackList.subList(lowest - 1, highest).clear();
+            queue.clear();
+            queue.addAll(trackList);
+            event.getTextChannel().sendMessage("Removed tracks " + lowest + "-" + highest + " from the queue.").queue();
+
+        } else if (isValidIndex(Integer.parseInt(args[0]))) {
+
+            var trackList = new ArrayList<>(queue);
+            queue.removeFirstOccurrence(trackList.get(index - 1));
+            event.getChannel().sendMessage("Successfully removed track `#" + index + "`").queue();
+
+        } else {
+
+            event.getTextChannel().sendMessage(":warning: Invalid argument: Please use `remove [index] | [from]-[to]`").queue();
+
         }
 
-        var trackList = new ArrayList<>(queue);
-        queue.removeFirstOccurrence(trackList.get(index - 1));
-        event.getChannel().sendMessage("Successfully removed track `#" + index + "`").queue();
+    }
 
+    private boolean isRange(@NotNull String input) {
+        return input.matches("^[1-9]+-[1-9]+$");
+    }
+
+    private boolean isValidIndex(int input) {
+        return input > 0;
     }
 
 }
