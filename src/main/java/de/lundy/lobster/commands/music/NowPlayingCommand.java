@@ -3,13 +3,14 @@ package de.lundy.lobster.commands.music;
 import de.lundy.lobster.commands.impl.Command;
 import de.lundy.lobster.lavaplayer.PlayerManager;
 import de.lundy.lobster.utils.ChatUtils;
+import de.lundy.lobster.utils.mysql.SettingsManager;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public class NowPlayingCommand implements Command {
+public record NowPlayingCommand(SettingsManager settingsManager) implements Command {
 
     @Override
     public void action(String[] args, @NotNull MessageReceivedEvent event) {
@@ -52,6 +53,7 @@ public class NowPlayingCommand implements Command {
         channel.sendMessage(new EmbedBuilder()
                 .setDescription(nowPlaying)
                 .setColor(Objects.requireNonNull(event.getGuild().getMember(event.getJDA().getSelfUser())).getColor())
+                .setFooter(ChatUtils.randomFooter(event.getGuild().getIdLong(), settingsManager))
                 .build()).queue();
 
     }

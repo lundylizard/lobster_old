@@ -12,36 +12,38 @@ public class JoinCommand implements Command {
     @Override
     public void action(String[] args, @NotNull MessageReceivedEvent event) {
 
-        try {
+        var channel = event.getTextChannel();
+        var self = Objects.requireNonNull(event.getMember()).getGuild().getSelfMember();
+        var selfVoiceState = self.getVoiceState();
 
-            var channel = event.getTextChannel();
-            var self = Objects.requireNonNull(event.getMember()).getGuild().getSelfMember();
-            var selfVoiceState = self.getVoiceState();
+        if (selfVoiceState != null && selfVoiceState.inVoiceChannel()) {
+            channel.sendMessage(":warning: I'm already in a voice channel.").queue();
+            return;
+        }
 
-            assert selfVoiceState != null;
-            if (selfVoiceState.inVoiceChannel()) {
-                channel.sendMessage(":warning: I'm already in a voice channel.").queue();
-                return;
-            }
+        var member = event.getMember();
+        var memberVoiceState = member.getVoiceState();
 
-            var member = event.getMember();
-            var memberVoiceState = member.getVoiceState();
+        if (!memberVoiceState.inVoiceChannel()) {
+            channel.sendMessage(":warning: You are not in a voice channel.").queue();
+            return;
+        }
 
-            assert memberVoiceState != null;
-            if (!memberVoiceState.inVoiceChannel()) {
-                channel.sendMessage(":warning: You are not in a voice channel.").queue();
-                return;
-            }
+        var memberChannel = Objects.requireNonNull(memberVoiceState).getChannel();
+
+        if (memberChannel != null) {
 
             var audioManager = event.getGuild().getAudioManager();
-            var memberChannel = memberVoiceState.getChannel();
-            audioManager.openAudioConnection(memberChannel);
-            assert memberChannel != null;
+
+            try {
+                audioManager.openAudioConnection(memberChannel);
+            } catch (InsufficientPermissionException e) {
+                event.getChannel().sendMessage(":warning: I do not have enough permissions to join that channel.").queue();
+                return;
+            }
+
             channel.sendMessage(":loud_sound: Connecting to `\uD83D\uDD0A " + memberChannel.getName() + "`").queue();
 
-        } catch (InsufficientPermissionException e) {
-            event.getChannel().sendMessage(":warning: I do not have enough permissions to join that channel.").queue();
-            e.printStackTrace();
         }
 
     }

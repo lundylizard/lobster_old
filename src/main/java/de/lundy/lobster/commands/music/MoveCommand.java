@@ -18,8 +18,7 @@ public class MoveCommand implements Command {
         var self = Objects.requireNonNull(event.getMember()).getGuild().getSelfMember();
         var selfVoiceState = self.getVoiceState();
 
-        assert selfVoiceState != null;
-        if (!selfVoiceState.inVoiceChannel()) {
+        if (!(selfVoiceState != null && selfVoiceState.inVoiceChannel())) {
             channel.sendMessage(":warning: I am not playing anything.").queue();
             return;
         }
@@ -27,8 +26,7 @@ public class MoveCommand implements Command {
         var member = event.getMember();
         var memberVoiceState = member.getVoiceState();
 
-        assert memberVoiceState != null;
-        if (!memberVoiceState.inVoiceChannel()) {
+        if (!(memberVoiceState != null && memberVoiceState.inVoiceChannel())) {
             channel.sendMessage(":warning: You are not in a voice channel.").queue();
             return;
         }
@@ -40,9 +38,6 @@ public class MoveCommand implements Command {
 
         if (args.length == 2) {
 
-            var musicManager = PlayerManager.getInstance().getMusicManager(event.getGuild());
-            var queue = musicManager.scheduler.queue;
-
             if (!ChatUtils.checkIfValidNumber(args[0])) {
                 event.getTextChannel().sendMessage(":warning: `" + args[0] + "` is not a valid number.").queue();
                 return;
@@ -53,6 +48,8 @@ public class MoveCommand implements Command {
                 return;
             }
 
+            var musicManager = PlayerManager.getInstance().getMusicManager(event.getGuild());
+            var queue = musicManager.scheduler.queue;
             var currentTrackPos = Integer.parseInt(args[0]);
             var movedTrackPos = Integer.parseInt(args[1]);
             var trackList = new LinkedList<>(queue);

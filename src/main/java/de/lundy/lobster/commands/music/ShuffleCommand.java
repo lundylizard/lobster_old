@@ -15,12 +15,9 @@ public class ShuffleCommand implements Command {
     public void action(String[] args, @NotNull MessageReceivedEvent event) {
 
         var channel = event.getTextChannel();
-        var musicManager = PlayerManager.getInstance().getMusicManager(event.getGuild());
-        var queue = musicManager.scheduler.queue;
         var self = Objects.requireNonNull(event.getMember()).getGuild().getSelfMember();
         var member = event.getMember();
         var memberVoiceState = member.getVoiceState();
-        var selfVoiceState = self.getVoiceState();
 
         assert memberVoiceState != null;
         if (!memberVoiceState.inVoiceChannel()) {
@@ -28,11 +25,15 @@ public class ShuffleCommand implements Command {
             return;
         }
 
+        var selfVoiceState = self.getVoiceState();
         assert selfVoiceState != null;
         if (!Objects.equals(memberVoiceState.getChannel(), selfVoiceState.getChannel())) {
             channel.sendMessage(":warning: You need to be in the same voice channel as me.").queue();
             return;
         }
+
+        var musicManager = PlayerManager.getInstance().getMusicManager(event.getGuild());
+        var queue = musicManager.scheduler.queue;
 
         if (queue.isEmpty()) {
             channel.sendMessage(":warning: The queue is currently empty.").queue();
@@ -40,7 +41,7 @@ public class ShuffleCommand implements Command {
         }
 
         var trackList = new LinkedList<>(queue);
-        Collections.shuffle(trackList); //Shoutout to this
+        Collections.shuffle(trackList);
         queue.clear();
         queue.addAll(trackList);
         channel.sendMessage("Successfully shuffled the queue.").queue();

@@ -16,8 +16,7 @@ public class LinkCommand implements Command {
         var self = Objects.requireNonNull(event.getMember()).getGuild().getSelfMember();
         var selfVoiceState = self.getVoiceState();
 
-        assert selfVoiceState != null;
-        if (!selfVoiceState.inVoiceChannel()) {
+        if (!(selfVoiceState != null && selfVoiceState.inVoiceChannel())) {
             channel.sendMessage(":warning: I am not playing anything.").queue();
             return;
         }

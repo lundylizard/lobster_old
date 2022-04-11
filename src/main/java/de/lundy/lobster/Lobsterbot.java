@@ -2,6 +2,7 @@ package de.lundy.lobster;
 
 import de.lundy.lobster.commands.admin.AdminCommand;
 import de.lundy.lobster.commands.impl.CommandHandler;
+import de.lundy.lobster.commands.misc.HelpCommand;
 import de.lundy.lobster.commands.misc.InviteCommand;
 import de.lundy.lobster.commands.misc.PrefixCommand;
 import de.lundy.lobster.commands.music.*;
@@ -31,7 +32,7 @@ public class Lobsterbot {
     // Please note: The Secrets class is not publicly available, because I did not intend this to be built from others.
     private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     public static final Logger LOGGER = LoggerFactory.getLogger(Lobsterbot.class);
-    public static final boolean DEBUG = false;
+    public static final boolean DEBUG = true;
 
     public static void main(String @NotNull [] args) {
 
@@ -53,13 +54,14 @@ public class Lobsterbot {
         CommandHandler.addCommand(new PrefixCommand(settingsManager), "prefix");
         CommandHandler.addCommand(new InviteCommand(settingsManager), "invite");
         CommandHandler.addCommand(new AdminCommand(blacklistManager), "admin");
+        CommandHandler.addCommand(new HelpCommand(settingsManager), "help");
         CommandHandler.addCommand(new ResumeCommand(), "resume", "unpause");
         CommandHandler.addCommand(new MoveCommand(), "move", "mv", "m");
         CommandHandler.addCommand(new PlayCommand(), "play", "p", "sr");
         CommandHandler.addCommand(new RemoveCommand(), "remove", "rm");
         CommandHandler.addCommand(new ShuffleCommand(), "shuffle");
         CommandHandler.addCommand(new SkipCommand(), "skip", "s");
-        CommandHandler.addCommand(new NowPlayingCommand(), "np");
+        CommandHandler.addCommand(new NowPlayingCommand(settingsManager), "np");
         CommandHandler.addCommand(new PauseCommand(), "pause");
         CommandHandler.addCommand(new JoinCommand(), "join");
         CommandHandler.addCommand(new SeekCommand(), "seek");

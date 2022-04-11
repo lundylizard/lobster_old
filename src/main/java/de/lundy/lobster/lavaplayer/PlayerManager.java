@@ -26,7 +26,7 @@ public class PlayerManager {
         this.audioPlayerManager = new DefaultAudioPlayerManager();
         AudioSourceManagers.registerRemoteSources(this.audioPlayerManager);
         AudioSourceManagers.registerLocalSource(this.audioPlayerManager);
-        new SpotifyToYoutubeInterpreter();
+        new SpotifyToYoutubeInterpreter(true);
     }
 
     public GuildMusicManager getMusicManager(@NotNull Guild guild) {

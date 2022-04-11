@@ -15,18 +15,14 @@ public class LeaveCommand implements Command {
         var channel = event.getTextChannel();
         var self = Objects.requireNonNull(event.getMember()).getGuild().getSelfMember();
         var selfVoiceState = self.getVoiceState();
+        var memberVoiceState = event.getMember().getVoiceState();
 
-        assert selfVoiceState != null;
-        if (!selfVoiceState.inVoiceChannel()) {
+        if (!(selfVoiceState != null && selfVoiceState.inVoiceChannel())) {
             channel.sendMessage(":warning: I am not playing anything.").queue();
             return;
         }
 
-        var member = event.getMember();
-        var memberVoiceState = member.getVoiceState();
-
-        assert memberVoiceState != null;
-        if (!memberVoiceState.inVoiceChannel()) {
+        if (!(memberVoiceState != null && memberVoiceState.inVoiceChannel())) {
             channel.sendMessage(":warning: You are not in a voice channel.").queue();
             return;
         }

@@ -24,8 +24,6 @@ public class PlayCommand implements Command {
         var selfVoiceState = self.getVoiceState();
         var member = event.getMember();
         var memberVoiceState = member.getVoiceState();
-        var spotify = new SpotifyToYoutubeInterpreter();
-        var top = false;
 
         assert memberVoiceState != null;
         if (!memberVoiceState.inVoiceChannel()) {
@@ -41,9 +39,14 @@ public class PlayCommand implements Command {
             assert memberChannel != null;
             event.getChannel().sendMessage(":loud_sound: Connecting to voice channel `\uD83D\uDD0A " + memberChannel.getName() + "`").queue();
         }
+        var top = false;
+        if (args.length > 0) {
+            top = args[0].equalsIgnoreCase("top");
+        }
 
-        if (args[0].equalsIgnoreCase("top")) {
-            top = true;
+        if (!event.getMessage().getAttachments().isEmpty()) {
+            PlayerManager.getInstance().loadAndPlay(event, event.getMessage().getAttachments().get(0).getUrl(), top, false);
+            return;
         }
 
         for (var i = top ? 1 : 0; i < args.length; i++) {
@@ -54,22 +57,18 @@ public class PlayCommand implements Command {
             link.insert(0, "ytsearch:");
         }
 
-        if (!event.getMessage().getAttachments().isEmpty()) {
-            if (link.length() != 0)
-                link.delete(0, link.length()); // Clear link if there's anything idk why there would tho
-            link.append(event.getMessage().getAttachments().get(0).getUrl());
-        }
-
         if (link.isEmpty()) {
             channel.sendMessage(":warning: Please provide a file or an URL.").queue();
             return;
         }
 
+        var spotify = new SpotifyToYoutubeInterpreter(false);
         //Spotify doesn't allow direct playback from their API, so it's getting the data from the song and searches it on YouTube
         if (spotify.isSpotifyLink(link.toString())) {
 
             if (!spotify.isSpotifyPlaylist(link.toString())) {
 
+                spotify = new SpotifyToYoutubeInterpreter(true);
                 var spotifyId = spotify.getSpotifyIdFromLink(link.toString());
                 link.delete(0, link.length());
 

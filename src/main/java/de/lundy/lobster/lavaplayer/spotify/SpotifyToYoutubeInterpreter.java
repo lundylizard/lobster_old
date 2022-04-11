@@ -17,8 +17,8 @@ public class SpotifyToYoutubeInterpreter {
 
     private SpotifyApi spotifyApi;
 
-    public SpotifyToYoutubeInterpreter() {
-        initSpotify();
+    public SpotifyToYoutubeInterpreter(boolean init) {
+        if (init) initSpotify();
     }
 
     //Initializes the spotify api

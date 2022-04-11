@@ -11,24 +11,15 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.Objects;
 
-public class QueueCommand implements Command {
-
-    private final SettingsManager settingsManager;
-
-    public QueueCommand(SettingsManager settingsManager) {
-        this.settingsManager = settingsManager;
-    }
+public record QueueCommand(SettingsManager settingsManager) implements Command {
 
     @Override
     public void action(String[] args, @NotNull MessageReceivedEvent event) {
 
         var channel = event.getTextChannel();
-        var musicManager = PlayerManager.getInstance().getMusicManager(event.getGuild());
-        var queue = musicManager.scheduler.queue;
         var self = Objects.requireNonNull(event.getMember()).getGuild().getSelfMember();
         var member = event.getMember();
         var memberVoiceState = member.getVoiceState();
-        var selfVoiceState = self.getVoiceState();
 
         assert memberVoiceState != null;
         if (!memberVoiceState.inVoiceChannel()) {
@@ -36,11 +27,15 @@ public class QueueCommand implements Command {
             return;
         }
 
+        var selfVoiceState = self.getVoiceState();
         assert selfVoiceState != null;
         if (!Objects.equals(memberVoiceState.getChannel(), selfVoiceState.getChannel())) {
             channel.sendMessage(":warning: You need to be in the same voice channel as me.").queue();
             return;
         }
+
+        var musicManager = PlayerManager.getInstance().getMusicManager(event.getGuild());
+        var queue = musicManager.scheduler.queue;
 
         if (queue.isEmpty() && musicManager.audioPlayer.getPlayingTrack() == null) {
             channel.sendMessage(":warning: The queue is currently empty and there is no song playing.").queue();
@@ -78,9 +73,9 @@ public class QueueCommand implements Command {
                     .append(" ")
                     .append(info.title)
                     .append(" `by ")
-                        .append(info.author)
-                        .append("` [`")
-                        .append(ChatUtils.formatTime(track.getDuration()))
+                    .append(info.author)
+                    .append("` [`")
+                    .append(ChatUtils.formatTime(track.getDuration()))
                     .append("`]\n");
 
         }

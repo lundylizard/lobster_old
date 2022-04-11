@@ -26,7 +26,7 @@ public class ChatUtils {
 
     //Checks if string is number using regex
     public static boolean checkIfValidNumber(@NotNull String string) {
-        return string.matches("[0-9]+");
+        return string.matches("[1-9]+");
     }
 
     //Returns a formatted string with the track position, I am aware this looks ugly and could be done better

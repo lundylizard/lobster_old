@@ -30,6 +30,7 @@ public record HelpCommand(SettingsManager settingsManager) implements Command {
                 `%prefix%join` - Join the voice channel you're in.
                 `%prefix%stop` - Stops the playback and leaves vc.
                 `%prefix%np` - Displays the current song.
+                                
                 __Misc. Commands:__
                 `%prefix%prefix` - Change the prefix for this bot.
                 `%prefix%invite` - Sends a bot invitation link into the channel.
