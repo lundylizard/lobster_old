@@ -21,14 +21,16 @@ public class MessageCommandListener extends ListenerAdapter {
     @Override
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
 
+        if (event.getChannelType() == ChannelType.PRIVATE) {
+            if (!event.getMessage().getAuthor().isBot()) {
+                event.getChannel().sendMessage("https://i.kym-cdn.com/photos/images/original/002/040/433/456.jpg").queue();
+            }
+            return;
+        }
+
         var message = event.getMessage();
         var commandHandler = new CommandHandler();
         var serverId = event.getGuild().getIdLong();
-
-        // Avoid private messages
-        if (event.getChannelType() == ChannelType.PRIVATE) {
-            return;
-        }
 
         //If the message starts with the prefix and is not from a bot
         if (message.getContentRaw().startsWith(settingsManager.getPrefix(serverId)) &&
