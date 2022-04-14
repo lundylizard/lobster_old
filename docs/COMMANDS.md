@@ -1,7 +1,7 @@
 # lobster Commands:
 
 Here you can find a list of available commands of this bot.<br>
-You can find other functions of this bot **[here](./FUNCTIONS.md)**
+You can find other functions of this bot **[here](FUNCTIONS.md)**
 
 ### Music Commands:
 
@@ -49,7 +49,7 @@ This will search for the video "devil town cavetown" on YouTube and put it to th
 <br>
 This will play a song from Spotify.
 <br>
-**Please note:** Due to Spotify's limitations this will search the song on YouTube instead.
+**Please note:** Due to [Spotify's limitations](FUNCTIONS.md#spotify-api) this will search the song on YouTube instead.
 <br>
 <br>
 **Supported & Tested Websites:**
@@ -61,7 +61,7 @@ This will play a song from Spotify.
 **You can also request embedded files or links to audio files.**
 <br>
 <br>
-<img src="images/embedded_file.png" width="70%" height="70%" alt="Embedded file playback"/>
+<img src="images/embedded_file.png" alt="Embedded file playback"/>
 <br>
 <br>
 **This uses the song's metadata:**

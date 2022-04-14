@@ -1,7 +1,7 @@
 # lobster Functions:
 
 **Here you can find some automatic functions of this bot.**<br>
-If you want to see a list of commands you can find it **[here](./COMMANDS.md)**
+If you want to see a list of commands you can find it **[here](COMMANDS.md)**
 
 ### Bot Functions:
 
