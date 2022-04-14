@@ -26,6 +26,11 @@ Supports **YouTube**, **SoundCloud**, **Spotify** and many more.
 | Manage Channels                         | Needed to edit channel size upon joining (For limited voice channel size) |
 | Move Members                            | Needed to join full voice channels                                        |
 
+## Features:
+
+A detailed list of commands can be found **[here](https://github.com/lundylizard/lobster/blob/master/docs/COMMANDS.md)**
+A list of extra features is found [here](https://github.com/lundylizard/lobster/blob/master/docs/FUNCTIONS.md)
+
 ## Credits:
 
 | [Bot Image](https://twitter.com/pixelforgegames/status/1350128998924226561) | [JDA](https://github.com/DV8FromTheWorld/JDA) | [LavaPlayer Fork](https://github.com/walkyst/lavaplayer-fork) | [Spotify API Wrapper](https://github.com/spotify-web-api-java/spotify-web-api-java) |
