@@ -25,12 +25,14 @@ class BotUtilsTest {
     void testParseAsInt() {
         assertEquals(100, BotUtils.parseAsInt("100"));
         assertEquals(- 1, BotUtils.parseAsInt("-1"));
+        assertThrows(NumberFormatException.class, () -> BotUtils.parseAsInt("test"));
     }
 
     @org.junit.jupiter.api.Test
     void testParseAsIntArray() {
         assertArrayEquals(new int[]{1, 2, 3}, BotUtils.parseAsInt(new String[]{"1", "2", "3"}));
         assertNotEquals(new int[]{1, 2, 3}, BotUtils.parseAsInt(new String[]{"4", "5", "6"}));
+        assertThrows(NumberFormatException.class, () -> BotUtils.parseAsInt(new String[]{"t", "e", "s", "t"}));
     }
 
     @org.junit.jupiter.api.Test
@@ -196,6 +198,7 @@ class BotUtilsTest {
     void isUrl() {
         assertTrue(BotUtils.isUrl("https://open.spotify.com/track/0vf2eBw2inhl8y61cYQMv2"));
         assertFalse(BotUtils.isUrl("test"));
+        assertFalse(BotUtils.isUrl("open.spotify.com/track/0vf2eBw2inhl8y61cYQMv2"));
     }
 
     @Test

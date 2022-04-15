@@ -55,7 +55,7 @@ public class BotUtils {
         try {
             return Arrays.stream(string).mapToInt(Integer::parseInt).toArray();
         } catch (NumberFormatException e) {
-            throw new NumberFormatException("Could not parse string to integer");
+            throw new NumberFormatException("Could not parse string[] to integer[]");
         }
 
     }
@@ -95,13 +95,7 @@ public class BotUtils {
     }
 
     public static boolean isUrl(String url) {
-        try {
-            (new java.net.URL(url)).openStream().close();
-            return true;
-        } catch (Exception ex) {
-            return false;
-        }
-
+        return url.matches("(https?://|www\\.)[-a-zA-Z\\d+&@#/%?=~_|!:.;]*[-a-zA-Z\\d+&@#/%=~_|]");
     }
 
     public static boolean isRange(@NotNull String input) {

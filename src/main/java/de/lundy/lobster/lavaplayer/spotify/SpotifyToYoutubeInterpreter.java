@@ -46,7 +46,7 @@ public class SpotifyToYoutubeInterpreter {
             artists.append(artist.getName()).append(" ");
         }
 
-        return artists.toString();
+        return artists.toString().trim();
 
     }
 
