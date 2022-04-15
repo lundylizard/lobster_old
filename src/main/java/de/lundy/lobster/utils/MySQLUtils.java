@@ -1,6 +1,6 @@
 package de.lundy.lobster.utils;
 
-import de.lundy.lobster.Lobsterbot;
+import de.lundy.lobster.Lobster;
 import de.lundy.lobster.Secrets;
 
 import java.sql.Connection;
@@ -17,8 +17,8 @@ public class MySQLUtils {
 
         if (properties == null) {
             properties = new Properties();
-            properties.setProperty("user", Lobsterbot.DEBUG ? "root" : Secrets.DATABASE_USER);
-            properties.setProperty("password", Lobsterbot.DEBUG ? "" : Secrets.DATABASE_PASSWORD);
+            properties.setProperty("user", Lobster.DEBUG ? "root" : Secrets.DATABASE_USER);
+            properties.setProperty("password", Lobster.DEBUG ? "" : Secrets.DATABASE_PASSWORD);
             properties.setProperty("MaxPooledStatements", "250");
         }
 

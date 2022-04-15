@@ -9,7 +9,7 @@
         </layout>
     </appender>
 
-    <logger name="de.lundy.lobster.Lobsterbot" level="debug" additivity="false">
+    <logger name="de.lundy.lobster.Lobster" level="debug" additivity="false">
         <appender-ref ref="CONSOLE"/>
     </logger>
 

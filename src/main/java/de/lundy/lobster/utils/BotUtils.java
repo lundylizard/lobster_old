@@ -77,7 +77,7 @@ public class BotUtils {
     }
 
     /**
-     * @param prefix Preplacement for %prefix%
+     * @param prefix Replacement for %prefix%
      * @return A random String for the embed footer
      */
     public static @NotNull String randomFooter(String prefix) {

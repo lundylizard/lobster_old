@@ -27,11 +27,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class Lobsterbot {
+public class Lobster {
 
     // Please note: The Secrets class is not publicly available, because I did not intend this to be built from others.
     private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-    public static final Logger LOGGER = LoggerFactory.getLogger(Lobsterbot.class);
+    public static final Logger LOGGER = LoggerFactory.getLogger(Lobster.class);
     public static final boolean DEBUG = true;
 
     public static void main(String @NotNull [] args) {
@@ -101,7 +101,7 @@ public class Lobsterbot {
                     var musicManager = PlayerManager.getInstance().getMusicManager(guilds);
                     var audioPlayer = musicManager.audioPlayer;
 
-                    // If there is no other undeafened member or bot in vc stop playing music and leave vc
+                    // If there is no other un-deafened member or bot in vc stop playing music and leave vc
                     if (Objects.requireNonNull(guilds.getAudioManager().getConnectedChannel()).getMembers().stream().noneMatch(x -> ! Objects.requireNonNull(x.getVoiceState()).isDeafened() && ! x.getUser().isBot())) {
 
                         guilds.getAudioManager().closeAudioConnection();

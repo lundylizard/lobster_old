@@ -1,6 +1,6 @@
 package de.lundy.lobster.utils.mysql;
 
-import de.lundy.lobster.Lobsterbot;
+import de.lundy.lobster.Lobster;
 import de.lundy.lobster.utils.MySQLUtils;
 
 import javax.annotation.Nullable;
@@ -9,8 +9,7 @@ import java.util.ArrayList;
 
 public record BlacklistManager(MySQLUtils database) {
 
-    public BlacklistManager(MySQLUtils database) {
-        this.database = database;
+    public BlacklistManager {
         generateBlacklistTable();
     }
 
@@ -85,7 +84,7 @@ public record BlacklistManager(MySQLUtils database) {
 
             var statement = database.getConnection().createStatement();
             statement.executeUpdate("insert into blacklist values (" + discordId + ", \"" + reason + "\")");
-            Lobsterbot.LOGGER.info("Added {} to the blacklist. Reason: {}", discordId, reason.trim());
+            Lobster.LOGGER.info("Added {} to the blacklist. Reason: {}", discordId, reason.trim());
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -99,7 +98,7 @@ public record BlacklistManager(MySQLUtils database) {
 
             var statement = database.getConnection().createStatement();
             statement.executeUpdate("delete from blacklist where discord_id = " + discordId);
-            Lobsterbot.LOGGER.info("Removed {} from the blacklist.", discordId);
+            Lobster.LOGGER.info("Removed {} from the blacklist.", discordId);
 
         } catch (SQLException e) {
             e.printStackTrace();
