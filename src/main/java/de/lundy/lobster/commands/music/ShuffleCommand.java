@@ -2,12 +2,14 @@ package de.lundy.lobster.commands.music;
 
 import de.lundy.lobster.commands.impl.Command;
 import de.lundy.lobster.lavaplayer.PlayerManager;
+import de.lundy.lobster.utils.BotUtils;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.Objects;
+import java.util.Random;
 
 public class ShuffleCommand implements Command {
 
@@ -40,8 +42,14 @@ public class ShuffleCommand implements Command {
             return;
         }
 
+        Random randomizer = new Random();
+
+        if (args.length == 1) {
+            randomizer = new Random(BotUtils.parseAsInt(args[0]));
+        }
+
         var trackList = new LinkedList<>(queue);
-        Collections.shuffle(trackList);
+        Collections.shuffle(trackList, randomizer);
         queue.clear();
         queue.addAll(trackList);
         channel.sendMessage("Successfully shuffled the queue.").queue();

@@ -2,7 +2,7 @@ package de.lundy.lobster.commands.music;
 
 import de.lundy.lobster.commands.impl.Command;
 import de.lundy.lobster.lavaplayer.PlayerManager;
-import de.lundy.lobster.utils.ChatUtils;
+import de.lundy.lobster.utils.BotUtils;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,8 +17,7 @@ public class SkipCommand implements Command {
         var self = Objects.requireNonNull(event.getMember()).getGuild().getSelfMember();
         var selfVoiceState = self.getVoiceState();
 
-        assert selfVoiceState != null;
-        if (!selfVoiceState.inVoiceChannel()) {
+        if (! (selfVoiceState != null && selfVoiceState.inVoiceChannel())) {
             channel.sendMessage(":warning: I am not playing anything.").queue();
             return;
         }
@@ -47,12 +46,7 @@ public class SkipCommand implements Command {
 
         if (args.length == 1) {
 
-            if (!ChatUtils.checkIfValidNumber(args[0])) {
-                channel.sendMessage(":warning: `" + args[0] + "` is not a valid number.").queue();
-                return;
-            }
-
-            var amount = Integer.parseInt(args[0]);
+            var amount = BotUtils.parseAsInt(args[0]);
             var queueSize = musicManager.scheduler.queue.size();
 
             if (amount > queueSize) {

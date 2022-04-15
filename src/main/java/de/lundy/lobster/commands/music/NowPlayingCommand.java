@@ -2,7 +2,7 @@ package de.lundy.lobster.commands.music;
 
 import de.lundy.lobster.commands.impl.Command;
 import de.lundy.lobster.lavaplayer.PlayerManager;
-import de.lundy.lobster.utils.ChatUtils;
+import de.lundy.lobster.utils.BotUtils;
 import de.lundy.lobster.utils.mysql.SettingsManager;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -19,8 +19,7 @@ public record NowPlayingCommand(SettingsManager settingsManager) implements Comm
         var self = Objects.requireNonNull(event.getMember()).getGuild().getSelfMember();
         var selfVoiceState = self.getVoiceState();
 
-        assert selfVoiceState != null;
-        if (!selfVoiceState.inVoiceChannel()) {
+        if (! (selfVoiceState != null && selfVoiceState.inVoiceChannel())) {
             channel.sendMessage(":warning: I am not playing anything.").queue();
             return;
         }
@@ -28,8 +27,7 @@ public record NowPlayingCommand(SettingsManager settingsManager) implements Comm
         var member = event.getMember();
         var memberVoiceState = member.getVoiceState();
 
-        assert memberVoiceState != null;
-        if (!memberVoiceState.inVoiceChannel()) {
+        if (! (memberVoiceState != null && memberVoiceState.inVoiceChannel())) {
             channel.sendMessage(":warning: You are not in a voice channel.").queue();
             return;
         }
@@ -47,14 +45,12 @@ public record NowPlayingCommand(SettingsManager settingsManager) implements Comm
             return;
         }
 
-        var trackInfo = audioPlayer.getPlayingTrack().getInfo();
+        var track = audioPlayer.getPlayingTrack();
+        var trackInfo = track.getInfo();
+
         var nowPlaying = new StringBuilder();
-        nowPlaying.append(":notes: **NOW PLAYING:** ").append(trackInfo.title).append("\n`by ").append(trackInfo.author).append("` [`").append(ChatUtils.trackPosition(audioPlayer.getPlayingTrack())).append("`]");
-        channel.sendMessage(new EmbedBuilder()
-                .setDescription(nowPlaying)
-                .setColor(Objects.requireNonNull(event.getGuild().getMember(event.getJDA().getSelfUser())).getColor())
-                .setFooter(ChatUtils.randomFooter(event.getGuild().getIdLong(), settingsManager))
-                .build()).queue();
+        nowPlaying.append(":notes: **NOW PLAYING:** ").append(trackInfo.title).append("\n`by ").append(trackInfo.author).append("` [`").append(BotUtils.getTrackPosition(track.getPosition(), track.getDuration())).append("`]");
+        channel.sendMessage(new EmbedBuilder().setDescription(nowPlaying).setColor(Objects.requireNonNull(event.getGuild().getMember(event.getJDA().getSelfUser())).getColor()).setFooter(BotUtils.randomFooter(settingsManager.getPrefix(event.getGuild().getIdLong()))).build()).queue();
 
     }
 }

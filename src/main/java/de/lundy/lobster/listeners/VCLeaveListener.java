@@ -19,7 +19,7 @@ public class VCLeaveListener extends ListenerAdapter {
                 VCJoinListener.vcSizeChanged.remove(event.getChannelLeft().getIdLong());
             }
 
-            Lobsterbot.LOGGER.info("Left Voice Channel in {} ({})", event.getGuild().getName(), event.getChannelLeft().getName());
+            Lobsterbot.LOGGER.info("({}) Left Voice Channel ({})", event.getGuild().getName(), event.getChannelLeft().getName());
 
         }
 

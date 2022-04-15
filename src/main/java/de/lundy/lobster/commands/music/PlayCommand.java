@@ -3,6 +3,8 @@ package de.lundy.lobster.commands.music;
 import de.lundy.lobster.commands.impl.Command;
 import de.lundy.lobster.lavaplayer.PlayerManager;
 import de.lundy.lobster.lavaplayer.spotify.SpotifyToYoutubeInterpreter;
+import de.lundy.lobster.lavaplayer.spotify.SpotifyUtils;
+import de.lundy.lobster.utils.BotUtils;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.apache.hc.core5.http.ParseException;
 import org.jetbrains.annotations.NotNull;
@@ -25,20 +27,19 @@ public class PlayCommand implements Command {
         var member = event.getMember();
         var memberVoiceState = member.getVoiceState();
 
-        assert memberVoiceState != null;
-        if (!memberVoiceState.inVoiceChannel()) {
+        if (! (memberVoiceState != null && memberVoiceState.inVoiceChannel())) {
             channel.sendMessage(":warning: You are not in a voice channel.").queue();
             return;
         }
 
-        assert selfVoiceState != null;
-        if (!selfVoiceState.inVoiceChannel()) {
+        if (! (selfVoiceState != null && selfVoiceState.inVoiceChannel())) {
             var audioManager = event.getGuild().getAudioManager();
             var memberChannel = Objects.requireNonNull(event.getMember().getVoiceState()).getChannel();
             audioManager.openAudioConnection(memberChannel);
             assert memberChannel != null;
             event.getChannel().sendMessage(":loud_sound: Connecting to voice channel `\uD83D\uDD0A " + memberChannel.getName() + "`").queue();
         }
+
         var top = false;
         if (args.length > 0) {
             top = args[0].equalsIgnoreCase("top");
@@ -53,7 +54,7 @@ public class PlayCommand implements Command {
             link.append(args[i]).append(" ");
         }
 
-        if (!isUrl(link.toString())) {
+        if (! BotUtils.isUrl(link.toString())) {
             link.insert(0, "ytsearch:");
         }
 
@@ -62,36 +63,35 @@ public class PlayCommand implements Command {
             return;
         }
 
-        var spotify = new SpotifyToYoutubeInterpreter(false);
         //Spotify doesn't allow direct playback from their API, so it's getting the data from the song and searches it on YouTube
-        if (spotify.isSpotifyLink(link.toString())) {
+        if (SpotifyUtils.isSpotifyLink(link.toString())) {
 
-            if (!spotify.isSpotifyPlaylist(link.toString())) {
+            var spotify = new SpotifyToYoutubeInterpreter();
+            var spotifyId = SpotifyUtils.getSpotifyIdFromLink(link.toString());
 
-                spotify = new SpotifyToYoutubeInterpreter(true);
-                var spotifyId = spotify.getSpotifyIdFromLink(link.toString());
-                link.delete(0, link.length());
+            if (! SpotifyUtils.isSpotifyPlaylist(link.toString())) {
+
+                link.delete(0, link.length()); // Clear link
 
                 try {
-                    link.append("ytsearch:").append(spotify.getArtistFromSpotify(spotifyId))
-                            .append(" ")
-                            .append(spotify.getSongNameFromSpotify(spotifyId));
+
+                    link.append("ytsearch:").append(spotify.getArtistFromSpotify(spotifyId)).append(" ").append(spotify.getSongNameFromSpotify(spotifyId));
+
                 } catch (IOException | ParseException | SpotifyWebApiException e) {
                     e.printStackTrace();
                 }
 
             } else {
 
-                var spotifyId = spotify.getSpotifyIdFromLink(link.toString());
-                Playlist playlist = null;
+                Playlist playlist;
 
                 try {
                     playlist = spotify.getSpotifyPlaylist(spotifyId);
                 } catch (IOException | ParseException | SpotifyWebApiException e) {
-                    e.printStackTrace();
+                    event.getTextChannel().sendMessage(":warning: Could not get Spotify playlist: " + e.getMessage()).queue();
+                    return;
                 }
 
-                assert playlist != null;
                 for (PlaylistTrack playlistTrack : playlist.getTracks().getItems()) {
 
                     try {
@@ -105,7 +105,8 @@ public class PlayCommand implements Command {
                         }
 
                     } catch (IOException | SpotifyWebApiException | ParseException e) {
-                        e.printStackTrace();
+                        event.getTextChannel().sendMessage(":warning: Could not get Spotify song `" + playlistTrack.getTrack().getName() + "`").queue();
+                        return;
                     }
 
                 }
@@ -113,20 +114,9 @@ public class PlayCommand implements Command {
                 event.getChannel().sendMessage("Added " + playlist.getTracks().getTotal() + " songs to the queue.").queue();
 
             }
-
         }
 
         PlayerManager.getInstance().loadAndPlay(event, link.toString().trim(), top, false);
-
-    }
-
-    private boolean isUrl(String url) {
-        try {
-            (new java.net.URL(url)).openStream().close();
-            return true;
-        } catch (Exception ex) {
-            return false;
-        }
 
     }
 }

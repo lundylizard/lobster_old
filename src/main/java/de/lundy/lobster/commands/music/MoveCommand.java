@@ -2,11 +2,11 @@ package de.lundy.lobster.commands.music;
 
 import de.lundy.lobster.commands.impl.Command;
 import de.lundy.lobster.lavaplayer.PlayerManager;
-import de.lundy.lobster.utils.ChatUtils;
+import de.lundy.lobster.utils.BotUtils;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.Objects;
 
 public class MoveCommand implements Command {
@@ -38,26 +38,31 @@ public class MoveCommand implements Command {
 
         if (args.length == 2) {
 
-            if (!ChatUtils.checkIfValidNumber(args[0])) {
-                event.getTextChannel().sendMessage(":warning: `" + args[0] + "` is not a valid number.").queue();
-                return;
-            }
+            int[] swap = new int[2];
 
-            if (!ChatUtils.checkIfValidNumber(args[1])) {
-                event.getTextChannel().sendMessage(":warning: `" + args[1] + "` is not a valid number.").queue();
-                return;
+            try {
+                swap = BotUtils.parseAsInt(args);
+            } catch (NumberFormatException e) {
+                event.getTextChannel().sendMessage(":warning: `" + args[0] + "` and `" + args[1] + "` are not valid.").queue();
             }
 
             var musicManager = PlayerManager.getInstance().getMusicManager(event.getGuild());
             var queue = musicManager.scheduler.queue;
-            var currentTrackPos = Integer.parseInt(args[0]);
-            var movedTrackPos = Integer.parseInt(args[1]);
-            var trackList = new LinkedList<>(queue);
-            trackList.add(movedTrackPos - 1, trackList.get(currentTrackPos - 1).makeClone());
-            trackList.remove(currentTrackPos + 1);
+            var from = -- swap[0];
+            var to = -- swap[1];
+
+            if (from > queue.size()) {
+                event.getTextChannel().sendMessage(":warning: Track `#" + ++ from + "` is not in the queue.").queue();
+                return;
+            }
+
+            var trackList = new ArrayList<>(queue);
+            trackList.add(to, trackList.get(from));
+            trackList.remove(from + 1);
             queue.clear();
             queue.addAll(trackList);
-            channel.sendMessage("Moved track `#" + args[0] + "` to position `#" + args[1] + "`").queue();
+
+            channel.sendMessage("Moved track `#" + ++ from + "` to position `#" + ++ to + "`").queue();
 
         } else {
             event.getTextChannel().sendMessage(":warning: Invalid arguments, please use `move [from] [to]`").queue();

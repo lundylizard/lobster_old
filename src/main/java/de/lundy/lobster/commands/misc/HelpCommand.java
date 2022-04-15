@@ -1,7 +1,7 @@
 package de.lundy.lobster.commands.misc;
 
 import de.lundy.lobster.commands.impl.Command;
-import de.lundy.lobster.utils.ChatUtils;
+import de.lundy.lobster.utils.BotUtils;
 import de.lundy.lobster.utils.mysql.SettingsManager;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -17,7 +17,7 @@ public record HelpCommand(SettingsManager settingsManager) implements Command {
         var helpContent = """
                 **LOBSTER MUSIC BOT**
 
-                Made by lundylizard » [Twitch](https://twitch.tv/Iundylizard) - [Twitter](https://twitter.com/lundylizard) - [GitHub](https://github.com/lundylizard/lobster) - [Discord](https://discord.gg/Hk5YP5AWhW)
+                Made by lundylizard » [Twitch](https://twitch.tv/iundylizard) - [Twitter](https://twitter.com/lundylizard) - [GitHub](https://github.com/lundylizard/lobster) - [Discord](https://discord.gg/Hk5YP5AWhW)
 
                 `%prefix%play <top> [link]` - Adds a song to the queue <at the top>.
                 `%prefix%move [from] [to]` - Move songs in the queue.
@@ -34,15 +34,14 @@ public record HelpCommand(SettingsManager settingsManager) implements Command {
                 __Misc. Commands:__
                 `%prefix%prefix` - Change the prefix for this bot.
                 `%prefix%invite` - Sends a bot invitation link into the channel.
+                                
+                A detailed list of commands can be found **[here](https://github.com/lundylizard/lobster/blob/master/docs/COMMANDS.md)** - [Features](https://github.com/lundylizard/lobster/blob/master/docs/FEATURES.md)
                 """;
 
         var serverId = event.getGuild().getIdLong();
         var prefix = settingsManager.getPrefix(serverId);
 
-        event.getChannel().sendMessage(new EmbedBuilder()
-                .setColor(Objects.requireNonNull(event.getGuild().getMember(event.getJDA().getSelfUser())).getColor())
-                .setDescription(helpContent.replace("%prefix%", prefix))
-                .setFooter(ChatUtils.randomFooter(serverId, settingsManager))
+        event.getChannel().sendMessage(new EmbedBuilder().setColor(Objects.requireNonNull(event.getGuild().getMember(event.getJDA().getSelfUser())).getColor()).setDescription(helpContent.replace("%prefix%", prefix)).setFooter(BotUtils.randomFooter(prefix))
                 .setThumbnail("https://raw.githubusercontent.com/lundylizard/lobster/master/src/main/resources/t_lobster_image_PixelForgeGames.png")
                 .build()).queue();
 

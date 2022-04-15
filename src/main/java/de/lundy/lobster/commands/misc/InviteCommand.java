@@ -1,7 +1,7 @@
 package de.lundy.lobster.commands.misc;
 
 import de.lundy.lobster.commands.impl.Command;
-import de.lundy.lobster.utils.ChatUtils;
+import de.lundy.lobster.utils.BotUtils;
 import de.lundy.lobster.utils.mysql.SettingsManager;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
@@ -28,8 +28,7 @@ public record InviteCommand(SettingsManager settingsManager) implements Command 
 
         var inviteUrl = event.getJDA().getInviteUrl(permissions);
 
-        event.getTextChannel().sendMessage(new EmbedBuilder()
-                .setFooter(ChatUtils.randomFooter(event.getGuild().getIdLong(), settingsManager))
+        event.getTextChannel().sendMessage(new EmbedBuilder().setFooter(BotUtils.randomFooter(settingsManager.getPrefix(event.getGuild().getIdLong())))
                 .setDescription("**INVITE LOBSTER BOT**\n\n[Click here](" + inviteUrl + ") to invite this bot to your server.")
                 .setColor(Objects.requireNonNull(event.getGuild().getMember(event.getJDA().getSelfUser())).getColor())
                 .build()).queue();

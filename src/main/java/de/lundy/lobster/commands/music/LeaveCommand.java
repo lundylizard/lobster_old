@@ -18,7 +18,7 @@ public class LeaveCommand implements Command {
         var memberVoiceState = event.getMember().getVoiceState();
 
         if (!(selfVoiceState != null && selfVoiceState.inVoiceChannel())) {
-            channel.sendMessage(":warning: I am not playing anything.").queue();
+            channel.sendMessage(":warning: I am not in a voice channel.").queue();
             return;
         }
 

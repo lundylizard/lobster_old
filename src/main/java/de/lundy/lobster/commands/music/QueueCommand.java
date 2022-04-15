@@ -2,7 +2,7 @@ package de.lundy.lobster.commands.music;
 
 import de.lundy.lobster.commands.impl.Command;
 import de.lundy.lobster.lavaplayer.PlayerManager;
-import de.lundy.lobster.utils.ChatUtils;
+import de.lundy.lobster.utils.BotUtils;
 import de.lundy.lobster.utils.mysql.SettingsManager;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -22,33 +22,31 @@ public record QueueCommand(SettingsManager settingsManager) implements Command {
         var memberVoiceState = member.getVoiceState();
 
         assert memberVoiceState != null;
-        if (!memberVoiceState.inVoiceChannel()) {
+        if (! memberVoiceState.inVoiceChannel()) {
             channel.sendMessage(":warning: You are not in a voice channel.").queue();
             return;
         }
 
         var selfVoiceState = self.getVoiceState();
-        assert selfVoiceState != null;
-        if (!Objects.equals(memberVoiceState.getChannel(), selfVoiceState.getChannel())) {
+
+        if (! Objects.equals(memberVoiceState.getChannel(), selfVoiceState != null ? selfVoiceState.getChannel() : null)) {
             channel.sendMessage(":warning: You need to be in the same voice channel as me.").queue();
             return;
         }
 
         var musicManager = PlayerManager.getInstance().getMusicManager(event.getGuild());
         var queue = musicManager.scheduler.queue;
+        var playingTrack = musicManager.audioPlayer.getPlayingTrack();
 
-        if (queue.isEmpty() && musicManager.audioPlayer.getPlayingTrack() == null) {
+        if (queue.isEmpty() && playingTrack == null) {
             channel.sendMessage(":warning: The queue is currently empty and there is no song playing.").queue();
             return;
         }
 
-        if (queue.isEmpty() && musicManager.audioPlayer.getPlayingTrack() != null) {
+        if (queue.isEmpty() && playingTrack != null) {
 
-            var trackInfo = musicManager.audioPlayer.getPlayingTrack().getInfo();
-            channel.sendMessage(new EmbedBuilder()
-                    .setDescription(":warning: The queue is currently empty.\n\n:notes: **NOW PLAYING:** " + trackInfo.title + " `by " + trackInfo.author + "` [`" + ChatUtils.trackPosition(musicManager.audioPlayer.getPlayingTrack()) + "`]")
-                    .setColor(Objects.requireNonNull(event.getGuild().getMember(event.getJDA().getSelfUser())).getColor())
-                    .build()).queue();
+            var trackInfo = playingTrack.getInfo();
+            channel.sendMessage(new EmbedBuilder().setDescription(":warning: The queue is currently empty.\n\n" + ":notes: **NOW PLAYING:** " + trackInfo.title + " `by " + trackInfo.author + "` [`" + BotUtils.getTrackPosition(playingTrack.getPosition(), playingTrack.getDuration()) + "`]").setColor(Objects.requireNonNull(event.getGuild().getMember(event.getJDA().getSelfUser())).getColor()).build()).queue();
             return;
 
         }
@@ -58,9 +56,7 @@ public record QueueCommand(SettingsManager settingsManager) implements Command {
         var messageAction = new StringBuilder("**CURRENT QUEUE:**\n\n");
         var trackInfo = musicManager.audioPlayer.getPlayingTrack().getInfo();
 
-        messageAction.append("*Current Song: ")
-                .append(trackInfo.title)
-                .append("* [`").append(ChatUtils.formatTime(musicManager.audioPlayer.getPlayingTrack().getDuration()))
+        messageAction.append("*Current Song: ").append(trackInfo.title).append("* [`").append(BotUtils.formatTime(musicManager.audioPlayer.getPlayingTrack().getDuration()))
                 .append("`]\n\n");
 
         for (var i = 0; i < trackCount; i++) {
@@ -68,14 +64,7 @@ public record QueueCommand(SettingsManager settingsManager) implements Command {
             var track = trackList.get(i);
             var info = track.getInfo();
 
-            messageAction.append('#')
-                    .append(i + 1)
-                    .append(" ")
-                    .append(info.title)
-                    .append(" `by ")
-                    .append(info.author)
-                    .append("` [`")
-                    .append(ChatUtils.formatTime(track.getDuration()))
+            messageAction.append('#').append(i + 1).append(" ").append(info.title).append(" `by ").append(info.author).append("` [`").append(BotUtils.formatTime(track.getDuration()))
                     .append("`]\n");
 
         }
@@ -86,10 +75,7 @@ public record QueueCommand(SettingsManager settingsManager) implements Command {
                     .append(" more...");
         }
 
-        channel.sendMessage(new EmbedBuilder()
-                .setColor(Objects.requireNonNull(event.getGuild().getMember(event.getJDA().getSelfUser())).getColor())
-                .setDescription(messageAction.toString())
-                .setFooter(ChatUtils.randomFooter(event.getGuild().getIdLong(), settingsManager))
+        channel.sendMessage(new EmbedBuilder().setColor(Objects.requireNonNull(event.getGuild().getMember(event.getJDA().getSelfUser())).getColor()).setDescription(messageAction.toString()).setFooter(BotUtils.randomFooter(settingsManager.getPrefix(event.getGuild().getIdLong())))
                 .build()).queue();
 
     }

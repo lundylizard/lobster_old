@@ -4,10 +4,11 @@ import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
+import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeHttpContextFilter;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import de.lundy.lobster.lavaplayer.spotify.SpotifyToYoutubeInterpreter;
+import de.lundy.lobster.Secrets;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.jetbrains.annotations.NotNull;
@@ -22,11 +23,16 @@ public class PlayerManager {
     private final AudioPlayerManager audioPlayerManager;
 
     public PlayerManager() {
+
         this.musicManagers = new HashMap<>();
         this.audioPlayerManager = new DefaultAudioPlayerManager();
         AudioSourceManagers.registerRemoteSources(this.audioPlayerManager);
         AudioSourceManagers.registerLocalSource(this.audioPlayerManager);
-        new SpotifyToYoutubeInterpreter(true);
+
+        // YouTube Age Restriction Config
+        YoutubeHttpContextFilter.setPSID(Secrets.YOUTUBE_PSID);
+        YoutubeHttpContextFilter.setPAPISID(Secrets.YOUTUBE_PAPISID);
+
     }
 
     public GuildMusicManager getMusicManager(@NotNull Guild guild) {

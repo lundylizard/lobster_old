@@ -7,9 +7,7 @@ import javax.annotation.Nullable;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-public class BlacklistManager {
-
-    private final MySQLUtils database;
+public record BlacklistManager(MySQLUtils database) {
 
     public BlacklistManager(MySQLUtils database) {
         this.database = database;
@@ -56,7 +54,7 @@ public class BlacklistManager {
     @Nullable
     public String getBlacklistReason(long discordId) {
 
-        if (!serverInBlacklistTable(discordId)) {
+        if (! serverInBlacklistTable(discordId)) {
             return null;
         }
 

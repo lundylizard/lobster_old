@@ -6,9 +6,7 @@ import de.lundy.lobster.utils.MySQLUtils;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-public class SettingsManager {
-
-    private final MySQLUtils database;
+public record SettingsManager(MySQLUtils database) {
 
     public SettingsManager(MySQLUtils database) {
         this.database = database;
@@ -84,7 +82,7 @@ public class SettingsManager {
             e.printStackTrace();
         }
 
-        return null;
+        return "!"; // Default Prefix in case something's up
 
     }
 
@@ -100,6 +98,12 @@ public class SettingsManager {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
+    }
+
+    public void resetSettings(long discordId) {
+
+        setPrefix(discordId, "!");
 
     }
 

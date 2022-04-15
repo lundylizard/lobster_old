@@ -2,6 +2,7 @@ package de.lundy.lobster.commands.music;
 
 import de.lundy.lobster.commands.impl.Command;
 import de.lundy.lobster.lavaplayer.PlayerManager;
+import de.lundy.lobster.utils.BotUtils;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.jetbrains.annotations.NotNull;
 
@@ -40,7 +41,7 @@ public class RemoveCommand implements Command {
         }
 
         int index = 0;
-        if (!isRange(args[0])) {
+        if (! BotUtils.isRange(args[0])) {
             try {
                 index = Integer.parseInt(args[0]);
             } catch (NumberFormatException e) {
@@ -49,11 +50,11 @@ public class RemoveCommand implements Command {
             }
         }
 
-        if (args[0].contains("-") && isRange(args[0])) {
+        if (args[0].contains("-") && BotUtils.isRange(args[0])) {
 
             var indexRange = new int[]{Integer.parseInt(args[0].split("-")[0]), Integer.parseInt(args[0].split("-")[1])};
 
-            if (!(isValidIndex(indexRange[0]) && isValidIndex(indexRange[1]))) {
+            if (! (BotUtils.isValidIndex(indexRange[0]) && BotUtils.isValidIndex(indexRange[1]))) {
                 event.getTextChannel().sendMessage(":warning: Invalid range").queue();
                 return;
             }
@@ -72,26 +73,16 @@ public class RemoveCommand implements Command {
             queue.addAll(trackList);
             event.getTextChannel().sendMessage("Removed tracks " + lowest + "-" + highest + " from the queue.").queue();
 
-        } else if (isValidIndex(Integer.parseInt(args[0]))) {
+        } else if (BotUtils.isValidIndex(Integer.parseInt(args[0]))) {
 
             var trackList = new ArrayList<>(queue);
             queue.removeFirstOccurrence(trackList.get(index - 1));
             event.getChannel().sendMessage("Successfully removed track `#" + index + "`").queue();
 
         } else {
-
             event.getTextChannel().sendMessage(":warning: Invalid argument: Please use `remove [index] | [from]-[to]`").queue();
-
         }
 
-    }
-
-    private boolean isRange(@NotNull String input) {
-        return input.matches("^[1-9]+-[1-9]+$");
-    }
-
-    private boolean isValidIndex(int input) {
-        return input > 0;
     }
 
 }

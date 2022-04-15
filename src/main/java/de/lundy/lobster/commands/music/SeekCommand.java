@@ -2,7 +2,7 @@ package de.lundy.lobster.commands.music;
 
 import de.lundy.lobster.commands.impl.Command;
 import de.lundy.lobster.lavaplayer.PlayerManager;
-import de.lundy.lobster.utils.ChatUtils;
+import de.lundy.lobster.utils.BotUtils;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import org.jetbrains.annotations.NotNull;
 
@@ -45,25 +45,18 @@ public class SeekCommand implements Command {
             return;
         }
 
-        if (!ChatUtils.checkIfValidNumber(args[0].split(":")[0])) {
-            channel.sendMessage(":warning: `" + args[0] + "` is not a valid timestamp.").queue();
+        var time = new int[2];
+
+        try {
+            time = BotUtils.parseAsInt(args[0].split(":"));
+        } catch (NumberFormatException e) {
+            event.getTextChannel().sendMessage(":warning: `" + args[0] + "` is not a valid timestamp.").queue();
             return;
         }
+        var mins = time[0];
+        var secs = time[1];
 
-        if (!ChatUtils.checkIfValidNumber(args[0].split(":")[1])) {
-            channel.sendMessage(":warning: `" + args[0] + "` is not a valid timestamp.").queue();
-            return;
-        }
-
-        var mins = Integer.parseInt(args[0].split(":")[0]);
-        var secs = Integer.parseInt(args[0].split(":")[1]);
-
-        if (secs > 60 || secs < 0) {
-            channel.sendMessage(":warning: `" + args[0] + "` is not a valid timestamp.").queue();
-            return;
-        }
-
-        if (mins < 0) {
+        if (secs > 60 || secs < 0 && mins < 0) {
             channel.sendMessage(":warning: `" + args[0] + "` is not a valid timestamp.").queue();
             return;
         }
@@ -71,12 +64,12 @@ public class SeekCommand implements Command {
         var seekPos = mins * 60000L + secs * 1000L;
 
         if (seekPos > audioPlayer.getPlayingTrack().getDuration()) {
-            channel.sendMessage(":warning: Could not skip to `" + (String.valueOf(secs).length() == 0 ? args[0].split(":")[1] + "0" : args[0].split(":")[1]) + "`").queue();
+            channel.sendMessage(":warning: Could not skip to `" + BotUtils.formatTime(seekPos) + "`").queue();
             return;
         }
 
         audioPlayer.getPlayingTrack().setPosition(seekPos);
-        channel.sendMessage("Set song position to `" + mins + ":" + (String.valueOf(secs).length() == 0 ? args[0].split(":")[1] + "0" : args[0].split(":")[1]) + "`").queue();
+        channel.sendMessage("Set song position to `" + BotUtils.formatTime(seekPos) + "`").queue();
 
     }
 }
