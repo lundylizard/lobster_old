@@ -148,10 +148,10 @@ This will jump to position 02:34 of the current song.
 <br>
 **Aliases:** None
 <br>
-**Usage:** ``shuffle``<br>
+**Usage:** ``shuffle <seed>``<br>
 
 **Arguments:**<br>
-None
+``seed`` - **Optional:** Set Seed for randomization.
 
 ## Leave Command
 
