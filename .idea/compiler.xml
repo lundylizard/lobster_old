@@ -8,6 +8,7 @@
         <outputRelativeToContentRoot value="true" />
         <module name="lobster" />
         <module name="musiclobster" />
+        <module name="Lobsterbot" />
       </profile>
     </annotationProcessing>
   </component>

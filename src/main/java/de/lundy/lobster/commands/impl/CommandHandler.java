@@ -1,6 +1,5 @@
 package de.lundy.lobster.commands.impl;
 
-import de.lundy.lobster.Lobster;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -21,8 +20,6 @@ public class CommandHandler {
         if (commands.containsKey(cmd.invoke)) {
 
             commands.get(cmd.invoke).action(cmd.args, cmd.event);
-            var author = cmd.event.getAuthor().getName() + "#" + cmd.event.getAuthor().getDiscriminator();
-            Lobster.LOGGER.info("({}) {} used command {}", cmd.event.getGuild().getName(), author, cmd.event.getMessage().getContentRaw().substring(1));
 
         }
     }

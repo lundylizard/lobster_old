@@ -10,15 +10,17 @@ public class CommandContainer {
     public final String[] splitBeheaded;
     public final String[] args;
     public final MessageReceivedEvent event;
+    public final long guildId;
 
     /**
      * Container used to parse event to create command
+     *
      * @param raw           Raw content of command
      * @param beheaded      Raw content without prefix
      * @param splitBeheaded Beheaded content split by space
      * @param invoke        Command (first entry of array)
      * @param args          All entries of array except invoke
-     * @param event         Event used for parsing
+     * @param event         Event for parsing
      */
     public CommandContainer(String raw, String beheaded, String[] splitBeheaded, String invoke, String[] args, MessageReceivedEvent event) {
 
@@ -28,6 +30,8 @@ public class CommandContainer {
         this.invoke = invoke;
         this.args = args;
         this.event = event;
+        this.guildId = event.getGuild().getIdLong();
 
     }
+
 }

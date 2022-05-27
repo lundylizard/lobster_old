@@ -9,12 +9,8 @@ import java.util.ArrayList;
 
 public record BlacklistManager(MySQLUtils database) {
 
-    public BlacklistManager {
-        generateBlacklistTable();
-    }
-
     //Creates a table in the mysql database to store the prefix for each server
-    private void generateBlacklistTable() {
+    public void generateBlacklistTable() {
 
         try {
 

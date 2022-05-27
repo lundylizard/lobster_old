@@ -8,13 +8,8 @@ import java.util.ArrayList;
 
 public record SettingsManager(MySQLUtils database) {
 
-    public SettingsManager(MySQLUtils database) {
-        this.database = database;
-        generateSettingsTable();
-    }
-
     //Creates a table in the mysql database to store the prefix for each server
-    private void generateSettingsTable() {
+    public void generateSettingsTable() {
 
         try {
 

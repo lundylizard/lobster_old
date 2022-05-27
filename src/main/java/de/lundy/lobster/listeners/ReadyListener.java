@@ -1,9 +1,11 @@
 package de.lundy.lobster.listeners;
 
-import de.lundy.lobster.Lobster;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Comparator;
 
 public class ReadyListener extends ListenerAdapter {
 
@@ -12,11 +14,8 @@ public class ReadyListener extends ListenerAdapter {
 
         //Prints every server this bot is running on in the console
 
-        Lobster.LOGGER.info("Bot is running on:");
-
-        for (var guild : event.getJDA().getGuilds()) {
-            Lobster.LOGGER.info("{} ({}) -- {}", guild.getName(), guild.getMemberCount(), guild.getIdLong());
-        }
+        System.out.println("Bot is running on:");
+        event.getJDA().getGuilds().stream().sorted(Comparator.comparingInt(Guild::getMemberCount)).forEach(g -> System.out.printf("» %s (%d) -- %d%n", g.getName(), g.getMemberCount(), g.getIdLong()));
 
     }
 }

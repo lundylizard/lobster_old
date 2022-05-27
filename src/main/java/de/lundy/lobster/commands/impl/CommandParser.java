@@ -13,10 +13,10 @@ public class CommandParser {
      * Parses the event and raw input to a command container
      *
      * @param raw   Raw content from event
-     * @param event Event used to get
+     * @param event event
      * @return Command container from parsed raw string and event
      */
-    public CommandContainer parse(@NotNull String raw, @NotNull MessageReceivedEvent event, @NotNull SettingsManager settingsManager) {
+    public CommandContainer parse(@NotNull String raw, MessageReceivedEvent event, @NotNull SettingsManager settingsManager) {
 
         var beheaded = raw.replace(settingsManager.getPrefix(event.getGuild().getIdLong()), "");
         var splitBeheaded = beheaded.split(" ");
@@ -28,4 +28,5 @@ public class CommandParser {
         return new CommandContainer(raw, beheaded, splitBeheaded, invoke, args, event);
 
     }
+
 }
