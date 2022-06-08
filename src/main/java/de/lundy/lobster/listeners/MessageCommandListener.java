@@ -22,9 +22,6 @@ public class MessageCommandListener extends ListenerAdapter {
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
 
         if (event.getChannelType() == ChannelType.PRIVATE) {
-            if (!event.getMessage().getAuthor().isBot()) {
-                event.getChannel().sendMessage("https://i.kym-cdn.com/photos/images/original/002/040/433/456.jpg").queue();
-            }
             return;
         }
 

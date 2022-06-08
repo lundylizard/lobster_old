@@ -1,5 +1,8 @@
 package de.lundy.lobster.lavaplayer;
 
+import com.github.topislavalinkplugins.topissourcemanagers.applemusic.AppleMusicSourceManager;
+import com.github.topislavalinkplugins.topissourcemanagers.spotify.SpotifyConfig;
+import com.github.topislavalinkplugins.topissourcemanagers.spotify.SpotifySourceManager;
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
@@ -26,12 +29,24 @@ public class PlayerManager {
 
         this.musicManagers = new HashMap<>();
         this.audioPlayerManager = new DefaultAudioPlayerManager();
+
+        // Set spotify config values
+        var spotifyConfig = new SpotifyConfig();
+        spotifyConfig.setClientId(Secrets.SPOTIFY_CLIENT_ID);
+        spotifyConfig.setClientSecret(Secrets.SPOTIFY_CLIENT_SECRET);
+        spotifyConfig.setCountryCode("US");
+
+        // Register external source managers
+        audioPlayerManager.registerSourceManager(new SpotifySourceManager(null, spotifyConfig, audioPlayerManager));
+        audioPlayerManager.registerSourceManager(new AppleMusicSourceManager(null, "US", audioPlayerManager));
+
+        // LavaPlayer default sources
         AudioSourceManagers.registerRemoteSources(this.audioPlayerManager);
         AudioSourceManagers.registerLocalSource(this.audioPlayerManager);
 
-        // YouTube Age Restriction Config
-        YoutubeHttpContextFilter.setPSID(Secrets.YOUTUBE_PSID);
+        // YouTube Age Restriction bypass --- Currently not working??
         YoutubeHttpContextFilter.setPAPISID(Secrets.YOUTUBE_PAPISID);
+        YoutubeHttpContextFilter.setPSID(Secrets.YOUTUBE_PSID);
 
     }
 
@@ -45,17 +60,17 @@ public class PlayerManager {
 
     }
 
-    public void loadAndPlay(@NotNull MessageReceivedEvent event, String trackUrl, boolean top, boolean spotifyPlaylist) {
+    public void loadAndPlay(@NotNull MessageReceivedEvent event, String trackUrl, boolean top) {
 
         var musicManager = this.getMusicManager(event.getGuild());
+
         this.audioPlayerManager.loadItemOrdered(musicManager, trackUrl, new AudioLoadResultHandler() {
 
             @Override
             public void trackLoaded(AudioTrack audioTrack) {
 
                 musicManager.scheduler.queueSong(audioTrack, top);
-                if (!spotifyPlaylist)
-                    event.getChannel().sendMessage("Added to the queue: `" + audioTrack.getInfo().title + "` by `" + audioTrack.getInfo().author + "`").queue();
+                event.getChannel().sendMessage("Added to the queue: `" + audioTrack.getInfo().title + "` by `" + audioTrack.getInfo().author + "`").queue();
 
             }
 
@@ -66,8 +81,7 @@ public class PlayerManager {
 
                     var track = audioPlaylist.getTracks().get(0);
 
-                    if (!spotifyPlaylist)
-                        event.getChannel().sendMessage("Added to the queue: `" + track.getInfo().title + "` by `" + track.getInfo().author + "`").queue();
+                    event.getChannel().sendMessage("Added to the queue: `" + track.getInfo().title + "` by `" + track.getInfo().author + "`").queue();
                     musicManager.scheduler.queueSong(track, top);
 
                 } else {

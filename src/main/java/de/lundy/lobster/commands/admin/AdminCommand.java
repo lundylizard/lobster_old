@@ -56,11 +56,13 @@ public record AdminCommand(BlacklistManager blacklistManager, SettingsManager se
 
                     blacklistManager.putServerInBlacklistTable(Long.parseLong(args[2]), reason.toString().trim());
                     event.getChannel().sendMessage("Added `" + args[2] + "` to the blacklist. Reason: `" + reason.toString().trim() + "`").queue();
+                    System.out.printf("Added %s to the blacklist. Reason: %s%n", args[2], reason.toString().trim());
 
                 } else if (args[1].equalsIgnoreCase("remove")) {
 
                     blacklistManager.removeServerFromBlacklistTable(Long.parseLong(args[2]));
                     event.getChannel().sendMessage("Removed `" + args[2] + "` from the blacklist").queue();
+                    System.out.printf("Removed %s from the blacklist%n", args[2]);
 
                 }
 

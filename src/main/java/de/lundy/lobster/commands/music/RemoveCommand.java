@@ -80,7 +80,7 @@ public class RemoveCommand implements Command {
             event.getChannel().sendMessage("Successfully removed track `#" + index + "`").queue();
 
         } else {
-            event.getTextChannel().sendMessage(":warning: Invalid argument: Please use `remove [index] | [from]-[to]`").queue();
+            event.getTextChannel().sendMessage(":warning: Invalid argument: Please use `remove [index] | [from]-[to] | [name]`").queue();
         }
 
     }

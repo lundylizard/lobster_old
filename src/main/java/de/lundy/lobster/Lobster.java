@@ -18,8 +18,6 @@ import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
 import net.dv8tion.jda.api.sharding.ShardManager;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.security.auth.login.LoginException;
 import java.util.Objects;
@@ -31,7 +29,7 @@ public class Lobster {
 
     // Please note: The Secrets class is not publicly available, because I did not intend this to be built from others.
     private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-    public static final Logger LOGGER = LoggerFactory.getLogger(Lobster.class);
+    // Enable this for debug mode (launch bot with debug bot user)
     public static final boolean DEBUG = true;
 
     public static void main(String @NotNull [] args) {
@@ -42,6 +40,9 @@ public class Lobster {
         var settingsManager = new SettingsManager(database);
         var blacklistManager = new BlacklistManager(database);
 
+        blacklistManager.generateBlacklistTable();
+        settingsManager.generateSettingsTable();
+
         shardBuilder.disableCache(CacheFlag.ACTIVITY, CacheFlag.ONLINE_STATUS, CacheFlag.EMOTE, CacheFlag.CLIENT_STATUS);
         shardBuilder.setLargeThreshold(50);
 
@@ -50,6 +51,7 @@ public class Lobster {
         shardBuilder.addEventListeners(new VCLeaveListener());
         shardBuilder.addEventListeners(new VCJoinListener());
         shardBuilder.addEventListeners(new ReadyListener());
+        // shardBuilder.addEventListeners(new MessageUpdateListener(settingsManager, blacklistManager));
 
         // Register commands
         CommandHandler.addCommand(new AdminCommand(blacklistManager, settingsManager), "admin");

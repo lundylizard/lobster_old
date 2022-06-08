@@ -1,6 +1,5 @@
 package de.lundy.lobster.utils.mysql;
 
-import de.lundy.lobster.Lobster;
 import de.lundy.lobster.utils.MySQLUtils;
 
 import java.sql.SQLException;
@@ -53,7 +52,7 @@ public record SettingsManager(MySQLUtils database) {
             var statement = database.getConnection().createStatement();
             statement.executeUpdate("insert into settings values (" + discordId + ", \"" + defaultPrefix + "\")");
 
-            Lobster.LOGGER.info("Created database entry for {}", discordId);
+            System.out.printf("Created database entry for %d%n", discordId);
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -88,7 +87,7 @@ public record SettingsManager(MySQLUtils database) {
 
             var statement = database.getConnection().createStatement();
             statement.executeUpdate("update settings set prefix = \"" + newPrefix + "\" where discord_id = " + discordId);
-            Lobster.LOGGER.info("Changed prefix in {} to {}", discordId, newPrefix);
+            System.out.printf("Changed prefix in %d to %s%n", discordId, newPrefix);
 
         } catch (SQLException e) {
             e.printStackTrace();

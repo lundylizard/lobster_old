@@ -35,15 +35,14 @@ public record HelpCommand(SettingsManager settingsManager) implements Command {
                 `%prefix%prefix` - Change the prefix for this bot.
                 `%prefix%invite` - Sends a bot invitation link into the channel.
                                 
-                A detailed list of commands can be found **[here](https://github.com/lundylizard/lobster/blob/master/docs/COMMANDS.md)** - [Features](https://github.com/lundylizard/lobster/blob/master/docs/FEATURES.md)
+                A detailed list of commands can be found **[here](https://github.com/lundylizard/lobster/blob/master/docs/COMMANDS.md)**
                 """;
 
         var serverId = event.getGuild().getIdLong();
         var prefix = settingsManager.getPrefix(serverId);
+        var color = Objects.requireNonNull(event.getGuild().getMember(event.getJDA().getSelfUser())).getColor();
 
-        event.getChannel().sendMessage(new EmbedBuilder().setColor(Objects.requireNonNull(event.getGuild().getMember(event.getJDA().getSelfUser())).getColor()).setDescription(helpContent.replace("%prefix%", prefix)).setFooter(BotUtils.randomFooter(prefix))
-                .setThumbnail("https://raw.githubusercontent.com/lundylizard/lobster/master/src/main/resources/t_lobster_image_PixelForgeGames.png")
-                .build()).queue();
+        event.getChannel().sendMessage(new EmbedBuilder().setColor(color).setDescription(helpContent.replace("%prefix%", prefix)).setFooter(BotUtils.randomFooter(prefix)).setThumbnail("https://raw.githubusercontent.com/lundylizard/lobster/master/src/main/resources/t_lobster_image_PixelForgeGames.png").build()).queue();
 
     }
 }

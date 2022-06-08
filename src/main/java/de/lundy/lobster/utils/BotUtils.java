@@ -94,10 +94,6 @@ public class BotUtils {
 
     }
 
-    public static boolean isUrl(String url) {
-        return url.matches("(https?://|www\\.)[-a-zA-Z\\d+&@#/%?=~_|!:.;]*[-a-zA-Z\\d+&@#/%=~_|]");
-    }
-
     public static boolean isRange(@NotNull String input) {
         return input.matches("\\d+-\\d+");
     }

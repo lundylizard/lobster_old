@@ -43,40 +43,34 @@ public record QueueCommand(SettingsManager settingsManager) implements Command {
             return;
         }
 
-        if (queue.isEmpty() && playingTrack != null) {
-
+        if (queue.isEmpty()) {
             var trackInfo = playingTrack.getInfo();
             channel.sendMessage(new EmbedBuilder().setDescription(":warning: The queue is currently empty.\n\n" + ":notes: **NOW PLAYING:** " + trackInfo.title + " `by " + trackInfo.author + "` [`" + BotUtils.getTrackPosition(playingTrack.getPosition(), playingTrack.getDuration()) + "`]").setColor(Objects.requireNonNull(event.getGuild().getMember(event.getJDA().getSelfUser())).getColor()).build()).queue();
             return;
-
         }
 
         var trackCount = Math.min(queue.size(), 10);
         var trackList = new ArrayList<>(queue);
         var messageAction = new StringBuilder("**CURRENT QUEUE:**\n\n");
         var trackInfo = musicManager.audioPlayer.getPlayingTrack().getInfo();
+        var duration = musicManager.audioPlayer.getPlayingTrack().getDuration();
 
-        messageAction.append("*Current Song: ").append(trackInfo.title).append("* [`").append(BotUtils.formatTime(musicManager.audioPlayer.getPlayingTrack().getDuration()))
-                .append("`]\n\n");
+        messageAction.append("*Current Song: ").append(trackInfo.title).append("* [`").append(BotUtils.formatTime(duration)).append("`]\n\n");
 
         for (var i = 0; i < trackCount; i++) {
 
             var track = trackList.get(i);
             var info = track.getInfo();
 
-            messageAction.append('#').append(i + 1).append(" ").append(info.title).append(" `by ").append(info.author).append("` [`").append(BotUtils.formatTime(track.getDuration()))
-                    .append("`]\n");
+            messageAction.append('#').append(i + 1).append(" ").append(info.title).append(" `by ").append(info.author).append("` [`").append(BotUtils.formatTime(track.getDuration())).append("`]\n");
 
         }
 
         if (trackList.size() > trackCount) {
-            messageAction.append("\nand ")
-                    .append(trackList.size() - trackCount)
-                    .append(" more...");
+            messageAction.append("\nand ").append(trackList.size() - trackCount).append(" more...");
         }
 
-        channel.sendMessage(new EmbedBuilder().setColor(Objects.requireNonNull(event.getGuild().getMember(event.getJDA().getSelfUser())).getColor()).setDescription(messageAction.toString()).setFooter(BotUtils.randomFooter(settingsManager.getPrefix(event.getGuild().getIdLong())))
-                .build()).queue();
+        channel.sendMessage(new EmbedBuilder().setColor(Objects.requireNonNull(event.getGuild().getMember(event.getJDA().getSelfUser())).getColor()).setDescription(messageAction.toString()).setFooter(BotUtils.randomFooter(settingsManager.getPrefix(event.getGuild().getIdLong()))).build()).queue();
 
     }
 }

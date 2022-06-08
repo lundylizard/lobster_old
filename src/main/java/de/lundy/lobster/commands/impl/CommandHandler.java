@@ -11,16 +11,14 @@ public class CommandHandler {
     protected static final Map<String, Command> commands = new HashMap<>();
 
     /**
-     * Executes action() from command from given command container if it was registered in commands Map on bootup
+     * Executes action() from command from given command container if it was registered in commands Map on launch
      *
      * @param cmd Command container
      */
     public void handleCommand(@NotNull CommandContainer cmd) {
 
         if (commands.containsKey(cmd.invoke)) {
-
             commands.get(cmd.invoke).action(cmd.args, cmd.event);
-
         }
     }
 
