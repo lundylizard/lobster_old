@@ -16,7 +16,7 @@ public class PauseCommand implements Command {
         var self = Objects.requireNonNull(event.getMember()).getGuild().getSelfMember();
         var selfVoiceState = self.getVoiceState();
 
-        if (!(selfVoiceState != null && selfVoiceState.inVoiceChannel())) {
+        if (!(selfVoiceState != null && selfVoiceState.inAudioChannel())) {
             channel.sendMessage(":warning: I am not playing anything.").queue();
             return;
         }
@@ -24,7 +24,7 @@ public class PauseCommand implements Command {
         var member = event.getMember();
         var memberVoiceState = member.getVoiceState();
 
-        if (!(memberVoiceState != null && memberVoiceState.inVoiceChannel())) {
+        if (!(memberVoiceState != null && memberVoiceState.inAudioChannel())) {
             channel.sendMessage(":warning: You are not in a voice channel.").queue();
             return;
         }

@@ -21,7 +21,7 @@ public class RemoveCommand implements Command {
         var selfVoiceState = self.getVoiceState();
 
         assert memberVoiceState != null;
-        if (!memberVoiceState.inVoiceChannel()) {
+        if (!memberVoiceState.inAudioChannel()) {
             channel.sendMessage(":warning: You are not in a voice channel.").queue();
             return;
         }

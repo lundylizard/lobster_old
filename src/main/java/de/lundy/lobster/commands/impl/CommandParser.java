@@ -1,9 +1,9 @@
 package de.lundy.lobster.commands.impl;
 
-import de.lundy.lobster.utils.mysql.SettingsManager;
+import de.lundy.lobster.Lobster;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import org.jetbrains.annotations.NotNull;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -14,11 +14,20 @@ public class CommandParser {
      *
      * @param raw   Raw content from event
      * @param event event
+     *
      * @return Command container from parsed raw string and event
      */
-    public CommandContainer parse(@NotNull String raw, MessageReceivedEvent event, @NotNull SettingsManager settingsManager) {
+    public CommandContainer parse(String raw, MessageReceivedEvent event) {
 
-        var beheaded = raw.replace(settingsManager.getPrefix(event.getGuild().getIdLong()), "");
+        String prefix;
+
+        try {
+            prefix = Lobster.getDatabase().getSettings().getPrefix(event.getGuild().getId());
+        } catch (SQLException e) {
+            return null;
+        }
+
+        var beheaded = raw.replace(prefix, "");
         var splitBeheaded = beheaded.split(" ");
         var invoke = splitBeheaded[0].toLowerCase();
         var split = new ArrayList<String>();

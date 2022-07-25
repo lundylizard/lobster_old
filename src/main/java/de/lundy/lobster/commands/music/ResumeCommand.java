@@ -17,7 +17,7 @@ public class ResumeCommand implements Command {
         var selfVoiceState = self.getVoiceState();
 
         assert selfVoiceState != null;
-        if (!selfVoiceState.inVoiceChannel()) {
+        if (!selfVoiceState.inAudioChannel()) {
             channel.sendMessage(":warning: I am not playing anything.").queue();
             return;
         }
@@ -26,7 +26,7 @@ public class ResumeCommand implements Command {
         var memberVoiceState = member.getVoiceState();
 
         assert memberVoiceState != null;
-        if (!memberVoiceState.inVoiceChannel()) {
+        if (!memberVoiceState.inAudioChannel()) {
             channel.sendMessage(":warning: You are not in a voice channel.").queue();
             return;
         }

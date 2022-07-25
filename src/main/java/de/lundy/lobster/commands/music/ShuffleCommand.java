@@ -22,7 +22,7 @@ public class ShuffleCommand implements Command {
         var memberVoiceState = member.getVoiceState();
 
         assert memberVoiceState != null;
-        if (!memberVoiceState.inVoiceChannel()) {
+        if (!memberVoiceState.inAudioChannel()) {
             channel.sendMessage(":warning: You are not in a voice channel.").queue();
             return;
         }

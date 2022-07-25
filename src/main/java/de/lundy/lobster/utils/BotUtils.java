@@ -1,7 +1,5 @@
 package de.lundy.lobster.utils;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
@@ -78,15 +76,16 @@ public class BotUtils {
 
     /**
      * @param prefix Replacement for %prefix%
+     *
      * @return A random String for the embed footer
      */
-    public static @NotNull String randomFooter(String prefix) {
+    public static String randomFooter(String prefix) {
 
         var messages = new ArrayList<String>();
         messages.add("\uD83E\uDD9E Do you enjoy this bot? Please share it with your friends: %prefix%invite");
         messages.add("\uD83E\uDD9E Did you know lobsters used to be prison food?");
         messages.add("\uD83E\uDD9E lundy would never eat a lobster.");
-        messages.add("\uD83E\uDD9E Shoutout to the Lobster Gang!");
+        messages.add("\uD83E\uDD9E Shout out to the Lobster Gang!");
         messages.add("\uD83E\uDD9E Found a bug? Have a feature request? Create an issue on GitHub!");
         messages.add("\uD83E\uDD9E Lobsters smell with their legs.");
 
@@ -94,7 +93,7 @@ public class BotUtils {
 
     }
 
-    public static boolean isRange(@NotNull String input) {
+    public static boolean isRange(String input) {
         return input.matches("\\d+-\\d+");
     }
 
