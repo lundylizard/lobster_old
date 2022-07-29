@@ -1,4 +1,4 @@
-#Currently under heavy development and therefore offline!
+# Currently under heavy development and therefore offline!
 
 # lobster
 
@@ -35,7 +35,7 @@ A list of extra features is found [here](https://github.com/lundylizard/lobster/
 
 ## Credits:
 
-| [Bot Image](https://twitter.com/pixelforgegames/status/1350128998924226561) | [JDA](https://github.com/DV8FromTheWorld/JDA) | [LavaPlayer Fork](https://github.com/walkyst/lavaplayer-fork) | [Spotify API Wrapper](https://github.com/spotify-web-api-java/spotify-web-api-java) |
+| [JDA](https://github.com/DV8FromTheWorld/JDA) | [LavaPlayer Fork](https://github.com/walkyst/lavaplayer-fork) | [Spotify API Wrapper](https://github.com/spotify-web-api-java/spotify-web-api-java) |
 |:---------------------------------------------------------------------------:|:---------------------------------------------:|:-------------------------------------------------------------:|:-----------------------------------------------------------------------------------:|
 
 ## Contact:
