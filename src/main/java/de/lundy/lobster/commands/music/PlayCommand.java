@@ -1,73 +1,74 @@
 package de.lundy.lobster.commands.music;
 
-import de.lundy.lobster.commands.impl.Command;
 import de.lundy.lobster.lavaplayer.PlayerManager;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import de.lundy.lobster.utils.BotUtils;
+import net.dv8tion.jda.api.entities.AudioChannel;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.managers.AudioManager;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Objects;
-
-public class PlayCommand implements Command {
+public class PlayCommand extends ListenerAdapter {
 
     @Override
-    public void action(String[] args, @NotNull MessageReceivedEvent event) {
+    public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
 
-        var link = new StringBuilder();
-        var channel = event.getTextChannel();
-        var self = Objects.requireNonNull(event.getMember()).getGuild().getSelfMember();
-        var selfVoiceState = self.getVoiceState();
-        var member = event.getMember();
-        var memberVoiceState = member.getVoiceState();
+        if (event.getGuild() == null) return;
 
-        assert memberVoiceState != null;
-        if (!memberVoiceState.inAudioChannel()) {
-            channel.sendMessage(":warning: You are not in a voice channel.").queue();
-            return;
-        }
+        if (event.getName().equalsIgnoreCase("play")) {
 
-        assert selfVoiceState != null;
-        if (!selfVoiceState.inAudioChannel()) {
-            var audioManager = event.getGuild().getAudioManager();
-            var memberChannel = Objects.requireNonNull(event.getMember().getVoiceState()).getChannel();
-            audioManager.openAudioConnection(memberChannel);
-            assert memberChannel != null;
-            event.getChannel().sendMessage("Connecting to voice channel `\uD83D\uDD0A " + memberChannel.getName() + "`").queue();
-        }
+            OptionMapping searchOption = event.getOption("search");
+            OptionMapping topOption = event.getOption("top");
+            OptionMapping attachmentOption = event.getOption("attachment");
+            Member member = event.getMember();
 
-        // Put request video at the top if the first argument is "top"
-        var top = args[0].equalsIgnoreCase("top");
-
-        var attachments = event.getMessage().getAttachments();
-
-        if (! attachments.isEmpty()) {
-
-            if (attachments.size() > 1) {
-                event.getTextChannel().sendMessage("Please request file embeds individually.").queue();
+            if (!member.getVoiceState().inAudioChannel()) {
+                event.reply(":warning: You are not in a voice channel.").setEphemeral(true).queue();
                 return;
             }
 
-            var att = attachments.get(0);
-            PlayerManager.getInstance().loadAndPlay(event, att.getUrl(), top);
-            return;
-        }
+            if (!event.getGuild().getSelfMember().getVoiceState().inAudioChannel()) {
 
-        for (var i = top ? 1 : 0; i < args.length; i++) {
-            link.append(args[i]).append(" ");
-        }
+                AudioManager audioManager = event.getGuild().getAudioManager();
+                AudioChannel audioChannel = member.getVoiceState().getChannel();
 
-        if (! isUrl(link.toString())) {
-            link.insert(0, "ytsearch:");
-        }
+                try {
+                    audioManager.openAudioConnection(audioChannel);
+                } catch (InsufficientPermissionException e) {
+                    event.reply(":warning: I do not have enough permissions to join that channel.").setEphemeral(true).queue();
+                    return;
+                }
 
-        if (link.isEmpty()) {
-            channel.sendMessage(":warning: Please provide a file or an URL.").queue();
-            return;
-        }
+            }
 
-        PlayerManager.getInstance().loadAndPlay(event, link.toString().trim(), top);
+            if (searchOption == null && attachmentOption == null) {
+                event.reply(":warning: Please enter a `search` or provide an `attachment`.").setEphemeral(true).queue();
+                return;
+            }
+
+            String search = (!isUrl(searchOption.getAsString()) ? "ytsearch:" : "") + searchOption.getAsString();
+
+            if (attachmentOption != null) {
+                Message.Attachment attachment = attachmentOption.getAsAttachment();
+                if (BotUtils.allowedFileExtensions().contains(attachment.getFileExtension())) {
+                    String allowedFileExtensions = String.join(", ", BotUtils.allowedFileExtensions());
+                    event.reply(":warning: File attached is invalid. Valid file formats are: " + allowedFileExtensions).setEphemeral(true).queue();
+                    return;
+                }
+                search = attachmentOption.getAsAttachment().getUrl();
+            }
+
+            PlayerManager.getInstance().loadAndPlay(event, search, topOption != null && topOption.getAsBoolean());
+
+        }
 
     }
 
+    // TODO replace with pattern and move to botutils class
     private boolean isUrl(String url) {
         try {
             (new java.net.URL(url)).openStream().close();

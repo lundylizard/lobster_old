@@ -1,45 +1,53 @@
 package de.lundy.lobster.commands.music;
 
-import de.lundy.lobster.commands.impl.Command;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.entities.AudioChannel;
+import net.dv8tion.jda.api.entities.GuildVoiceState;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.managers.AudioManager;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Objects;
-
-public class JoinCommand implements Command {
+public class JoinCommand extends ListenerAdapter {
 
     @Override
-    public void action(String[] args, @NotNull MessageReceivedEvent event) {
+    public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
 
-        var channel = event.getChannel().asTextChannel();
-        var self = Objects.requireNonNull(event.getMember()).getGuild().getSelfMember();
-        var selfVoiceState = self.getVoiceState();
+        if (event.getName().equalsIgnoreCase("join")) {
 
-        if (selfVoiceState != null && selfVoiceState.inAudioChannel()) {
-            channel.sendMessage(":warning: I'm already in a voice channel.").queue();
-            return;
+            if (event.getGuild() == null) return;
+
+            Member self = event.getGuild().getSelfMember();
+            GuildVoiceState selfVoiceState = self.getVoiceState();
+
+            if (selfVoiceState != null && selfVoiceState.inAudioChannel() && selfVoiceState.getChannel() != null) {
+                event.reply(":warning: I'm already in " + selfVoiceState.getChannel().getAsMention()).setEphemeral(true).queue();
+                return;
+            }
+
+            Member member = event.getMember();
+
+            if (member == null) return;
+
+            GuildVoiceState memberVoiceState = member.getVoiceState();
+
+            if (memberVoiceState != null && !memberVoiceState.inAudioChannel()) {
+                event.reply(":warning: You are not in a voice channel.").setEphemeral(true).queue();
+                return;
+            }
+
+            AudioChannel memberChannel = memberVoiceState.getChannel();
+            AudioManager audioManager = event.getGuild().getAudioManager();
+
+            try {
+                audioManager.openAudioConnection(memberChannel);
+            } catch (InsufficientPermissionException e) {
+                event.reply(":warning: I do not have enough permissions to join that channel.").setEphemeral(true).queue();
+            } finally {
+                event.reply(String.format(":loud_sound: Joined voice channel %s", memberChannel.getAsMention())).queue();
+            }
+
         }
-
-        var member = event.getMember();
-        var memberVoiceState = member.getVoiceState();
-
-        if (!(memberVoiceState != null && memberVoiceState.inAudioChannel())) {
-            channel.sendMessage(":warning: You are not in a voice channel.").queue();
-            return;
-        }
-
-        var memberChannel = memberVoiceState.getChannel();
-        var audioManager = event.getGuild().getAudioManager();
-
-        try {
-            audioManager.openAudioConnection(memberChannel);
-        } catch (InsufficientPermissionException e) {
-            event.getChannel().sendMessage(":warning: I do not have enough permissions to join that channel.").queue();
-            return;
-        }
-
-        channel.sendMessage(":loud_sound: Connecting to `\uD83D\uDD0A " + Objects.requireNonNull(memberChannel).getName() + "`").queue();
-
     }
 }

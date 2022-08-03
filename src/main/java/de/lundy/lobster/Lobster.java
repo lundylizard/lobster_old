@@ -2,16 +2,16 @@ package de.lundy.lobster;
 
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
-import de.lundy.lobster.commands.impl.CommandHandler;
 import de.lundy.lobster.commands.misc.HelpCommand;
 import de.lundy.lobster.commands.misc.InviteCommand;
-import de.lundy.lobster.commands.misc.PrefixCommand;
 import de.lundy.lobster.commands.music.*;
-import de.lundy.lobster.database.LobsterDatabase;
 import de.lundy.lobster.lavaplayer.PlayerManager;
-import de.lundy.lobster.listeners.*;
+import de.lundy.lobster.listeners.ReadyListener;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
 import net.dv8tion.jda.api.sharding.ShardManager;
@@ -21,6 +21,8 @@ import org.jetbrains.annotations.NotNull;
 import javax.security.auth.login.LoginException;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -28,7 +30,6 @@ import java.util.concurrent.TimeUnit;
 
 public class Lobster {
 
-    private static LobsterDatabase database;
     private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
     public static void main(String @NotNull [] args) {
@@ -44,47 +45,84 @@ public class Lobster {
         }
 
         LobsterConfig config = gson.fromJson(reader, LobsterConfig.class);
-        database = new LobsterDatabase(config.getPassword());
 
-        database.createTables();
+        DefaultShardManagerBuilder shardBuilder = DefaultShardManagerBuilder.createLight(config.token());
+        shardBuilder.enableIntents(GatewayIntent.GUILD_VOICE_STATES, GatewayIntent.GUILD_MEMBERS);
+        shardBuilder.disableCache(CacheFlag.ACTIVITY, CacheFlag.ONLINE_STATUS, CacheFlag.EMOJI, CacheFlag.CLIENT_STATUS, CacheFlag.ROLE_TAGS);
+        shardBuilder.setLargeThreshold(50);
 
-        var shardBuilder = DefaultShardManagerBuilder.createLight(args[0])
+        Collection<ListenerAdapter> listeners = new ArrayList<>();
+        listeners.add(new ReadyListener());
+        listeners.add(new HelpCommand());
+        listeners.add(new InviteCommand());
+        listeners.add(new JoinCommand());
+        listeners.add(new LeaveCommand());
+        listeners.add(new LoopCommand());
+        listeners.add(new MoveCommand());
+        listeners.add(new NowPlayingCommand());
+        listeners.add(new PauseToggleCommand());
+        listeners.add(new PlayCommand());
+        listeners.add(new QueueCommand());
+        listeners.add(new RemoveCommand());
+        listeners.add(new SeekCommand());
+        listeners.add(new ShuffleCommand());
+        listeners.add(new SkipCommand());
+        listeners.add(new StopCommand());
+        listeners.add(new VolumeCommand());
 
-            .enableIntents(GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_VOICE_STATES, GatewayIntent.GUILD_MEMBERS)
-
-            .disableCache(CacheFlag.ACTIVITY, CacheFlag.ONLINE_STATUS, CacheFlag.EMOJI, CacheFlag.CLIENT_STATUS).setLargeThreshold(50)
-
-            .addEventListeners(new MessageCommandListener()).addEventListeners(new JoinListener()).addEventListeners(new VCLeaveListener()).addEventListeners(new VCJoinListener()).addEventListeners(new ReadyListener());
-
-        // Register commands
-        CommandHandler.addCommand(new LeaveCommand(), "dc", "disconnect", "leave");
-        CommandHandler.addCommand(new QueueCommand(), "queue", "q");
-        CommandHandler.addCommand(new PrefixCommand(), "prefix");
-        CommandHandler.addCommand(new InviteCommand(), "invite");
-        CommandHandler.addCommand(new NowPlayingCommand(), "np");
-        CommandHandler.addCommand(new HelpCommand(), "help");
-        CommandHandler.addCommand(new ResumeCommand(), "resume", "unpause");
-        CommandHandler.addCommand(new MoveCommand(), "move", "mv", "m");
-        CommandHandler.addCommand(new PlayCommand(), "play", "p", "sr");
-        CommandHandler.addCommand(new RemoveCommand(), "remove", "rm");
-        CommandHandler.addCommand(new ShuffleCommand(), "shuffle");
-        CommandHandler.addCommand(new SkipCommand(), "skip", "s");
-        CommandHandler.addCommand(new PauseCommand(), "pause");
-        CommandHandler.addCommand(new JoinCommand(), "join");
-        CommandHandler.addCommand(new SeekCommand(), "seek");
-        CommandHandler.addCommand(new LoopCommand(), "loop");
-        CommandHandler.addCommand(new LinkCommand(), "link");
-        CommandHandler.addCommand(new StopCommand(), "stop");
-
-        ShardManager shard = null;
+        shardBuilder.addEventListeners(listeners);
+        ShardManager shardManager;
 
         try {
-            shard = shardBuilder.build();
+            shardManager = shardBuilder.build();
         } catch (LoginException e) {
             e.printStackTrace();
+            return;
         }
 
-        tick(shard); // This gets executed every 60 seconds
+        shardManager.getShards().forEach(shard -> {
+
+            shard.retrieveCommands().complete().forEach(command -> command.delete().complete());
+
+            shard.updateCommands().addCommands(
+
+                Commands.slash("help", "List of commands you can use.").setGuildOnly(true),
+
+                Commands.slash("invite", "Invite lobster to your server.").setGuildOnly(true),
+
+                Commands.slash("join", "Let lobster join a voice channel.").setGuildOnly(true),
+
+                Commands.slash("leave", "Let lobster leave the voice channel.").setGuildOnly(true),
+
+                Commands.slash("loop", "Change whether the current song is looping or not.").setGuildOnly(true),
+
+                Commands.slash("move", "Move songs in the queue.").setGuildOnly(true).addOption(OptionType.INTEGER, "from", "What song should be moved.", true).addOption(OptionType.INTEGER, "to", "Where the song should be moved to.", true),
+
+                Commands.slash("np", "See what song is playing right now.").setGuildOnly(true),
+
+                Commands.slash("pause", "Toggle pause").setGuildOnly(true),
+
+                Commands.slash("play", "Add a song to the song queue.").addOption(OptionType.BOOLEAN, "top", "Add this song to the top of the queue.").addOption(OptionType.STRING, "search", "Search term or url of the song.").addOption(OptionType.ATTACHMENT, "attachment", "Add a file to the queue.").setGuildOnly(true),
+
+                Commands.slash("queue", "Display the upcoming songs.").setGuildOnly(true),
+
+                Commands.slash("remove", "Remove a song from the queue.").addOption(OptionType.INTEGER, "index", "What song should be removed", true).setGuildOnly(true),
+
+                Commands.slash("seek", "Change the position of the current song").addOption(OptionType.INTEGER, "amount", "Amount to seek (seconds)", true).setGuildOnly(true),
+
+                Commands.slash("shuffle", "Shuffle the queue").setGuildOnly(true),
+
+                Commands.slash("skip", "Skip the current song").setGuildOnly(true),
+
+                Commands.slash("stop", "Stop the music and clear the queue").setGuildOnly(true),
+
+                Commands.slash("volume", "Change the volume").addOption(OptionType.INTEGER, "amount", "Amount of volume").setGuildOnly(true)
+
+            ).queue();
+
+        });
+
+        tick(shardManager); // This gets executed every 60 seconds
 
     }
 
@@ -106,7 +144,7 @@ public class Lobster {
                     var audioPlayer = musicManager.audioPlayer;
 
                     // If there is no other un-deafened member or bot in vc stop playing music and leave vc
-                    if (Objects.requireNonNull(guilds.getAudioManager().getConnectedChannel()).getMembers().stream().noneMatch(x -> ! Objects.requireNonNull(x.getVoiceState()).isDeafened() && ! x.getUser().isBot())) {
+                    if (Objects.requireNonNull(guilds.getAudioManager().getConnectedChannel()).getMembers().stream().noneMatch(x -> !Objects.requireNonNull(x.getVoiceState()).isDeafened() && !x.getUser().isBot())) {
 
                         guilds.getAudioManager().closeAudioConnection();
                         audioPlayer.stopTrack();
@@ -116,55 +154,13 @@ public class Lobster {
                 }
             }
 
-        }, 0, 60, TimeUnit.SECONDS);
+        }, 0, 90, TimeUnit.SECONDS);
 
     }
 
-    public static LobsterDatabase getDatabase() {
-        return database;
-    }
+    public record LobsterConfig(String token, String password, String spotifyClientId, String spotifyClientSecret,
+                                String youtubePsid, String youtubePapisid) {
 
-    public static class LobsterConfig {
-
-        private final String token;
-        private final String password;
-        private final String spotifyClientId;
-        private final String spotifyClientSecret;
-        private final String youtubePsid;
-        private final String youtubePapisid;
-
-        public LobsterConfig(String token, String password, String spotifyClientId, String spotifyClientSecret, String youtubePsid, String youtubePapisid) {
-            this.token = token;
-            this.password = password;
-            this.spotifyClientId = spotifyClientId;
-            this.spotifyClientSecret = spotifyClientSecret;
-            this.youtubePsid = youtubePsid;
-            this.youtubePapisid = youtubePapisid;
-        }
-
-        public String getToken() {
-            return token;
-        }
-
-        public String getPassword() {
-            return password;
-        }
-
-        public String getSpotifyClientId() {
-            return spotifyClientId;
-        }
-
-        public String getSpotifyClientSecret() {
-            return spotifyClientSecret;
-        }
-
-        public String getYoutubePsid() {
-            return youtubePsid;
-        }
-
-        public String getYoutubePapisid() {
-            return youtubePapisid;
-        }
     }
 
 }

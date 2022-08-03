@@ -1,88 +1,64 @@
 package de.lundy.lobster.commands.music;
 
-import de.lundy.lobster.commands.impl.Command;
+import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
+import de.lundy.lobster.lavaplayer.GuildMusicManager;
 import de.lundy.lobster.lavaplayer.PlayerManager;
-import de.lundy.lobster.utils.BotUtils;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.entities.GuildVoiceState;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
-public class RemoveCommand implements Command {
+public class RemoveCommand extends ListenerAdapter {
 
     @Override
-    public void action(String[] args, @NotNull MessageReceivedEvent event) {
+    public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
 
-        var channel = event.getTextChannel();
-        var self = Objects.requireNonNull(event.getMember()).getGuild().getSelfMember();
-        var member = event.getMember();
-        var memberVoiceState = member.getVoiceState();
-        var selfVoiceState = self.getVoiceState();
+        if (event.getGuild() == null) return;
 
-        assert memberVoiceState != null;
-        if (!memberVoiceState.inAudioChannel()) {
-            channel.sendMessage(":warning: You are not in a voice channel.").queue();
-            return;
-        }
+        if (event.getName().equalsIgnoreCase("remove")) {
 
-        assert selfVoiceState != null;
-        if (!Objects.equals(memberVoiceState.getChannel(), selfVoiceState.getChannel())) {
-            channel.sendMessage(":warning: You need to be in the same voice channel as me.").queue();
-            return;
-        }
+            OptionMapping indexOption = event.getOption("index");
+            GuildVoiceState selfVoiceState = event.getGuild().getSelfMember().getVoiceState();
+            GuildVoiceState memberVoiceState = event.getMember().getVoiceState();
 
-        var musicManager = PlayerManager.getInstance().getMusicManager(event.getGuild());
-        var queue = musicManager.scheduler.queue;
-
-        if (queue.isEmpty()) {
-            channel.sendMessage(":warning: The queue is currently empty.").queue();
-            return;
-        }
-
-        int index = 0;
-        if (! BotUtils.isRange(args[0])) {
-            try {
-                index = Integer.parseInt(args[0]);
-            } catch (NumberFormatException e) {
-                e.printStackTrace();
-                return;
-            }
-        }
-
-        if (args[0].contains("-") && BotUtils.isRange(args[0])) {
-
-            var indexRange = new int[]{Integer.parseInt(args[0].split("-")[0]), Integer.parseInt(args[0].split("-")[1])};
-
-            if (! (BotUtils.isValidIndex(indexRange[0]) && BotUtils.isValidIndex(indexRange[1]))) {
-                event.getTextChannel().sendMessage(":warning: Invalid range").queue();
+            if (!selfVoiceState.inAudioChannel()) {
+                event.reply(":warning: I am not in a voice channel.").setEphemeral(true).queue();
                 return;
             }
 
-            var highest = Math.max(indexRange[0], indexRange[1]);
-            var lowest = Math.min(indexRange[0], indexRange[1]);
-
-            if (queue.size() < highest) {
-                event.getTextChannel().sendMessage(":warning: Provided range is too high. Not enough songs in queue.").queue();
+            if (!memberVoiceState.inAudioChannel()) {
+                event.reply(":warning: You are not in a voice channel.").setEphemeral(true).queue();
                 return;
             }
 
-            var trackList = new ArrayList<>(queue);
-            trackList.subList(lowest - 1, highest).clear();
-            queue.clear();
-            queue.addAll(trackList);
-            event.getTextChannel().sendMessage("Removed tracks " + lowest + "-" + highest + " from the queue.").queue();
+            if (!Objects.equals(selfVoiceState.getChannel(), memberVoiceState.getChannel())) {
+                event.reply(":warning: We are not in the same voice channel.").setEphemeral(true).queue();
+                return;
+            }
 
-        } else if (BotUtils.isValidIndex(Integer.parseInt(args[0]))) {
+            GuildMusicManager musicManager = PlayerManager.getInstance().getMusicManager(event.getGuild());
 
-            var trackList = new ArrayList<>(queue);
-            queue.removeFirstOccurrence(trackList.get(index - 1));
-            event.getChannel().sendMessage("Successfully removed track `#" + index + "`").queue();
+            if (musicManager.scheduler.queue.isEmpty()) {
+                event.reply(":warning: The queue is currently empty.").setEphemeral(true).queue();
+                return;
+            }
 
-        } else {
-            event.getTextChannel().sendMessage(":warning: Invalid argument: Please use `remove [index] | [from]-[to] | [name]`").queue();
+            int index = indexOption.getAsInt();
+
+            if (index > musicManager.scheduler.queue.size() || index < musicManager.scheduler.queue.size()) {
+                event.reply(":warning: This song is not in the queue.").setEphemeral(true).queue();
+                return;
+            }
+
+            List<AudioTrack> trackList = new ArrayList<>(musicManager.scheduler.queue);
+            musicManager.scheduler.queue.removeFirstOccurrence(trackList.get(index - 1));
+            event.reply(String.format("Removed song #%d from the queue.", index)).queue();
+
         }
-
     }
-
 }

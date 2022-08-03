@@ -13,7 +13,7 @@ import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import de.lundy.lobster.Secrets;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -60,7 +60,7 @@ public class PlayerManager {
 
     }
 
-    public void loadAndPlay(@NotNull MessageReceivedEvent event, String trackUrl, boolean top) {
+    public void loadAndPlay(@NotNull SlashCommandInteractionEvent event, String trackUrl, boolean top) {
 
         var musicManager = this.getMusicManager(event.getGuild());
 

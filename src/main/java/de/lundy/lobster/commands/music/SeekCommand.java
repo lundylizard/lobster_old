@@ -1,75 +1,69 @@
 package de.lundy.lobster.commands.music;
 
-import de.lundy.lobster.commands.impl.Command;
+import de.lundy.lobster.lavaplayer.GuildMusicManager;
 import de.lundy.lobster.lavaplayer.PlayerManager;
 import de.lundy.lobster.utils.BotUtils;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.entities.GuildVoiceState;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public class SeekCommand implements Command {
+public class SeekCommand extends ListenerAdapter {
 
     @Override
-    public void action(String[] args, @NotNull MessageReceivedEvent event) {
+    public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
 
-        var channel = event.getTextChannel();
-        var self = Objects.requireNonNull(event.getMember()).getGuild().getSelfMember();
-        var selfVoiceState = self.getVoiceState();
+        if (event.getGuild() == null) return;
 
-        assert selfVoiceState != null;
-        if (!selfVoiceState.inAudioChannel()) {
-            channel.sendMessage(":warning: I am not playing anything.").queue();
-            return;
+        if (event.getName().equalsIgnoreCase("seek")) {
+
+            OptionMapping seekOption = event.getOption("amount");
+            GuildVoiceState selfVoiceState = event.getGuild().getSelfMember().getVoiceState();
+            GuildVoiceState memberVoiceState = event.getMember().getVoiceState();
+
+            if (!selfVoiceState.inAudioChannel()) {
+                event.reply(":warning: I am not in a voice channel.").setEphemeral(true).queue();
+                return;
+            }
+
+            if (!memberVoiceState.inAudioChannel()) {
+                event.reply(":warning: You are not in a voice channel.").setEphemeral(true).queue();
+                return;
+            }
+
+            if (!Objects.equals(selfVoiceState.getChannel(), memberVoiceState.getChannel())) {
+                event.reply(":warning: We are not in the same voice channel.").setEphemeral(true).queue();
+                return;
+            }
+
+            GuildMusicManager musicManager = PlayerManager.getInstance().getMusicManager(event.getGuild());
+
+            if (musicManager.audioPlayer.getPlayingTrack() == null) {
+                event.reply(":warning: There is currently no song playing.").setEphemeral(true).queue();
+                return;
+            }
+
+            int seekAmount = seekOption.getAsInt();
+            long newPos = musicManager.audioPlayer.getPlayingTrack().getPosition() + seekAmount;
+
+            if (newPos < 0) {
+                newPos = 0L;
+            }
+
+            if (newPos > musicManager.audioPlayer.getPlayingTrack().getDuration()) {
+                musicManager.scheduler.nextTrack();
+                event.reply(String.format("Skipped `%s`", musicManager.audioPlayer.getPlayingTrack().getInfo().title)).queue();
+                return;
+            }
+
+            musicManager.audioPlayer.getPlayingTrack().setPosition(newPos);
+            String position = BotUtils.formatTime(musicManager.audioPlayer.getPlayingTrack().getPosition());
+            event.reply(String.format("Set song position to **%s**", position)).queue();
+
         }
-
-        var member = event.getMember();
-        var memberVoiceState = member.getVoiceState();
-
-        assert memberVoiceState != null;
-        if (!memberVoiceState.inAudioChannel()) {
-            channel.sendMessage(":warning: You are not in a voice channel.").queue();
-            return;
-        }
-
-        if (!Objects.equals(memberVoiceState.getChannel(), selfVoiceState.getChannel())) {
-            channel.sendMessage(":warning: You need to be in the same voice channel as me.").queue();
-            return;
-        }
-
-        var musicManager = PlayerManager.getInstance().getMusicManager(event.getGuild());
-        var audioPlayer = musicManager.audioPlayer;
-
-        if (audioPlayer.getPlayingTrack() == null) {
-            channel.sendMessage(":warning: There is currently no track playing.").queue();
-            return;
-        }
-
-        var time = new int[2];
-
-        try {
-            time = BotUtils.parseAsInt(args[0].split(":"));
-        } catch (NumberFormatException e) {
-            event.getTextChannel().sendMessage(":warning: `" + args[0] + "` is not a valid timestamp.").queue();
-            return;
-        }
-        var mins = time[0];
-        var secs = time[1];
-
-        if (secs > 60 || secs < 0 && mins < 0) {
-            channel.sendMessage(":warning: `" + args[0] + "` is not a valid timestamp.").queue();
-            return;
-        }
-
-        var seekPos = mins * 60000L + secs * 1000L;
-
-        if (seekPos > audioPlayer.getPlayingTrack().getDuration()) {
-            channel.sendMessage(":warning: Could not skip to `" + BotUtils.formatTime(seekPos) + "`").queue();
-            return;
-        }
-
-        audioPlayer.getPlayingTrack().setPosition(seekPos);
-        channel.sendMessage("Set song position to `" + BotUtils.formatTime(seekPos) + "`").queue();
 
     }
 }

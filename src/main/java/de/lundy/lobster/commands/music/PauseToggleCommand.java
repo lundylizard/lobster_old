@@ -1,5 +1,6 @@
 package de.lundy.lobster.commands.music;
 
+import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import de.lundy.lobster.lavaplayer.GuildMusicManager;
 import de.lundy.lobster.lavaplayer.PlayerManager;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
@@ -10,14 +11,14 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public class LoopCommand extends ListenerAdapter {
+public class PauseToggleCommand extends ListenerAdapter {
 
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
 
         if (event.getGuild() == null) return;
 
-        if (event.getName().equalsIgnoreCase("loop")) {
+        if (event.getName().equalsIgnoreCase("pause")) {
 
             Member self = event.getGuild().getSelfMember();
             GuildVoiceState selfVoiceState = self.getVoiceState();
@@ -35,17 +36,25 @@ public class LoopCommand extends ListenerAdapter {
                 return;
             }
 
-            if (!Objects.equals(selfVoiceState.getChannel(), memberVoiceState.getChannel())) {
-                event.reply(":warning: We are not in the same voice channel.").setEphemeral(true).queue();
+            if (!Objects.equals(memberVoiceState.getChannel(), selfVoiceState.getChannel())) {
+                event.reply(":warning: You need to be in the same voice channel as me.").setEphemeral(true).queue();
                 return;
             }
 
             GuildMusicManager musicManager = PlayerManager.getInstance().getMusicManager(event.getGuild());
-            boolean isRepeating = musicManager.scheduler.isRepeating();
-            musicManager.scheduler.setRepeating(!isRepeating);
-            event.reply(String.format("%s looping current song.", isRepeating ? "Now" : "No longer")).queue();
+            AudioPlayer audioPlayer = musicManager.audioPlayer;
+
+            if (audioPlayer.getPlayingTrack() == null) {
+                event.reply(":warning: There is currently no track playing.").setEphemeral(true).queue();
+                return;
+            }
+
+            boolean paused = audioPlayer.isPaused();
+            audioPlayer.setPaused(!paused);
+
+            event.reply(String.format("%s the current song.", paused ? ":pause_button: Paused " : ":arrow_forward: Resumed")).queue();
 
         }
-
     }
 }
+

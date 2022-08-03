@@ -2,6 +2,7 @@ package de.lundy.lobster.utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
@@ -75,30 +76,28 @@ public class BotUtils {
     }
 
     /**
-     * @param prefix Replacement for %prefix%
-     *
      * @return A random String for the embed footer
      */
-    public static String randomFooter(String prefix) {
+    public static String randomFooter() {
 
         var messages = new ArrayList<String>();
-        messages.add("\uD83E\uDD9E Do you enjoy this bot? Please share it with your friends: %prefix%invite");
+        messages.add("\uD83E\uDD9E Do you enjoy this bot? Please share it with your friends: /invite");
         messages.add("\uD83E\uDD9E Did you know lobsters used to be prison food?");
         messages.add("\uD83E\uDD9E lundy would never eat a lobster.");
         messages.add("\uD83E\uDD9E Shout out to the Lobster Gang!");
         messages.add("\uD83E\uDD9E Found a bug? Have a feature request? Create an issue on GitHub!");
         messages.add("\uD83E\uDD9E Lobsters smell with their legs.");
 
-        return messages.get(new Random().nextInt(messages.size())).replace("%prefix%", prefix);
+        return messages.get(new Random().nextInt(messages.size()));
 
     }
 
-    public static boolean isRange(String input) {
-        return input.matches("\\d+-\\d+");
-    }
-
-    public static boolean isValidIndex(int input) {
-        return input > 0;
+    public static List<String> allowedFileExtensions() {
+        List<String> allowedFileExtensions = new ArrayList<>();
+        allowedFileExtensions.add(".mp3");
+        allowedFileExtensions.add(".mp4");
+        allowedFileExtensions.add(".wav");
+        return allowedFileExtensions;
     }
 
 }

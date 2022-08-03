@@ -1,43 +1,47 @@
 package de.lundy.lobster.commands.music;
 
-import de.lundy.lobster.commands.impl.Command;
+import de.lundy.lobster.lavaplayer.GuildMusicManager;
 import de.lundy.lobster.lavaplayer.PlayerManager;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.entities.GuildVoiceState;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public class StopCommand implements Command {
+public class StopCommand extends ListenerAdapter {
 
     @Override
-    public void action(String[] args, @NotNull MessageReceivedEvent event) {
+    public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
 
-        var channel = event.getTextChannel();
-        var self = Objects.requireNonNull(event.getMember()).getGuild().getSelfMember();
-        var selfVoiceState = self.getVoiceState();
+        if (event.getGuild() == null) return;
 
-        if (!(selfVoiceState != null && selfVoiceState.inAudioChannel())) {
-            channel.sendMessage(":warning: I am not playing anything.").queue();
-            return;
+        if (event.getName().equalsIgnoreCase("stop")) {
+
+            GuildVoiceState selfVoiceState = event.getGuild().getSelfMember().getVoiceState();
+            GuildVoiceState memberVoiceState = event.getMember().getVoiceState();
+
+            if (!selfVoiceState.inAudioChannel()) {
+                event.reply(":warning: I am not in a voice channel.").setEphemeral(true).queue();
+                return;
+            }
+
+            if (!memberVoiceState.inAudioChannel()) {
+                event.reply(":warning: You are not in a voice channel.").setEphemeral(true).queue();
+                return;
+            }
+
+            if (!Objects.equals(selfVoiceState.getChannel(), memberVoiceState.getChannel())) {
+                event.reply(":warning: We are not in the same voice channel.").setEphemeral(true).queue();
+                return;
+            }
+
+            GuildMusicManager musicManager = PlayerManager.getInstance().getMusicManager(event.getGuild());
+            musicManager.scheduler.queue.clear();
+            musicManager.scheduler.player.stopTrack();
+            event.reply("Stopped the playback.").queue();
+
         }
-
-        var member = event.getMember();
-        var memberVoiceState = member.getVoiceState();
-
-        if (!(memberVoiceState != null && memberVoiceState.inAudioChannel())) {
-            channel.sendMessage(":warning: You are not in a voice channel.").queue();
-            return;
-        }
-
-        if (!Objects.equals(memberVoiceState.getChannel(), selfVoiceState.getChannel())) {
-            channel.sendMessage(":warning: You need to be in the same voice channel as me.").queue();
-            return;
-        }
-
-        var musicManager = PlayerManager.getInstance().getMusicManager(event.getGuild());
-        musicManager.scheduler.queue.clear();
-        musicManager.scheduler.player.stopTrack();
-        channel.sendMessage(":octagonal_sign: Stopped the playback.").queue();
 
     }
 }
