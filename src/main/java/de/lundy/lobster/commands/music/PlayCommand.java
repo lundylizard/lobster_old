@@ -12,6 +12,8 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.managers.AudioManager;
 import org.jetbrains.annotations.NotNull;
 
+import java.net.URL;
+
 public class PlayCommand extends ListenerAdapter {
 
     @Override
@@ -50,7 +52,7 @@ public class PlayCommand extends ListenerAdapter {
                 return;
             }
 
-            String search = (!isUrl(searchOption.getAsString()) ? "ytsearch:" : "") + searchOption.getAsString();
+            String search = "";
 
             if (attachmentOption != null) {
                 Message.Attachment attachment = attachmentOption.getAsAttachment();
@@ -62,16 +64,19 @@ public class PlayCommand extends ListenerAdapter {
                 search = attachmentOption.getAsAttachment().getUrl();
             }
 
+            if (searchOption != null)
+                search = (!isUrl(searchOption.getAsString()) ? "ytsearch:" : "") + searchOption.getAsString();
+
+            event.deferReply().queue();
             PlayerManager.getInstance().loadAndPlay(event, search, topOption != null && topOption.getAsBoolean());
 
         }
 
     }
 
-    // TODO replace with pattern and move to botutils class
     private boolean isUrl(String url) {
         try {
-            (new java.net.URL(url)).openStream().close();
+            new URL(url);
             return true;
         } catch (Exception ex) {
             return false;

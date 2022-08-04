@@ -53,8 +53,9 @@ public class QueueCommand extends ListenerAdapter {
 
             for (int i = 0; i < trackCount; i++) {
                 AudioTrack track = trackList.get(i);
-                String out = String.format("`#%d` [%s](%s)", (i + 1), track.getInfo().title, track.getInfo().uri);
+                String out = String.format("`#%d` [%s](%s) | %s", (i + 1), track.getInfo().title, track.getInfo().uri, track.getInfo().author);
                 queueOutput.append(out).append("\n");
+                System.out.println(out.length());
             }
 
             if (trackList.size() > trackCount) {

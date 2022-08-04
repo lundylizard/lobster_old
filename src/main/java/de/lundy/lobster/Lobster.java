@@ -9,20 +9,18 @@ import de.lundy.lobster.lavaplayer.PlayerManager;
 import de.lundy.lobster.listeners.ReadyListener;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
-import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
 import net.dv8tion.jda.api.sharding.ShardManager;
+import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.jetbrains.annotations.NotNull;
 
 import javax.security.auth.login.LoginException;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -46,31 +44,32 @@ public class Lobster {
 
         LobsterConfig config = gson.fromJson(reader, LobsterConfig.class);
 
-        DefaultShardManagerBuilder shardBuilder = DefaultShardManagerBuilder.createLight(config.token());
-        shardBuilder.enableIntents(GatewayIntent.GUILD_VOICE_STATES, GatewayIntent.GUILD_MEMBERS);
-        shardBuilder.disableCache(CacheFlag.ACTIVITY, CacheFlag.ONLINE_STATUS, CacheFlag.EMOJI, CacheFlag.CLIENT_STATUS, CacheFlag.ROLE_TAGS);
-        shardBuilder.setLargeThreshold(50);
+        // Stupid hack I will fix later
+        Secrets.SPOTIFY_CLIENT_ID = config.spotifyClientId;
+        Secrets.SPOTIFY_CLIENT_SECRET = config.spotifyClientSecret;
 
-        Collection<ListenerAdapter> listeners = new ArrayList<>();
-        listeners.add(new ReadyListener());
-        listeners.add(new HelpCommand());
-        listeners.add(new InviteCommand());
-        listeners.add(new JoinCommand());
-        listeners.add(new LeaveCommand());
-        listeners.add(new LoopCommand());
-        listeners.add(new MoveCommand());
-        listeners.add(new NowPlayingCommand());
-        listeners.add(new PauseToggleCommand());
-        listeners.add(new PlayCommand());
-        listeners.add(new QueueCommand());
-        listeners.add(new RemoveCommand());
-        listeners.add(new SeekCommand());
-        listeners.add(new ShuffleCommand());
-        listeners.add(new SkipCommand());
-        listeners.add(new StopCommand());
-        listeners.add(new VolumeCommand());
+        DefaultShardManagerBuilder shardBuilder = DefaultShardManagerBuilder.createLight(config.token);
+        shardBuilder.enableIntents(GatewayIntent.GUILD_VOICE_STATES);
+        shardBuilder.enableCache(CacheFlag.VOICE_STATE);
+        shardBuilder.setMemberCachePolicy(MemberCachePolicy.VOICE);
+        shardBuilder.addEventListeners(new ReadyListener());
+        shardBuilder.addEventListeners(new HelpCommand());
+        shardBuilder.addEventListeners(new InviteCommand());
+        shardBuilder.addEventListeners(new JoinCommand());
+        shardBuilder.addEventListeners(new LeaveCommand());
+        shardBuilder.addEventListeners(new LoopCommand());
+        shardBuilder.addEventListeners(new MoveCommand());
+        shardBuilder.addEventListeners(new NowPlayingCommand());
+        shardBuilder.addEventListeners(new PauseToggleCommand());
+        shardBuilder.addEventListeners(new PlayCommand());
+        shardBuilder.addEventListeners(new QueueCommand());
+        shardBuilder.addEventListeners(new RemoveCommand());
+        shardBuilder.addEventListeners(new SeekCommand());
+        shardBuilder.addEventListeners(new ShuffleCommand());
+        shardBuilder.addEventListeners(new SkipCommand());
+        shardBuilder.addEventListeners(new StopCommand());
+        shardBuilder.addEventListeners(new VolumeCommand());
 
-        shardBuilder.addEventListeners(listeners);
         ShardManager shardManager;
 
         try {
@@ -81,8 +80,6 @@ public class Lobster {
         }
 
         shardManager.getShards().forEach(shard -> {
-
-            shard.retrieveCommands().complete().forEach(command -> command.delete().complete());
 
             shard.updateCommands().addCommands(
 
@@ -122,7 +119,7 @@ public class Lobster {
 
         });
 
-        tick(shardManager); // This gets executed every 60 seconds
+        tick(shardManager); // This gets executed every 90 seconds
 
     }
 
@@ -158,8 +155,11 @@ public class Lobster {
 
     }
 
-    public record LobsterConfig(String token, String password, String spotifyClientId, String spotifyClientSecret,
-                                String youtubePsid, String youtubePapisid) {
+    public class LobsterConfig {
+
+        private String token;
+        private String spotifyClientId;
+        private String spotifyClientSecret;
 
     }
 

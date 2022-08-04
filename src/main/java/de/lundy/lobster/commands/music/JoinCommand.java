@@ -27,12 +27,13 @@ public class JoinCommand extends ListenerAdapter {
             }
 
             Member member = event.getMember();
-
-            if (member == null) return;
-
             GuildVoiceState memberVoiceState = member.getVoiceState();
+            System.out.println(member);
+            System.out.println(memberVoiceState);
+            System.out.println(memberVoiceState.inAudioChannel());
+            System.out.println(memberVoiceState.getChannel());
 
-            if (memberVoiceState != null && !memberVoiceState.inAudioChannel()) {
+            if (!memberVoiceState.inAudioChannel()) {
                 event.reply(":warning: You are not in a voice channel.").setEphemeral(true).queue();
                 return;
             }

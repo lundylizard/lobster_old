@@ -7,7 +7,6 @@ import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
-import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeHttpContextFilter;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
@@ -44,10 +43,6 @@ public class PlayerManager {
         AudioSourceManagers.registerRemoteSources(this.audioPlayerManager);
         AudioSourceManagers.registerLocalSource(this.audioPlayerManager);
 
-        // YouTube Age Restriction bypass --- Currently not working??
-        YoutubeHttpContextFilter.setPAPISID(Secrets.YOUTUBE_PAPISID);
-        YoutubeHttpContextFilter.setPSID(Secrets.YOUTUBE_PSID);
-
     }
 
     public GuildMusicManager getMusicManager(@NotNull Guild guild) {
@@ -70,7 +65,7 @@ public class PlayerManager {
             public void trackLoaded(AudioTrack audioTrack) {
 
                 musicManager.scheduler.queueSong(audioTrack, top);
-                event.getChannel().sendMessage("Added to the queue: `" + audioTrack.getInfo().title + "` by `" + audioTrack.getInfo().author + "`").queue();
+                event.getHook().editOriginal("Added to the queue: `" + audioTrack.getInfo().title + "` by `" + audioTrack.getInfo().author + "`").queue();
 
             }
 
@@ -81,13 +76,13 @@ public class PlayerManager {
 
                     var track = audioPlaylist.getTracks().get(0);
 
-                    event.getChannel().sendMessage("Added to the queue: `" + track.getInfo().title + "` by `" + track.getInfo().author + "`").queue();
+                    event.getHook().editOriginal("Added to the queue: `" + track.getInfo().title + "` by `" + track.getInfo().author + "`").queue();
                     musicManager.scheduler.queueSong(track, top);
 
                 } else {
 
                     var trackList = audioPlaylist.getTracks();
-                    event.getChannel().sendMessage("Added `" + trackList.size() + "` songs to the queue.").queue();
+                    event.getHook().editOriginal("Added `" + trackList.size() + "` songs to the queue.").queue();
 
                     for (var track : trackList) {
                         musicManager.scheduler.queueSong(track, top);
@@ -98,12 +93,13 @@ public class PlayerManager {
 
             @Override
             public void noMatches() {
-                event.getChannel().sendMessage(":warning: Could not find specified song.").queue();
+                event.getHook().editOriginal(":warning: Could not find specified song.").queue();
             }
 
             @Override
             public void loadFailed(FriendlyException e) {
-                event.getChannel().sendMessage(":warning: Could not load specified song: " + e.getMessage()).queue();
+                event.getHook().editOriginal(":warning: Could not load specified song: " + e.getMessage()).queue();
+                e.printStackTrace();
             }
         });
 
