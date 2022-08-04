@@ -1,3 +1,5 @@
+# Currently under heavy development and therefore offline!
+
 # lobster
 
 lobster is an easy-to-use Discord bot to play music in a voice channel.
