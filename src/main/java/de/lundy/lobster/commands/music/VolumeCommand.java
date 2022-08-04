@@ -3,32 +3,30 @@ package de.lundy.lobster.commands.music;
 import de.lundy.lobster.lavaplayer.GuildMusicManager;
 import de.lundy.lobster.lavaplayer.PlayerManager;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
-import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public class LoopCommand extends ListenerAdapter {
+public class VolumeCommand extends ListenerAdapter {
 
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
 
         if (event.getGuild() == null) return;
 
-        if (event.getName().equalsIgnoreCase("loop")) {
+        if (event.getName().equalsIgnoreCase("volume")) {
 
-            Member self = event.getGuild().getSelfMember();
-            GuildVoiceState selfVoiceState = self.getVoiceState();
+            OptionMapping volumeOption = event.getOption("amount");
+            GuildVoiceState selfVoiceState = event.getGuild().getSelfMember().getVoiceState();
+            GuildVoiceState memberVoiceState = event.getMember().getVoiceState();
 
             if (!selfVoiceState.inAudioChannel()) {
-                event.reply(":warning: I am not playing anything.").setEphemeral(true).queue();
+                event.reply(":warning: I am not in a voice channel.").setEphemeral(true).queue();
                 return;
             }
-
-            Member member = event.getMember();
-            GuildVoiceState memberVoiceState = member.getVoiceState();
 
             if (!memberVoiceState.inAudioChannel()) {
                 event.reply(":warning: You are not in a voice channel.").setEphemeral(true).queue();
@@ -41,9 +39,21 @@ public class LoopCommand extends ListenerAdapter {
             }
 
             GuildMusicManager musicManager = PlayerManager.getInstance().getMusicManager(event.getGuild());
-            boolean isRepeating = musicManager.scheduler.isRepeating();
-            musicManager.scheduler.setRepeating(!isRepeating);
-            event.reply(String.format("%s looping current song.", isRepeating ? "Now" : "No longer")).queue();
+
+            if (volumeOption == null) {
+                event.reply(String.format("Current volume is %d", musicManager.audioPlayer.getVolume())).setEphemeral(true).queue();
+                return;
+            }
+
+            int newVolume = volumeOption.getAsInt();
+
+            if (newVolume <= 0) {
+                event.reply("Volume cannot be 0 or lower.").setEphemeral(true).queue();
+                return;
+            }
+
+            musicManager.audioPlayer.setVolume(newVolume);
+            event.reply(String.format("Changed the volume to %d", newVolume)).queue();
 
         }
 

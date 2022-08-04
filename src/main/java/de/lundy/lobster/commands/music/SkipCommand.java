@@ -1,69 +1,43 @@
 package de.lundy.lobster.commands.music;
 
-import de.lundy.lobster.commands.impl.Command;
+import de.lundy.lobster.lavaplayer.GuildMusicManager;
 import de.lundy.lobster.lavaplayer.PlayerManager;
-import de.lundy.lobster.utils.BotUtils;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.entities.GuildVoiceState;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public class SkipCommand implements Command {
+public class SkipCommand extends ListenerAdapter {
 
     @Override
-    public void action(String[] args, @NotNull MessageReceivedEvent event) {
+    public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
 
-        var channel = event.getTextChannel();
-        var self = Objects.requireNonNull(event.getMember()).getGuild().getSelfMember();
-        var selfVoiceState = self.getVoiceState();
+        if (event.getGuild() == null) return;
 
-        if (! (selfVoiceState != null && selfVoiceState.inVoiceChannel())) {
-            channel.sendMessage(":warning: I am not playing anything.").queue();
-            return;
-        }
+        if (event.getName().equalsIgnoreCase("skip")) {
 
-        var member = event.getMember();
-        var memberVoiceState = member.getVoiceState();
+            GuildVoiceState selfVoiceState = event.getGuild().getSelfMember().getVoiceState();
+            GuildVoiceState memberVoiceState = event.getMember().getVoiceState();
 
-        assert memberVoiceState != null;
-        if (!memberVoiceState.inVoiceChannel()) {
-            channel.sendMessage(":warning: You are not in a voice channel.").queue();
-            return;
-        }
-
-        if (!Objects.equals(memberVoiceState.getChannel(), selfVoiceState.getChannel())) {
-            channel.sendMessage(":warning: You need to be in the same voice channel as me.").queue();
-            return;
-        }
-
-        var musicManager = PlayerManager.getInstance().getMusicManager(event.getGuild());
-        var audioPlayer = musicManager.audioPlayer;
-
-        if (audioPlayer.getPlayingTrack() == null) {
-            channel.sendMessage(":warning: There is currently no track playing.").queue();
-            return;
-        }
-
-        if (args.length == 1) {
-
-            var amount = BotUtils.parseAsInt(args[0]);
-            var queueSize = musicManager.scheduler.queue.size();
-
-            if (amount > queueSize) {
-                channel.sendMessage(":warning: The queue is " + queueSize + " songs long. You cannot skip more than that.").queue();
+            if (!selfVoiceState.inAudioChannel()) {
+                event.reply(":warning: I am not in a voice channel.").setEphemeral(true).queue();
                 return;
             }
 
-            for (var i = 0; i < amount; i++) {
-                musicManager.scheduler.nextTrack();
+            if (!memberVoiceState.inAudioChannel()) {
+                event.reply(":warning: You are not in a voice channel.").setEphemeral(true).queue();
+                return;
             }
 
-            channel.sendMessage("Skipped `" + amount + "` songs from the queue.").queue();
+            if (!Objects.equals(selfVoiceState.getChannel(), memberVoiceState.getChannel())) {
+                event.reply(":warning: We are not in the same voice channel.").setEphemeral(true).queue();
+                return;
+            }
 
-        } else {
-
-            var trackInfo = audioPlayer.getPlayingTrack().getInfo();
-            channel.sendMessage("Skipped `" + trackInfo.title + "`").queue();
+            GuildMusicManager musicManager = PlayerManager.getInstance().getMusicManager(event.getGuild());
+            event.reply(String.format("Skipping %s...", musicManager.audioPlayer.getPlayingTrack().getInfo().title)).queue();
             musicManager.scheduler.nextTrack();
 
         }

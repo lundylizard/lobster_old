@@ -1,58 +1,53 @@
 package de.lundy.lobster.commands.music;
 
-import de.lundy.lobster.commands.impl.Command;
+import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
+import de.lundy.lobster.lavaplayer.GuildMusicManager;
 import de.lundy.lobster.lavaplayer.PlayerManager;
-import de.lundy.lobster.utils.BotUtils;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.entities.GuildVoiceState;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
+import java.util.List;
 import java.util.Objects;
-import java.util.Random;
 
-public class ShuffleCommand implements Command {
+public class ShuffleCommand extends ListenerAdapter {
 
     @Override
-    public void action(String[] args, @NotNull MessageReceivedEvent event) {
+    public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
 
-        var channel = event.getTextChannel();
-        var self = Objects.requireNonNull(event.getMember()).getGuild().getSelfMember();
-        var member = event.getMember();
-        var memberVoiceState = member.getVoiceState();
+        if (event.getGuild() == null) return;
 
-        assert memberVoiceState != null;
-        if (!memberVoiceState.inVoiceChannel()) {
-            channel.sendMessage(":warning: You are not in a voice channel.").queue();
-            return;
+        if (event.getName().equalsIgnoreCase("shuffle")) {
+
+            GuildVoiceState selfVoiceState = event.getGuild().getSelfMember().getVoiceState();
+            GuildVoiceState memberVoiceState = event.getMember().getVoiceState();
+
+            if (!selfVoiceState.inAudioChannel()) {
+                event.reply(":warning: I am not in a voice channel.").setEphemeral(true).queue();
+                return;
+            }
+
+            if (!memberVoiceState.inAudioChannel()) {
+                event.reply(":warning: You are not in a voice channel.").setEphemeral(true).queue();
+                return;
+            }
+
+            if (!Objects.equals(selfVoiceState.getChannel(), memberVoiceState.getChannel())) {
+                event.reply(":warning: We are not in the same voice channel.").setEphemeral(true).queue();
+                return;
+            }
+
+            GuildMusicManager musicManager = PlayerManager.getInstance().getMusicManager(event.getGuild());
+            List<AudioTrack> trackList = new ArrayList<>(musicManager.scheduler.queue);
+            Collections.shuffle(trackList);
+            musicManager.scheduler.queue.clear();
+            musicManager.scheduler.queue.addAll(trackList);
+            event.reply("Shuffled the queue.").queue();
+
         }
-
-        var selfVoiceState = self.getVoiceState();
-        assert selfVoiceState != null;
-        if (!Objects.equals(memberVoiceState.getChannel(), selfVoiceState.getChannel())) {
-            channel.sendMessage(":warning: You need to be in the same voice channel as me.").queue();
-            return;
-        }
-
-        var musicManager = PlayerManager.getInstance().getMusicManager(event.getGuild());
-        var queue = musicManager.scheduler.queue;
-
-        if (queue.isEmpty()) {
-            channel.sendMessage(":warning: The queue is currently empty.").queue();
-            return;
-        }
-
-        Random randomizer = new Random();
-
-        if (args.length == 1) {
-            randomizer = new Random(BotUtils.parseAsInt(args[0]));
-        }
-
-        var trackList = new LinkedList<>(queue);
-        Collections.shuffle(trackList, randomizer);
-        queue.clear();
-        queue.addAll(trackList);
-        channel.sendMessage("Successfully shuffled the queue.").queue();
 
     }
 }
