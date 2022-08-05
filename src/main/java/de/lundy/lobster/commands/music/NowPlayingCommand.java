@@ -4,6 +4,7 @@ import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
 import de.lundy.lobster.lavaplayer.GuildMusicManager;
 import de.lundy.lobster.lavaplayer.PlayerManager;
+import de.lundy.lobster.utils.BotUtils;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -36,7 +37,7 @@ public class NowPlayingCommand extends ListenerAdapter {
             }
 
             AudioTrackInfo trackInfo = audioPlayer.getPlayingTrack().getInfo();
-            event.reply(trackInfo.uri).queue();
+            event.reply(String.format("%s | `%s`", trackInfo.uri, BotUtils.getTrackPosition(audioPlayer.getPlayingTrack()))).queue();
 
         }
 

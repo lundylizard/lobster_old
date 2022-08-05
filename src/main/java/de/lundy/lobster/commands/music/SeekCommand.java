@@ -46,7 +46,7 @@ public class SeekCommand extends ListenerAdapter {
                 return;
             }
 
-            int seekAmount = seekOption.getAsInt();
+            int seekAmount = seekOption.getAsInt() * 1000;
             long newPos = musicManager.audioPlayer.getPlayingTrack().getPosition() + seekAmount;
 
             if (newPos < 0) {

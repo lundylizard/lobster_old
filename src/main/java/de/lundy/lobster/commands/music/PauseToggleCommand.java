@@ -52,7 +52,7 @@ public class PauseToggleCommand extends ListenerAdapter {
             boolean paused = audioPlayer.isPaused();
             audioPlayer.setPaused(!paused);
 
-            event.reply(String.format("%s the current song.", paused ? ":pause_button: Paused " : ":arrow_forward: Resumed")).queue();
+            event.reply(String.format("%s the current song.", paused ? ":arrow_forward: Resumed" : ":pause_button: Paused")).queue();
 
         }
     }

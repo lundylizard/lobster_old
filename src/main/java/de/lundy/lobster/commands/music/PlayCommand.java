@@ -1,10 +1,8 @@
 package de.lundy.lobster.commands.music;
 
 import de.lundy.lobster.lavaplayer.PlayerManager;
-import de.lundy.lobster.utils.BotUtils;
 import net.dv8tion.jda.api.entities.AudioChannel;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -55,12 +53,6 @@ public class PlayCommand extends ListenerAdapter {
             String search = "";
 
             if (attachmentOption != null) {
-                Message.Attachment attachment = attachmentOption.getAsAttachment();
-                if (BotUtils.allowedFileExtensions().contains(attachment.getFileExtension())) {
-                    String allowedFileExtensions = String.join(", ", BotUtils.allowedFileExtensions());
-                    event.reply(":warning: File attached is invalid. Valid file formats are: " + allowedFileExtensions).setEphemeral(true).queue();
-                    return;
-                }
                 search = attachmentOption.getAsAttachment().getUrl();
             }
 

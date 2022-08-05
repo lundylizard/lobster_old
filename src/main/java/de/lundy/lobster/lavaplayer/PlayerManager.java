@@ -10,17 +10,17 @@ import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import de.lundy.lobster.Secrets;
+import de.lundy.lobster.Lobster;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class PlayerManager {
 
-    private static PlayerManager INSTANCE;
+    private static PlayerManager instance;
     private final Map<Long, GuildMusicManager> musicManagers;
     private final AudioPlayerManager audioPlayerManager;
 
@@ -30,9 +30,9 @@ public class PlayerManager {
         this.audioPlayerManager = new DefaultAudioPlayerManager();
 
         // Set spotify config values
-        var spotifyConfig = new SpotifyConfig();
-        spotifyConfig.setClientId(Secrets.SPOTIFY_CLIENT_ID);
-        spotifyConfig.setClientSecret(Secrets.SPOTIFY_CLIENT_SECRET);
+        SpotifyConfig spotifyConfig = new SpotifyConfig();
+        spotifyConfig.setClientId(Lobster.config.getSpotifyClientId());
+        spotifyConfig.setClientSecret(Lobster.config.getSpotifyClientSecret());
         spotifyConfig.setCountryCode("US");
 
         // Register external source managers
@@ -45,7 +45,12 @@ public class PlayerManager {
 
     }
 
-    public GuildMusicManager getMusicManager(@NotNull Guild guild) {
+    public static PlayerManager getInstance() {
+        if (instance == null) instance = new PlayerManager();
+        return instance;
+    }
+
+    public GuildMusicManager getMusicManager(Guild guild) {
 
         return this.musicManagers.computeIfAbsent(guild.getIdLong(), guildId -> {
             var guildMusicManager = new GuildMusicManager(this.audioPlayerManager);
@@ -55,40 +60,24 @@ public class PlayerManager {
 
     }
 
-    public void loadAndPlay(@NotNull SlashCommandInteractionEvent event, String trackUrl, boolean top) {
+    public void loadAndPlay(SlashCommandInteractionEvent event, String trackUrl, boolean top) {
 
-        var musicManager = this.getMusicManager(event.getGuild());
+        if (event.getGuild() == null) return;
+        GuildMusicManager musicManager = this.getMusicManager(event.getGuild());
 
         this.audioPlayerManager.loadItemOrdered(musicManager, trackUrl, new AudioLoadResultHandler() {
 
             @Override
-            public void trackLoaded(AudioTrack audioTrack) {
-
-                musicManager.scheduler.queueSong(audioTrack, top);
-                event.getHook().editOriginal("Added to the queue: `" + audioTrack.getInfo().title + "` by `" + audioTrack.getInfo().author + "`").queue();
-
+            public void trackLoaded(AudioTrack track) {
+                musicManager.scheduler.queueSong(track, top);
+                event.getHook().editOriginal(String.format("Added `%s` by `%s`", track.getInfo().title, track.getInfo().author)).queue();
             }
 
             @Override
             public void playlistLoaded(AudioPlaylist audioPlaylist) {
-
-                if (audioPlaylist.isSearchResult()) {
-
-                    var track = audioPlaylist.getTracks().get(0);
-
-                    event.getHook().editOriginal("Added to the queue: `" + track.getInfo().title + "` by `" + track.getInfo().author + "`").queue();
-                    musicManager.scheduler.queueSong(track, top);
-
-                } else {
-
-                    var trackList = audioPlaylist.getTracks();
-                    event.getHook().editOriginal("Added `" + trackList.size() + "` songs to the queue.").queue();
-
-                    for (var track : trackList) {
-                        musicManager.scheduler.queueSong(track, top);
-                    }
-
-                }
+                List<AudioTrack> trackList = audioPlaylist.getTracks();
+                event.getHook().editOriginal(String.format("Added `%d` songs to the queue.", trackList.size())).queue();
+                for (AudioTrack track : trackList) musicManager.scheduler.queueSong(track, top);
             }
 
             @Override
@@ -99,19 +88,10 @@ public class PlayerManager {
             @Override
             public void loadFailed(FriendlyException e) {
                 event.getHook().editOriginal(":warning: Could not load specified song: " + e.getMessage()).queue();
-                e.printStackTrace();
             }
+
         });
 
     }
 
-    public static PlayerManager getInstance() {
-
-        if (INSTANCE == null) {
-            INSTANCE = new PlayerManager();
-        }
-
-        return INSTANCE;
-
-    }
 }

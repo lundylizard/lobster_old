@@ -4,7 +4,6 @@ import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -23,12 +22,10 @@ public class TrackScheduler extends AudioEventAdapter {
     public void queueSong(AudioTrack track, boolean top) {
 
         if (!this.player.startTrack(track, true)) {
-
             if (top) {
                 this.queue.addFirst(track);
                 return;
             }
-
             this.queue.offerLast(track);
 
         }
@@ -39,16 +36,14 @@ public class TrackScheduler extends AudioEventAdapter {
     }
 
     @Override
-    public void onTrackEnd(AudioPlayer player, AudioTrack track, @NotNull AudioTrackEndReason endReason) {
+    public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
 
         if (endReason.mayStartNext) {
             if (repeating) {
                 this.player.startTrack(track.makeClone(), false);
                 return;
             }
-
             nextTrack();
-
         }
     }
 

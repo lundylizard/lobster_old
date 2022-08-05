@@ -39,7 +39,7 @@ public class LeaveCommand extends ListenerAdapter {
             }
 
             GuildMusicManager musicManager = PlayerManager.getInstance().getMusicManager(event.getGuild());
-            if (musicManager.scheduler.queue.size() > 0) musicManager.scheduler.queue.clear();
+            if (!musicManager.scheduler.queue.isEmpty()) musicManager.scheduler.queue.clear();
             if (musicManager.audioPlayer.getPlayingTrack() != null) musicManager.audioPlayer.getPlayingTrack().stop();
             event.getGuild().getAudioManager().closeAudioConnection();
             event.reply("Left the voice channel.").queue();

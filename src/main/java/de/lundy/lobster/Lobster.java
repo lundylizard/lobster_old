@@ -21,7 +21,6 @@ import org.jetbrains.annotations.NotNull;
 import javax.security.auth.login.LoginException;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -29,6 +28,7 @@ import java.util.concurrent.TimeUnit;
 public class Lobster {
 
     private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    public static LobsterConfig config;
 
     public static void main(String @NotNull [] args) {
 
@@ -42,13 +42,9 @@ public class Lobster {
             return;
         }
 
-        LobsterConfig config = gson.fromJson(reader, LobsterConfig.class);
+        config = gson.fromJson(reader, LobsterConfig.class);
 
-        // Stupid hack I will fix later
-        Secrets.SPOTIFY_CLIENT_ID = config.spotifyClientId;
-        Secrets.SPOTIFY_CLIENT_SECRET = config.spotifyClientSecret;
-
-        DefaultShardManagerBuilder shardBuilder = DefaultShardManagerBuilder.createLight(config.token);
+        DefaultShardManagerBuilder shardBuilder = DefaultShardManagerBuilder.createLight(config.getToken());
         shardBuilder.enableIntents(GatewayIntent.GUILD_VOICE_STATES);
         shardBuilder.enableCache(CacheFlag.VOICE_STATE);
         shardBuilder.setMemberCachePolicy(MemberCachePolicy.VOICE);
@@ -79,45 +75,11 @@ public class Lobster {
             return;
         }
 
-        shardManager.getShards().forEach(shard -> {
+        shardManager.getShards().forEach(shard -> shard.updateCommands().addCommands(
 
-            shard.updateCommands().addCommands(
+            Commands.slash("help", "List of commands you can use.").setGuildOnly(true), Commands.slash("invite", "Invite lobster to your server.").setGuildOnly(true), Commands.slash("join", "Let lobster join a voice channel.").setGuildOnly(true), Commands.slash("leave", "Let lobster leave the voice channel.").setGuildOnly(true), Commands.slash("loop", "Change whether the current song is looping or not.").setGuildOnly(true), Commands.slash("move", "Move songs in the queue.").setGuildOnly(true).addOption(OptionType.INTEGER, "from", "What song should be moved.", true).addOption(OptionType.INTEGER, "to", "Where the song should be moved to.", true), Commands.slash("np", "See what song is playing right now.").setGuildOnly(true), Commands.slash("pause", "Toggle pause").setGuildOnly(true), Commands.slash("play", "Add a song to the song queue.").addOption(OptionType.BOOLEAN, "top", "Add this song to the top of the queue.").addOption(OptionType.STRING, "search", "Search term or url of the song.").addOption(OptionType.ATTACHMENT, "attachment", "Add a file to the queue.").setGuildOnly(true), Commands.slash("queue", "Display the upcoming songs.").setGuildOnly(true), Commands.slash("remove", "Remove a song from the queue.").addOption(OptionType.INTEGER, "index", "What song should be removed", true).setGuildOnly(true), Commands.slash("seek", "Change the position of the current song").addOption(OptionType.INTEGER, "amount", "Amount to seek (seconds)", true).setGuildOnly(true), Commands.slash("shuffle", "Shuffle the queue").setGuildOnly(true), Commands.slash("skip", "Skip the current song").setGuildOnly(true), Commands.slash("stop", "Stop the music and clear the queue").setGuildOnly(true), Commands.slash("volume", "Change the volume").addOption(OptionType.INTEGER, "amount", "Amount of volume").setGuildOnly(true)
 
-                Commands.slash("help", "List of commands you can use.").setGuildOnly(true),
-
-                Commands.slash("invite", "Invite lobster to your server.").setGuildOnly(true),
-
-                Commands.slash("join", "Let lobster join a voice channel.").setGuildOnly(true),
-
-                Commands.slash("leave", "Let lobster leave the voice channel.").setGuildOnly(true),
-
-                Commands.slash("loop", "Change whether the current song is looping or not.").setGuildOnly(true),
-
-                Commands.slash("move", "Move songs in the queue.").setGuildOnly(true).addOption(OptionType.INTEGER, "from", "What song should be moved.", true).addOption(OptionType.INTEGER, "to", "Where the song should be moved to.", true),
-
-                Commands.slash("np", "See what song is playing right now.").setGuildOnly(true),
-
-                Commands.slash("pause", "Toggle pause").setGuildOnly(true),
-
-                Commands.slash("play", "Add a song to the song queue.").addOption(OptionType.BOOLEAN, "top", "Add this song to the top of the queue.").addOption(OptionType.STRING, "search", "Search term or url of the song.").addOption(OptionType.ATTACHMENT, "attachment", "Add a file to the queue.").setGuildOnly(true),
-
-                Commands.slash("queue", "Display the upcoming songs.").setGuildOnly(true),
-
-                Commands.slash("remove", "Remove a song from the queue.").addOption(OptionType.INTEGER, "index", "What song should be removed", true).setGuildOnly(true),
-
-                Commands.slash("seek", "Change the position of the current song").addOption(OptionType.INTEGER, "amount", "Amount to seek (seconds)", true).setGuildOnly(true),
-
-                Commands.slash("shuffle", "Shuffle the queue").setGuildOnly(true),
-
-                Commands.slash("skip", "Skip the current song").setGuildOnly(true),
-
-                Commands.slash("stop", "Stop the music and clear the queue").setGuildOnly(true),
-
-                Commands.slash("volume", "Change the volume").addOption(OptionType.INTEGER, "amount", "Amount of volume").setGuildOnly(true)
-
-            ).queue();
-
-        });
+        ).queue());
 
         tick(shardManager); // This gets executed every 90 seconds
 
@@ -141,7 +103,7 @@ public class Lobster {
                     var audioPlayer = musicManager.audioPlayer;
 
                     // If there is no other un-deafened member or bot in vc stop playing music and leave vc
-                    if (Objects.requireNonNull(guilds.getAudioManager().getConnectedChannel()).getMembers().stream().noneMatch(x -> !Objects.requireNonNull(x.getVoiceState()).isDeafened() && !x.getUser().isBot())) {
+                    if (guilds.getAudioManager().getConnectedChannel().getMembers().stream().noneMatch(x -> !x.getVoiceState().isDeafened() && !x.getUser().isBot())) {
 
                         guilds.getAudioManager().closeAudioConnection();
                         audioPlayer.stopTrack();
@@ -155,11 +117,29 @@ public class Lobster {
 
     }
 
-    public class LobsterConfig {
+    public static class LobsterConfig {
 
-        private String token;
-        private String spotifyClientId;
-        private String spotifyClientSecret;
+        private final String token;
+        private final String spotifyClientId;
+        private final String spotifyClientSecret;
+
+        public LobsterConfig(String token, String spotifyClientId, String spotifyClientSecret) {
+            this.token = token;
+            this.spotifyClientId = spotifyClientId;
+            this.spotifyClientSecret = spotifyClientSecret;
+        }
+
+        public String getToken() {
+            return token;
+        }
+
+        public String getSpotifyClientId() {
+            return spotifyClientId;
+        }
+
+        public String getSpotifyClientSecret() {
+            return spotifyClientSecret;
+        }
 
     }
 

@@ -52,8 +52,9 @@ public class VolumeCommand extends ListenerAdapter {
                 return;
             }
 
+            boolean probablyLoud = newVolume >= 250;
             musicManager.audioPlayer.setVolume(newVolume);
-            event.reply(String.format("Changed the volume to %d", newVolume)).queue();
+            event.reply(String.format("Changed the volume to %d%s", newVolume, probablyLoud ? "% - This might be loud." : "%")).queue();
 
         }
 

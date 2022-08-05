@@ -55,7 +55,6 @@ public class QueueCommand extends ListenerAdapter {
                 AudioTrack track = trackList.get(i);
                 String out = String.format("`#%d` [%s](%s) | %s", (i + 1), track.getInfo().title, track.getInfo().uri, track.getInfo().author);
                 queueOutput.append(out).append("\n");
-                System.out.println(out.length());
             }
 
             if (trackList.size() > trackCount) {
@@ -66,7 +65,6 @@ public class QueueCommand extends ListenerAdapter {
             EmbedBuilder embedBuilder = new EmbedBuilder();
             embedBuilder.setDescription(queueOutput);
             embedBuilder.setColor(event.getGuild().getSelfMember().getColor());
-            embedBuilder.setFooter("Page 1 of " + Math.ceil(musicManager.scheduler.queue.size() / 10d));
             event.replyEmbeds(embedBuilder.build()).queue();
 
         }
