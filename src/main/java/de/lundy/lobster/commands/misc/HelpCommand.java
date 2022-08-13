@@ -20,7 +20,7 @@ public class HelpCommand extends ListenerAdapter {
             EmbedBuilder embedBuilder = new EmbedBuilder();
             StringBuilder description = new StringBuilder();
             embedBuilder.setTitle("About lobster Bot", "https://github.com/lundylizard/lobster");
-            description.append("lobster Bot (v2.0.1)\n");
+            description.append("lobster Bot (v2.1.1)\n");
             description.append("Developed by lundylizard\n\n");
             event.getJDA().retrieveCommands().complete().stream().sorted(Comparator.comparingInt(c -> -c.getName().length())).forEach(command -> description.append("`/").append(command.getName()).append("` - ").append(command.getDescription()).append("\n"));
             embedBuilder.setColor(event.getGuild().getSelfMember().getColor());

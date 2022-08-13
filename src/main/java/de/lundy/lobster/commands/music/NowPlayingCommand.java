@@ -37,7 +37,15 @@ public class NowPlayingCommand extends ListenerAdapter {
             }
 
             AudioTrackInfo trackInfo = audioPlayer.getPlayingTrack().getInfo();
-            event.reply(String.format("%s | `%s`", trackInfo.uri, BotUtils.getTrackPosition(audioPlayer.getPlayingTrack()))).queue();
+            String trackUrl = trackInfo.uri;
+            String position = BotUtils.getTrackPosition(audioPlayer.getPlayingTrack());
+
+            if (trackUrl.startsWith("https://listen7.myradio24.com/69366")) {
+                trackUrl = "Pyongyang FM 105.2";
+                position = "North Korea";
+            }
+
+            event.reply(String.format("%s | `%s`", trackUrl, position)).queue();
 
         }
 

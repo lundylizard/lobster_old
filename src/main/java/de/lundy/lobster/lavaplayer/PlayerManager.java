@@ -75,10 +75,24 @@ public class PlayerManager {
 
             @Override
             public void playlistLoaded(AudioPlaylist audioPlaylist) {
+
+                if (audioPlaylist.isSearchResult()) {
+                    AudioTrack track = audioPlaylist.getTracks().get(0);
+                    musicManager.scheduler.queueSong(track, top);
+                    event.getHook().editOriginal(String.format("Added to the queue: `%s` by `%s`", track.getInfo().title, track.getInfo().author)).queue();
+                    return;
+                }
+
                 List<AudioTrack> trackList = audioPlaylist.getTracks();
+
+                for (AudioTrack track : trackList) {
+                    musicManager.scheduler.queueSong(track, top);
+                }
+
                 event.getHook().editOriginal(String.format("Added `%d` songs to the queue.", trackList.size())).queue();
-                for (AudioTrack track : trackList) musicManager.scheduler.queueSong(track, top);
+
             }
+
 
             @Override
             public void noMatches() {

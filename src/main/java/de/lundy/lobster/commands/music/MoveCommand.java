@@ -64,7 +64,7 @@ public class MoveCommand extends ListenerAdapter {
             }
 
             List<AudioTrack> trackList = new ArrayList<>(musicManager.scheduler.queue);
-            trackList.add(to, trackList.get(from));
+            trackList.add(to - 1, trackList.get(from - 1));
             trackList.remove(from);
             musicManager.scheduler.queue.clear();
             musicManager.scheduler.queue.addAll(trackList);

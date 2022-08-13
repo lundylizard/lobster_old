@@ -14,9 +14,9 @@ public class JoinCommand extends ListenerAdapter {
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
 
-        if (event.getName().equalsIgnoreCase("join")) {
+        if (event.getGuild() == null) return;
 
-            if (event.getGuild() == null) return;
+        if (event.getName().equalsIgnoreCase("join")) {
 
             Member self = event.getGuild().getSelfMember();
             GuildVoiceState selfVoiceState = self.getVoiceState();

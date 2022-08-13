@@ -10,9 +10,7 @@ public class InviteCommand extends ListenerAdapter {
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
 
-        if (event.getGuild() == null) {
-            return;
-        }
+        if (event.getGuild() == null) return;
 
         if (event.getName().equalsIgnoreCase("invite")) {
 
