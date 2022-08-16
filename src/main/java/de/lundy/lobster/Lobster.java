@@ -2,15 +2,19 @@ package de.lundy.lobster;
 
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
+import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import de.lundy.lobster.commands.misc.HelpCommand;
 import de.lundy.lobster.commands.misc.InviteCommand;
 import de.lundy.lobster.commands.music.*;
+import de.lundy.lobster.lavaplayer.GuildMusicManager;
 import de.lundy.lobster.lavaplayer.PlayerManager;
 import de.lundy.lobster.listeners.ReadyListener;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
 import net.dv8tion.jda.api.sharding.ShardManager;
@@ -21,6 +25,8 @@ import org.jetbrains.annotations.NotNull;
 import javax.security.auth.login.LoginException;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -45,9 +51,11 @@ public class Lobster {
         config = gson.fromJson(reader, LobsterConfig.class);
 
         DefaultShardManagerBuilder shardBuilder = DefaultShardManagerBuilder.createLight(config.getToken());
+
         shardBuilder.enableIntents(GatewayIntent.GUILD_VOICE_STATES);
         shardBuilder.enableCache(CacheFlag.VOICE_STATE);
         shardBuilder.setMemberCachePolicy(MemberCachePolicy.VOICE);
+
         shardBuilder.addEventListeners(new ReadyListener());
         shardBuilder.addEventListeners(new HelpCommand());
         shardBuilder.addEventListeners(new InviteCommand());
@@ -58,7 +66,6 @@ public class Lobster {
         shardBuilder.addEventListeners(new NowPlayingCommand());
         shardBuilder.addEventListeners(new PauseToggleCommand());
         shardBuilder.addEventListeners(new PlayCommand());
-        shardBuilder.addEventListeners(new PyongyangCommand());
         shardBuilder.addEventListeners(new QueueCommand());
         shardBuilder.addEventListeners(new RemoveCommand());
         shardBuilder.addEventListeners(new SeekCommand());
@@ -66,6 +73,7 @@ public class Lobster {
         shardBuilder.addEventListeners(new SkipCommand());
         shardBuilder.addEventListeners(new StopCommand());
         shardBuilder.addEventListeners(new VolumeCommand());
+        shardBuilder.addEventListeners(new RadioCommand());
 
         ShardManager shardManager;
 
@@ -76,11 +84,58 @@ public class Lobster {
             return;
         }
 
-        shardManager.getShards().forEach(shard -> shard.updateCommands().addCommands(
+        Collection<SlashCommandData> commands = new ArrayList<>();
 
-            Commands.slash("help", "List of commands you can use.").setGuildOnly(true), Commands.slash("invite", "Invite lobster to your server.").setGuildOnly(true), Commands.slash("join", "Let lobster join a voice channel.").setGuildOnly(true), Commands.slash("leave", "Let lobster leave the voice channel.").setGuildOnly(true), Commands.slash("loop", "Change whether the current song is looping or not.").setGuildOnly(true), Commands.slash("move", "Move songs in the queue.").setGuildOnly(true).addOption(OptionType.INTEGER, "from", "What song should be moved.", true).addOption(OptionType.INTEGER, "to", "Where the song should be moved to.", true), Commands.slash("np", "See what song is playing right now.").setGuildOnly(true), Commands.slash("pause", "Toggle pause").setGuildOnly(true), Commands.slash("play", "Add a song to the song queue.").addOption(OptionType.STRING, "search", "Search term or url of the song.").addOption(OptionType.ATTACHMENT, "attachment", "Add a file to the queue.").addOption(OptionType.BOOLEAN, "top", "Add this song to the top of the queue.").setGuildOnly(true), Commands.slash("queue", "Display the upcoming songs.").setGuildOnly(true), Commands.slash("pyongyang", "Add Pyongyang FM 105.2 to the queue.").setGuildOnly(true), Commands.slash("remove", "Remove a song from the queue.").addOption(OptionType.INTEGER, "index", "What song should be removed", true).setGuildOnly(true), Commands.slash("seek", "Change the position of the current song").addOption(OptionType.INTEGER, "amount", "Amount to seek (seconds)", true).setGuildOnly(true), Commands.slash("shuffle", "Shuffle the queue").setGuildOnly(true), Commands.slash("skip", "Skip the current song").setGuildOnly(true), Commands.slash("stop", "Stop the music and clear the queue").setGuildOnly(true), Commands.slash("volume", "Change the volume").addOption(OptionType.INTEGER, "amount", "Amount of volume").setGuildOnly(true)
+        // Commands without options
+        commands.add(Commands.slash("help", "List of commands you can use."));
+        commands.add(Commands.slash("invite", "Invite lobster to your server."));
+        commands.add(Commands.slash("join", "Let lobster join a voice channel."));
+        commands.add(Commands.slash("leave", "Let lobster leave the voice channel."));
+        commands.add(Commands.slash("loop", "Change whether the current song is looping or not."));
+        commands.add(Commands.slash("np", "See what song is playing right now."));
+        commands.add(Commands.slash("pause", "Toggle pause"));
+        commands.add(Commands.slash("queue", "Display the upcoming songs."));
+        commands.add(Commands.slash("shuffle", "Shuffle the queue"));
+        commands.add(Commands.slash("skip", "Skip the current song"));
+        commands.add(Commands.slash("stop", "Stop the music and clear the queue"));
 
-        ).queue());
+        // Move Command
+        SlashCommandData moveCommand = Commands.slash("move", "Move songs in the queue.");
+        moveCommand.addOption(OptionType.INTEGER, "from", "What song should be moved.", true);
+        moveCommand.addOption(OptionType.INTEGER, "to", "Where the song should be moved to.", true);
+        commands.add(moveCommand);
+
+        // Play Command
+        SlashCommandData playCommand = Commands.slash("play", "Add a song to the song queue.");
+        playCommand.addOption(OptionType.STRING, "search", "Search term or url of the song.");
+        playCommand.addOption(OptionType.ATTACHMENT, "attachment", "Add a file to the queue.");
+        playCommand.addOption(OptionType.BOOLEAN, "top", "Add this song to the top of the queue.");
+        commands.add(playCommand);
+
+        // Remove Command
+        SlashCommandData removeCommand = Commands.slash("remove", "Remove a song from the queue.");
+        removeCommand.addOption(OptionType.INTEGER, "index", "What song should be removed", true);
+        commands.add(removeCommand);
+
+        // Seek Command
+        SlashCommandData seekCommand = Commands.slash("seek", "Change the position of the current song");
+        seekCommand.addOption(OptionType.INTEGER, "amount", "Amount to seek (seconds)", true);
+        commands.add(seekCommand);
+
+        // Volume Command
+        SlashCommandData volumeCommand = Commands.slash("volume", "Change the volume");
+        volumeCommand.addOption(OptionType.INTEGER, "amount", "Amount of volume");
+        commands.add(volumeCommand);
+
+        // Radio Command
+        SlashCommandData radioCommand = Commands.slash("radio", "Play a radio station from radio.garden");
+        radioCommand.addOption(OptionType.STRING, "location", "Location of the radio station", true, true);
+        commands.add(radioCommand);
+
+        // Make every command guild only
+        commands.forEach(c -> c.setGuildOnly(true));
+
+        shardManager.getShards().forEach(shard -> shard.updateCommands().addCommands(commands).queue());
 
         tick(shardManager); // This gets executed every 90 seconds
 
@@ -90,18 +145,18 @@ public class Lobster {
 
         scheduler.scheduleWithFixedDelay(() -> {
 
-            var serverCount = shardManager.getGuilds().size();
+            int serverCount = shardManager.getGuilds().size();
 
             // Update activity to show how many servers this bot is on
             shardManager.getShards().forEach(shard -> shard.getPresence().setPresence(OnlineStatus.ONLINE, Activity.playing("on " + serverCount + " servers.")));
 
-            for (var guilds : shardManager.getGuilds()) {
+            for (Guild guilds : shardManager.getGuilds()) {
 
                 // Checks if lobster is connected to a vc
                 if (guilds.getAudioManager().isConnected()) {
 
-                    var musicManager = PlayerManager.getInstance().getMusicManager(guilds);
-                    var audioPlayer = musicManager.audioPlayer;
+                    GuildMusicManager musicManager = PlayerManager.getInstance().getMusicManager(guilds);
+                    AudioPlayer audioPlayer = musicManager.audioPlayer;
 
                     // If there is no other un-deafened member or bot in vc stop playing music and leave vc
                     if (guilds.getAudioManager().getConnectedChannel().getMembers().stream().noneMatch(x -> !x.getVoiceState().isDeafened() && !x.getUser().isBot())) {

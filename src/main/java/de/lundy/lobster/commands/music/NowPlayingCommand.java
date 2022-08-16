@@ -41,8 +41,8 @@ public class NowPlayingCommand extends ListenerAdapter {
             String position = BotUtils.getTrackPosition(audioPlayer.getPlayingTrack());
 
             if (trackUrl.startsWith("https://listen7.myradio24.com/69366")) {
-                trackUrl = "Pyongyang FM 105.2";
-                position = "North Korea";
+                trackUrl = trackInfo.title;
+                position = "Radio";
             }
 
             event.reply(String.format("%s | `%s`", trackUrl, position)).queue();

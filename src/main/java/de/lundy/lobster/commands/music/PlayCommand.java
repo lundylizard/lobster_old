@@ -60,7 +60,7 @@ public class PlayCommand extends ListenerAdapter {
                 search = (!isUrl(searchOption.getAsString()) ? "ytsearch:" : "") + searchOption.getAsString();
 
             event.deferReply().queue();
-            PlayerManager.getInstance().loadAndPlay(event, search, topOption != null && topOption.getAsBoolean());
+            PlayerManager.getInstance().loadAndPlay(event.getHook(), search, topOption != null && topOption.getAsBoolean());
 
         }
 
