@@ -17,5 +17,6 @@ lobster is an easy-to-use Discord bot to play music in a voice channel.
 | [JDA](https://github.com/DV8FromTheWorld/JDA) | [lavaplayer-fork](https://github.com/walkyst/lavaplayer-fork) | [Topis-Source-Managers](https://github.com/Topis-Lavalink-Plugins/Topis-Source-Managers) |
 |:---------------------------------------------:|:-------------------------------------------------------------:|------------------------------------------------------------------------------------------|
 
-- Goodigo (Reporting bugs)
-- E-Why (Forcing me to keep working on version 2)
+- Goodigo (Reporting bugs, Ko-Fi Supporter)
+- Eleks (Ko-Fi Supporter)
+- E-Why (Forcing me to keep working on Version 2)
