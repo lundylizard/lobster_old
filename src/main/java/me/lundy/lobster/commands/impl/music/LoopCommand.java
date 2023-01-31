@@ -12,7 +12,7 @@ public class LoopCommand extends BotCommand {
         GuildMusicManager musicManager = PlayerManager.getInstance().getMusicManager(event.getGuild());
         boolean isRepeating = musicManager.scheduler.isRepeating();
         musicManager.scheduler.setRepeating(!isRepeating);
-        event.reply(String.format("%s looping current song.", isRepeating ? "Now" : "No longer")).queue();
+        event.reply(String.format("%s looping current song.", musicManager.scheduler.isRepeating() ? "Now" : "No longer")).queue();
     }
 
     @Override
