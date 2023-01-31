@@ -1,5 +1,5 @@
 # Project exclude paths
-./target/
-./src/main/java/de/lundy/lobster/Secrets.java
-./.idea/
-./out/
+/target/*
+/.idea/*
+/out/*
+config.json

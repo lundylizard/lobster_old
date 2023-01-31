@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss} %boldGreen(%-20.-20logger{0}) %highlight(%-6level) %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <file>.\lobster-debug.log</file>
+        <append>true</append>
+        <immediateFlush>true</immediateFlush>
+        <encoder>
+            <pattern>%d{HH:mm:ss} %-20.-20logger{0} %-6level %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="info">
+        <appender-ref ref="STDOUT"/>
+    </root>
+
+    <root level="debug">
+        <appender-ref ref="FILE"/>
+    </root>
+
+    <logger name="com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAccessTokenTracker" level="OFF"/>
+
+</configuration>
