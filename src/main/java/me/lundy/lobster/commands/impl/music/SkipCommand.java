@@ -10,8 +10,14 @@ public class SkipCommand extends BotCommand {
     @Override
     public void onCommand(SlashCommandInteractionEvent event) {
         GuildMusicManager musicManager = PlayerManager.getInstance().getMusicManager(event.getGuild());
-        event.reply(String.format("Skipping `%s`...", musicManager.audioPlayer.getPlayingTrack().getInfo().title)).queue();
+        String oldTrack = musicManager.audioPlayer.getPlayingTrack().getInfo().title;
         musicManager.scheduler.nextTrack();
+        String newTrack = "";
+        if (musicManager.audioPlayer.getPlayingTrack() != null) {
+            newTrack = musicManager.audioPlayer.getPlayingTrack().getInfo().title;
+        }
+        event.reply(String.format("Skipping `%s`...%s", oldTrack,
+                newTrack.equals("") ? "" : "\n:musical_note: Now Playing: `" + newTrack + "`")).queue();
     }
 
     @Override

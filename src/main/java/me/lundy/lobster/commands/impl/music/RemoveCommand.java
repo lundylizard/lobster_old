@@ -28,14 +28,15 @@ public class RemoveCommand extends BotCommand {
         int humanIndex = indexOption.getAsInt();
         int queueIndex = humanIndex - 1;
 
-        if (queueIndex > musicManager.scheduler.queue.size() || queueIndex < musicManager.scheduler.queue.size()) {
+        List<AudioTrack> trackList = new ArrayList<>(musicManager.scheduler.queue);
+
+        if (trackList.get(queueIndex) == null) {
             event.reply(":warning: This song is not in the queue.").setEphemeral(true).queue();
             return;
         }
 
-        List<AudioTrack> trackList = new ArrayList<>(musicManager.scheduler.queue);
         musicManager.scheduler.queue.removeFirstOccurrence(trackList.get(queueIndex));
-        event.reply(String.format("Removed song #%d from the queue.", humanIndex)).queue();
+        event.reply(String.format("Removed song `#%d` from the queue.", humanIndex)).queue();
     }
 
     @Override

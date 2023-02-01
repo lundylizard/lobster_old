@@ -16,7 +16,7 @@ public class VoiceChatCheck {
             return CheckResult.EXECUTOR_NOT_IN_VOICE;
         }
 
-        if (self.getVoiceState().inAudioChannel()) {
+        if (!self.getVoiceState().inAudioChannel()) {
             return CheckResult.SELF_NOT_IN_VOICE;
         }
 

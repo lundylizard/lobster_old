@@ -4,6 +4,7 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import me.lundy.lobster.commands.BotCommand;
 import me.lundy.lobster.lavaplayer.GuildMusicManager;
 import me.lundy.lobster.lavaplayer.PlayerManager;
+import me.lundy.lobster.utils.BotUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
@@ -27,7 +28,7 @@ public class QueueCommand extends BotCommand {
 
         for (int i = 0; i < trackCount; i++) {
             AudioTrack track = trackList.get(i);
-            String out = String.format("`#%d` [%s](%s) | %s", (i + 1), track.getInfo().title, track.getInfo().uri, track.getInfo().author);
+            String out = String.format("`#%d` [%s](%s) | %s `%s`", (i + 1), track.getInfo().title, track.getInfo().uri, track.getInfo().author, BotUtils.formatTime(track.getDuration()));
             queueOutput.append(out).append("\n");
         }
 

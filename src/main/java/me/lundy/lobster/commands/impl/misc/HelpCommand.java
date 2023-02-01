@@ -1,10 +1,12 @@
 package me.lundy.lobster.commands.impl.misc;
 
+import me.lundy.lobster.Lobster;
 import me.lundy.lobster.commands.BotCommand;
 import me.lundy.lobster.commands.IgnoreChecks;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.Command;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 
 import java.util.Comparator;
 import java.util.List;
@@ -31,7 +33,10 @@ public class HelpCommand extends BotCommand {
 
         embedBuilder.setColor(event.getGuild().getSelfMember().getColor());
         embedBuilder.setDescription(description.toString());
-        event.replyEmbeds(embedBuilder.build()).queue();
+        event.replyEmbeds(embedBuilder.build()).addActionRow(
+                Button.link(Lobster.DISCORD_URL, "Discord"),
+                Button.link(Lobster.INVITE_URL, "Invite")
+        ).queue();
 
     }
 
