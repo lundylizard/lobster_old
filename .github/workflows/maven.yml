@@ -10,18 +10,5 @@ jobs:
     runs-on: self-hosted
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Set up JDK 17
-      uses: actions/setup-java@v3
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-        cache: maven
     - name: Build with Maven
       run: mvn -B package --file pom.xml
-    - name: Kill lobster process
-      run: screen -S lobster -X quit
-    - name: Run new lobster version
-      run: |
-        screen -dmS lobster sh
-        screen -S lobster -X stuff "java -jar /root/actions-runner/_work/lobster/lobster/target/lobster-2.0.jar"
