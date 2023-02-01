@@ -30,4 +30,6 @@ jobs:
     - name: Kill lobster process
       run: screen -S lobster -X quit
     - name: Run new lobster version
-      run: screen -S lobster "java -jar /root/actions-runner/_work/lobster/lobster/target/lobster-2.0.jar"
+      run: |
+        screen -S lobster
+        screen -S lobster -X "java -jar /root/actions-runner/_work/lobster/lobster/target/lobster-2.0.jar"
