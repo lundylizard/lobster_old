@@ -1,6 +1,7 @@
 package me.lundy.lobster.utils;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
+import me.lundy.lobster.Lobster;
 import me.lundy.lobster.lavaplayer.GuildMusicManager;
 import me.lundy.lobster.lavaplayer.PlayerManager;
 import net.dv8tion.jda.api.entities.Guild;
@@ -25,10 +26,11 @@ public class InactivityManager {
                 AudioPlayer audioPlayer = musicManager.audioPlayer;
 
                 if (g.getAudioManager().getConnectedChannel().getMembers()
-                        .stream().noneMatch(member -> member.getVoiceState().isDeafened() && !member.getUser().isBot())) {
+                        .stream().noneMatch(member -> !member.getVoiceState().isDeafened() && !member.getUser().isBot())) {
                     g.getAudioManager().closeAudioConnection();
                     audioPlayer.stopTrack();
                     musicManager.scheduler.queue.clear();
+                    Lobster.getInstance().getLogger().info("Left voice chat in {} due to inactivity.", g.getName());
                 }
 
             }

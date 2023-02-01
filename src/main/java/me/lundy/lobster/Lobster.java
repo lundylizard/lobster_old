@@ -30,6 +30,8 @@ public class Lobster {
             "client_id=891760327522394183" +
             "&permissions=2150647808" +
             "&scope=bot%20applications.commands";
+    public static final String DISCORD_URL = "https://discord.gg/Hk5YP5AWhW";
+
     private static Lobster instance;
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private final Logger logger = LoggerFactory.getLogger(Lobster.class);
@@ -88,6 +90,10 @@ public class Lobster {
     }
 
     public InactivityManager getInactivityManager() {
-        return Lobster.instance.inactivityManager;
+        return inactivityManager;
+    }
+
+    public Logger getLogger() {
+        return logger;
     }
 }
