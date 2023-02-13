@@ -28,6 +28,7 @@ public class CommandManager extends ListenerAdapter {
         registerCommand(new LoopCommand());
         registerCommand(new MoveCommand());
         registerCommand(new NowPlayingCommand());
+        registerCommand(new PauseCommand());
         registerCommand(new PlayCommand());
         registerCommand(new QueueCommand());
         registerCommand(new RemoveCommand());
@@ -45,14 +46,9 @@ public class CommandManager extends ListenerAdapter {
         for (BotCommand command : this.commandList) {
 
             if (command.name().equals(event.getName())) {
-
-                boolean noChecks = command.getClass().isAnnotationPresent(IgnoreChecks.class);
-                logger.debug("noChecks={}", noChecks);
-
-                if (!noChecks) {
+                if (!command.getClass().isAnnotationPresent(IgnoreChecks.class)) {
 
                     VoiceChatCheck.CheckResult voiceChatCheck = VoiceChatCheck.runCheck(event.getHook());
-                    logger.debug(voiceChatCheck.getMessage());
 
                     if (!voiceChatCheck.hasPassed()) {
                         event.reply(voiceChatCheck.getMessage()).setEphemeral(true).queue();
@@ -62,6 +58,7 @@ public class CommandManager extends ListenerAdapter {
                 }
 
                 command.onCommand(event);
+                command.getLogger().info("({}) {} -> {}", event.getGuild().getName(), event.getMember().getUser().getAsTag(), event.getCommandString());
 
             }
         }
