@@ -24,6 +24,7 @@ public class CommandManager extends ListenerAdapter {
         this.commandList = new ArrayList<>();
         registerCommand(new HelpCommand());
         registerCommand(new InviteCommand());
+        registerCommand(new JoinCommand());
         registerCommand(new LeaveCommand());
         registerCommand(new LoopCommand());
         registerCommand(new MoveCommand());

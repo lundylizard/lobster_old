@@ -94,4 +94,5 @@ public class Lobster {
     public Logger getLogger() {
         return logger;
     }
+
 }
