@@ -10,6 +10,7 @@ import me.lundy.lobster.utils.InactivityManager;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
+import net.dv8tion.jda.api.managers.Presence;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
 import net.dv8tion.jda.api.sharding.ShardManager;
@@ -64,7 +65,7 @@ public class Lobster {
 
         Lobster.instance.scheduler.scheduleWithFixedDelay(() -> {
             Lobster.instance.tick(shardManager);
-        }, 0, 3, TimeUnit.MINUTES);
+        }, 0, 1, TimeUnit.MINUTES);
 
     }
 
@@ -83,10 +84,7 @@ public class Lobster {
 
     private void updatePresence(ShardManager shardManager) {
         int serverCount = shardManager.getGuilds().size();
-        shardManager.getShards().forEach(shard -> {
-            Activity updatedActivity = Activity.playing("on " + serverCount + " servers.");
-            shard.getPresence().setPresence(OnlineStatus.ONLINE, updatedActivity);
-        });
+        shardManager.setPresence(OnlineStatus.ONLINE, Activity.playing("on " + serverCount + " servers"));
     }
 
     public InactivityManager getInactivityManager() {
@@ -96,4 +94,5 @@ public class Lobster {
     public Logger getLogger() {
         return logger;
     }
+
 }
