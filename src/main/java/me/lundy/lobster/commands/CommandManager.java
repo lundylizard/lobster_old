@@ -12,16 +12,17 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class CommandManager extends ListenerAdapter {
 
-    private final List<BotCommand> commandList;
+    private final Map<String, BotCommand> commandMap = new HashMap<>();
     private final Logger logger = LoggerFactory.getLogger(CommandManager.class);
 
     public CommandManager() {
-        this.commandList = new ArrayList<>();
         registerCommand(new HelpCommand());
         registerCommand(new InviteCommand());
         registerCommand(new LeaveCommand());
@@ -42,61 +43,42 @@ public class CommandManager extends ListenerAdapter {
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
 
-        for (BotCommand command : this.commandList) {
+        BotCommand command = this.commandMap.get(event.getName());
+        if (command == null) return;
 
-            if (command.name().equals(event.getName())) {
+        if (!command.getClass().isAnnotationPresent(IgnoreChecks.class)) {
 
-                boolean noChecks = command.getClass().isAnnotationPresent(IgnoreChecks.class);
-                logger.debug("noChecks={}", noChecks);
+            VoiceChatCheck.CheckResult voiceChatCheck = VoiceChatCheck.runCheck(event.getHook());
 
-                if (!noChecks) {
-
-                    VoiceChatCheck.CheckResult voiceChatCheck = VoiceChatCheck.runCheck(event.getHook());
-                    logger.debug(voiceChatCheck.getMessage());
-
-                    if (!voiceChatCheck.hasPassed()) {
-                        event.reply(voiceChatCheck.getMessage()).setEphemeral(true).queue();
-                        return;
-                    }
-
-                }
-
-                command.onCommand(event);
-
+            if (!voiceChatCheck.hasPassed()) {
+                event.reply(voiceChatCheck.getMessage()).setEphemeral(true).queue();
+                return;
             }
+
         }
+
+        command.onCommand(event);
+        command.getLogger().info("({}) {} -> {}", event.getGuild().getName(), event.getMember().getUser().getAsTag(), event.getCommandString());
+
     }
 
     public void registerCommand(BotCommand command) {
-        this.commandList.add(command);
+        this.commandMap.put(command.name(), command);
     }
 
-    public List<BotCommand> getCommands() {
-        return this.commandList;
+    public Map<String, BotCommand> getCommands() {
+        return this.commandMap;
     }
 
     public List<SlashCommandData> getCommandDataList() {
+        return this.commandMap.values().stream().map(this::createCommandData).collect(Collectors.toList());
+    }
 
-        List<SlashCommandData> commandDataList = new ArrayList<>();
-
-        for (BotCommand command : this.commandList) {
-
-            SlashCommandData commandData = Commands.slash(command.name(), command.description());
-
-            if (!command.options().isEmpty()) {
-                commandData.addOptions(command.options());
-            }
-
-            if (!command.subCommands().isEmpty()) {
-                commandData.addSubcommands(command.subCommands());
-            }
-
-            commandData.setGuildOnly(true);
-            commandDataList.add(commandData);
-        }
-
-        return commandDataList;
-
+    private SlashCommandData createCommandData(BotCommand command) {
+        return Commands.slash(command.name(), command.description())
+                .addOptions(command.options())
+                .addSubcommands(command.subCommands())
+                .setGuildOnly(true);
     }
 
 }

@@ -20,7 +20,7 @@ public class VoiceChatCheck {
             return CheckResult.SELF_NOT_IN_VOICE;
         }
 
-        if (!Objects.equals(self.getVoiceState().getChannel(), executor.getVoiceState().getChannel())) {
+        if (self.getVoiceState().getChannel() != executor.getVoiceState().getChannel()) {
             return CheckResult.NOT_IN_SAME_VOICE;
         }
 
@@ -40,7 +40,7 @@ public class VoiceChatCheck {
 
         CheckResult(String message) {
             this.message = message;
-            this.passed = message.equalsIgnoreCase("");
+            this.passed = message.isEmpty();
         }
 
         public String getMessage() {
@@ -50,6 +50,7 @@ public class VoiceChatCheck {
         public boolean hasPassed() {
             return passed;
         }
+
     }
 
 }

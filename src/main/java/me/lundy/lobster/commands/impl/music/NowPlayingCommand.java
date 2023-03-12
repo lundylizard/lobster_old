@@ -24,8 +24,8 @@ public class NowPlayingCommand extends BotCommand {
         AudioTrackInfo trackInfo = track.getInfo();
         String trackUrl = trackInfo.uri;
         String position = BotUtils.getTrackPosition(track);
-        boolean isRepeating = musicManager.scheduler.isRepeating();
-        event.reply(String.format("%s | `%s`%s", trackUrl, position, isRepeating ? " :repeat:" : "")).queue();
+        String repeatingString = musicManager.scheduler.isRepeating() ? " :repeat:" : "";
+        event.reply(String.format("%s | `%s`%s", trackUrl, position, repeatingString)).queue();
 
     }
 

@@ -17,10 +17,8 @@ public class MoveCommand extends BotCommand {
     @Override
     public void onCommand(SlashCommandInteractionEvent event) {
 
-        OptionMapping optionFrom = event.getOption("from");
-        OptionMapping optionTo = event.getOption("to");
-        int from = optionFrom.getAsInt();
-        int to = optionTo.getAsInt();
+        int from = event.getOption("from").getAsInt();
+        int to = event.getOption("to").getAsInt();
 
         if (from <= 0 || to <= 0) {
             event.reply("The new index has to be higher than 0").setEphemeral(true).queue();

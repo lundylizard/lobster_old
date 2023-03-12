@@ -19,22 +19,24 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class PlayerManager {
 
     private static PlayerManager instance;
     private final Map<Long, GuildMusicManager> musicManagers;
     private final AudioPlayerManager audioPlayerManager;
-    private final Logger logger = LoggerFactory.getLogger(PlayerManager.class);
+    private final Logger logger;
 
     public PlayerManager() {
 
-        this.musicManagers = new HashMap<>();
+        this.musicManagers = new ConcurrentHashMap<>();
         this.audioPlayerManager = new DefaultAudioPlayerManager();
+        this.logger = LoggerFactory.getLogger(PlayerManager.class);
 
         // Register external source managers
-        String spotifyClientId = Lobster.getConfig().getProperty(ConfigValues.SPOTIFY_CLIENT_ID);
-        String spotifyClientSecret = Lobster.getConfig().getProperty(ConfigValues.SPOTIFY_CLIENT_SECRET);
+        String spotifyClientId = Lobster.getInstance().getConfig().getProperty(ConfigValues.SPOTIFY_CLIENT_ID);
+        String spotifyClientSecret = Lobster.getInstance().getConfig().getProperty(ConfigValues.SPOTIFY_CLIENT_SECRET);
         audioPlayerManager.registerSourceManager(new SpotifySourceManager(null, spotifyClientId, spotifyClientSecret, "US", this.audioPlayerManager));
         logger.info("Registered Spotify source manager");
         // String appleMediaApiToken = Lobster.getConfig().getProperty(ConfigValues.APPLE_MEDIA_API_TOKEN);
@@ -48,7 +50,9 @@ public class PlayerManager {
     }
 
     public static PlayerManager getInstance() {
-        if (instance == null) instance = new PlayerManager();
+        if (instance == null) {
+            instance = new PlayerManager();
+        }
         return instance;
     }
 
@@ -99,7 +103,6 @@ public class PlayerManager {
                 interactionHook.editOriginal(String.format("Added `%d` songs to the queue.", trackList.size())).queue();
 
             }
-
 
             @Override
             public void noMatches() {

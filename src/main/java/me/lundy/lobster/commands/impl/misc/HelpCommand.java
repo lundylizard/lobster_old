@@ -5,11 +5,10 @@ import me.lundy.lobster.commands.BotCommand;
 import me.lundy.lobster.commands.IgnoreChecks;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 
 import java.util.Comparator;
-import java.util.List;
+import java.util.Map;
 
 @IgnoreChecks
 public class HelpCommand extends BotCommand {
@@ -18,21 +17,21 @@ public class HelpCommand extends BotCommand {
     public void onCommand(SlashCommandInteractionEvent event) {
 
         EmbedBuilder embedBuilder = new EmbedBuilder();
-        StringBuilder description = new StringBuilder();
-
         embedBuilder.setTitle("About lobster Bot", "https://github.com/lundylizard/lobster");
-        description.append("Developed by lundylizard\n\n");
+        embedBuilder.setDescription("Developed by lundylizard\n\n");
 
-        List<Command> allCommands = event.getJDA().retrieveCommands().complete();
+        Map<String, BotCommand> commands = Lobster.getInstance().getCommandManager().getCommands();
 
-        allCommands.stream().sorted(
-                Comparator.comparingInt(c -> -c.getName().length())
-        ).forEach(command -> {
-            description.append(String.format("`/%s` - %s\n", command.getName(), command.getDescription()));
-        });
+        commands.entrySet().stream()
+                .sorted(Comparator.comparingInt(entry -> entry.getKey().length()))
+                .forEach(entry -> {
+                    BotCommand command = entry.getValue();
+                    String commandString = String.format("`/%s` - %s\n", command.name(), command.description());
+                    embedBuilder.appendDescription(commandString);
+                }
+        );
 
         embedBuilder.setColor(event.getGuild().getSelfMember().getColor());
-        embedBuilder.setDescription(description.toString());
         event.replyEmbeds(embedBuilder.build()).addActionRow(
                 Button.link(Lobster.DISCORD_URL, "Discord"),
                 Button.link(Lobster.INVITE_URL, "Invite")

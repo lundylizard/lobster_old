@@ -1,5 +1,6 @@
 package me.lundy.lobster.commands.impl.music;
 
+import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import me.lundy.lobster.commands.BotCommand;
 import me.lundy.lobster.lavaplayer.GuildMusicManager;
 import me.lundy.lobster.lavaplayer.PlayerManager;
@@ -9,15 +10,26 @@ public class SkipCommand extends BotCommand {
 
     @Override
     public void onCommand(SlashCommandInteractionEvent event) {
+
         GuildMusicManager musicManager = PlayerManager.getInstance().getMusicManager(event.getGuild());
-        String oldTrack = musicManager.audioPlayer.getPlayingTrack().getInfo().title;
-        musicManager.scheduler.nextTrack();
-        String newTrack = "";
-        if (musicManager.audioPlayer.getPlayingTrack() != null) {
-            newTrack = musicManager.audioPlayer.getPlayingTrack().getInfo().title;
+        AudioTrack oldTrack = musicManager.audioPlayer.getPlayingTrack();
+
+        if (oldTrack == null) {
+            event.reply(":warning: There is no track currently playing.").setEphemeral(true).queue();
+            return;
         }
-        event.reply(String.format("Skipping `%s`...%s", oldTrack,
-                newTrack.equals("") ? "" : "\n:musical_note: Now Playing: `" + newTrack + "`")).queue();
+
+        musicManager.scheduler.nextTrack();
+        AudioTrack newTrack = musicManager.audioPlayer.getPlayingTrack();
+
+        String message = String.format("Skipping `%s`...", oldTrack.getInfo().title);
+
+        if (newTrack != null) {
+            message += String.format("\n:musical_note: Now Playing: `%s`", newTrack.getInfo().title);
+        }
+
+        event.reply(message).queue();
+
     }
 
     @Override
