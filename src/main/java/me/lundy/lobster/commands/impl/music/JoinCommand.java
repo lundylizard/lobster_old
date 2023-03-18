@@ -26,7 +26,7 @@ public class JoinCommand extends BotCommand {
             } catch (InsufficientPermissionException e) {
                 event.reply(":warning: I do not have enough permissions to join that channel.").setEphemeral(true).queue();
             } finally {
-                event.reply("Join voice channel `" + audioChannel.getName() + "`").queue();
+                event.reply("Joined voice channel `\uD83D\uDD0A " + audioChannel.getName() + "`").queue();
             }
 
         }

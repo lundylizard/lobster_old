@@ -15,26 +15,26 @@ public class VolumeCommand extends BotCommand {
     @Override
     public void onCommand(SlashCommandInteractionEvent event) {
 
-        OptionMapping volumeOption = event.getOption("amount");
         GuildMusicManager musicManager = PlayerManager.getInstance().getMusicManager(event.getGuild());
+        OptionMapping volumeOption = event.getOption("amount");
 
         if (volumeOption == null) {
-            event.reply(String.format("Current volume is %d", musicManager.audioPlayer.getVolume())).setEphemeral(true).queue();
+            int currentVolume = musicManager.audioPlayer.getVolume();
+            event.replyFormat("Current volume is %d%%.", currentVolume).setEphemeral(true).queue();
             return;
         }
 
-        int oldVolume = musicManager.audioPlayer.getVolume();
         int newVolume = volumeOption.getAsInt();
-
-        if (newVolume <= 0) {
-            event.reply("Volume cannot be 0 or lower.").setEphemeral(true).queue();
+        if (newVolume <= 10) {
+            event.reply("Volume cannot be 10 or lower.").setEphemeral(true).queue();
             return;
         }
 
         boolean probablyLoud = newVolume >= 101;
         musicManager.audioPlayer.setVolume(newVolume);
-        event.reply(String.format("Changed the volume to %d%s", newVolume, probablyLoud ? "% - This might be loud." : "%")).queue();
-        getLogger().debug("Volume Command: oldValue={} newValue={}", newVolume, oldVolume);
+
+        String message = probablyLoud ? " - This might be loud." : "";
+        event.replyFormat("Changed the volume to %d%%%s", newVolume, message).queue();
 
     }
 

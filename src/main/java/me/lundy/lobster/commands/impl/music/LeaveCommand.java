@@ -16,10 +16,7 @@ public class LeaveCommand extends BotCommand {
             musicManager.scheduler.queue.clear();
         }
 
-        if (musicManager.audioPlayer.getPlayingTrack() != null) {
-            musicManager.audioPlayer.getPlayingTrack().stop();
-        }
-
+        musicManager.audioPlayer.destroy();
         event.getGuild().getAudioManager().closeAudioConnection();
         event.reply("Left the voice channel.").queue();
     }

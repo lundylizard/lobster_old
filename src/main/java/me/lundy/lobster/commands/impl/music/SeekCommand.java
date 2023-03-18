@@ -1,5 +1,6 @@
 package me.lundy.lobster.commands.impl.music;
 
+import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import me.lundy.lobster.commands.BotCommand;
 import me.lundy.lobster.lavaplayer.GuildMusicManager;
 import me.lundy.lobster.lavaplayer.PlayerManager;
@@ -15,30 +16,26 @@ public class SeekCommand extends BotCommand {
 
     @Override
     public void onCommand(SlashCommandInteractionEvent event) {
-
-        OptionMapping seekOption = event.getOption("amount");
         GuildMusicManager musicManager = PlayerManager.getInstance().getMusicManager(event.getGuild());
 
-        if (musicManager.audioPlayer.getPlayingTrack() == null) {
+        AudioTrack track = musicManager.audioPlayer.getPlayingTrack();
+        if (track == null) {
             event.reply(":warning: There is currently no song playing.").setEphemeral(true).queue();
             return;
         }
 
-        int seekAmount = seekOption.getAsInt() * 1000;
-        long newPos = musicManager.audioPlayer.getPlayingTrack().getPosition() + seekAmount;
+        int seekAmount = event.getOption("amount").getAsInt();
+        long newPos = track.getPosition() + (seekAmount * 1000L);
+        newPos = Math.max(0L, newPos);
 
-        if (newPos < 0) newPos = 0L;
-
-        if (newPos > musicManager.audioPlayer.getPlayingTrack().getDuration()) {
+        if (newPos >= track.getDuration()) {
             musicManager.scheduler.nextTrack();
-            event.reply(String.format("Skipped `%s`", musicManager.audioPlayer.getPlayingTrack().getInfo().title)).queue();
-            return;
+            event.reply(String.format("Skipped `%s`", track.getInfo().title)).queue();
+        } else {
+            track.setPosition(newPos);
+            String position = BotUtils.formatTime(newPos);
+            event.reply(String.format("Set song position to **%s**", position)).queue();
         }
-
-        musicManager.audioPlayer.getPlayingTrack().setPosition(newPos);
-        String position = BotUtils.formatTime(musicManager.audioPlayer.getPlayingTrack().getPosition());
-        event.reply(String.format("Set song position to **%s**", position)).queue();
-
     }
 
     @Override
