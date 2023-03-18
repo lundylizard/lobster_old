@@ -20,13 +20,14 @@ import java.util.stream.Collectors;
 public class CommandManager extends ListenerAdapter {
 
     private final Map<String, BotCommand> commandMap = new HashMap<>();
-    private final Logger logger = LoggerFactory.getLogger(CommandManager.class);
 
     public CommandManager() {
         registerCommand(new HelpCommand());
         registerCommand(new InviteCommand());
+        registerCommand(new JoinCommand());
         registerCommand(new LeaveCommand());
         registerCommand(new LoopCommand());
+        registerCommand(new LyricsCommand());
         registerCommand(new MoveCommand());
         registerCommand(new NowPlayingCommand());
         registerCommand(new PlayCommand());
@@ -37,7 +38,8 @@ public class CommandManager extends ListenerAdapter {
         registerCommand(new SkipCommand());
         registerCommand(new StopCommand());
         registerCommand(new VolumeCommand());
-        this.logger.info("Registered all commands!");
+        Logger logger = LoggerFactory.getLogger(CommandManager.class);
+        logger.info("Registered all commands!");
     }
 
     @Override

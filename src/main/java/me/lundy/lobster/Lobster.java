@@ -5,7 +5,7 @@ import me.lundy.lobster.config.BotConfig;
 import me.lundy.lobster.config.ConfigValues;
 import me.lundy.lobster.listeners.GuildJoinListener;
 import me.lundy.lobster.listeners.GuildLeaveListener;
-import me.lundy.lobster.listeners.ReadyListener;
+import me.lundy.lobster.listeners.QueueButtonListener;
 import me.lundy.lobster.utils.BotUtils;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
@@ -25,7 +25,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 public class Lobster {
 
@@ -56,34 +55,30 @@ public class Lobster {
             return;
         }
 
-        debug = Boolean.parseBoolean(instance.config.getProperty(ConfigValues.DEBUG_MODE));
-
-        if (debug) {
-            instance.logger.info("Launching in DEBUG mode.");
-        }
+        debug = false; //Boolean.parseBoolean(instance.config.getProperty(ConfigValues.DEBUG_MODE));
 
         Lobster.instance.commandManager = new CommandManager();
 
         DefaultShardManagerBuilder shardBuilder = DefaultShardManagerBuilder.createLight(Lobster.instance.config.getProperty(ConfigValues.BOT_TOKEN));
 
-        shardBuilder.setShardsTotal(SHARD_COUNT);
+        // shardBuilder.setShardsTotal(SHARD_COUNT);
         shardBuilder.enableIntents(GatewayIntent.GUILD_VOICE_STATES);
         shardBuilder.enableCache(CacheFlag.VOICE_STATE);
         shardBuilder.setMemberCachePolicy(MemberCachePolicy.VOICE);
 
-        shardBuilder.addEventListeners(new ReadyListener());
         shardBuilder.addEventListeners(new GuildJoinListener());
         shardBuilder.addEventListeners(new GuildLeaveListener());
+        shardBuilder.addEventListeners(new QueueButtonListener());
         shardBuilder.addEventListeners(Lobster.instance.commandManager);
 
         ShardManager shardManager = shardBuilder.build();
 
         List<SlashCommandData> commands = new ArrayList<>(Lobster.instance.commandManager.getCommandDataList());
-        shardManager.getShards().forEach(shard -> shard.updateCommands().addCommands(commands).queue());
+        shardManager.getShards().forEach(shard -> shard.updateCommands().addCommands(commands).complete());
 
         Lobster.instance.scheduler.scheduleWithFixedDelay(() -> {
             Lobster.instance.tick(shardManager);
-        }, 0, 3, TimeUnit.MINUTES);
+        }, 0, 1, TimeUnit.MINUTES);
 
     }
 

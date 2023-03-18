@@ -6,15 +6,18 @@ import me.lundy.lobster.lavaplayer.GuildMusicManager;
 import me.lundy.lobster.lavaplayer.PlayerManager;
 import me.lundy.lobster.utils.BotUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class QueueCommand extends BotCommand {
 
     @Override
     public void onCommand(SlashCommandInteractionEvent event) {
+
         GuildMusicManager musicManager = PlayerManager.getInstance().getMusicManager(event.getGuild());
 
         if (musicManager.scheduler.queue.isEmpty()) {
@@ -22,25 +25,34 @@ public class QueueCommand extends BotCommand {
             return;
         }
 
-        int trackCount = Math.min(musicManager.scheduler.queue.size(), 10);
-        List<AudioTrack> trackList = new ArrayList<>(musicManager.scheduler.queue);
-        StringBuilder queueOutput = new StringBuilder();
-
-        for (int i = 0; i < trackCount; i++) {
-            AudioTrack track = trackList.get(i);
-            String out = String.format("`#%d` [%s](%s) | %s `%s`", (i + 1), track.getInfo().title, track.getInfo().uri, track.getInfo().author, BotUtils.formatTime(track.getDuration()));
-            queueOutput.append(out).append("\n");
-        }
-
-        if (trackList.size() > trackCount) {
-            String out = String.format("and %d more...", (trackList.size() - trackCount));
-            queueOutput.append("\n").append(out);
-        }
+        AudioTrack[][] trackGroups = BotUtils.splitTracksIntoGroups(musicManager.scheduler.queue);
+        int pagesTotal = trackGroups.length;
+        double trackCount = 15;
+        int queueSize = musicManager.scheduler.queue.size();
+        boolean nextPage = queueSize > trackCount;
 
         EmbedBuilder embedBuilder = new EmbedBuilder();
-        embedBuilder.setDescription(queueOutput);
         embedBuilder.setColor(event.getGuild().getSelfMember().getColor());
-        event.replyEmbeds(embedBuilder.build()).queue();
+        embedBuilder.setTitle("Current Queue");
+
+        if (nextPage) {
+            embedBuilder.setFooter("Page 1 of " + pagesTotal + " (" + queueSize + " songs total)");
+        }
+
+        StringBuilder descriptionBuilder = new StringBuilder();
+        int trackIndex = 0;
+
+        for (AudioTrack track : trackGroups[0]) {
+            trackIndex++;
+            String shortenedTitle = BotUtils.endStringWithEllipsis(track.getInfo().title, 22);
+            String shortenedArtist = track.getInfo().author;
+            String out = String.format("`#%02d` [%s](%s) | %s `\uD83D\uDD52%s`\n", trackIndex, shortenedTitle, track.getInfo().uri, shortenedArtist, BotUtils.formatTime(track.getDuration()));
+            descriptionBuilder.append(out);
+        }
+
+        embedBuilder.setDescription(descriptionBuilder.toString());
+        createReply(event.replyEmbeds(embedBuilder.build()), nextPage).queue();
+
     }
 
     @Override
@@ -51,6 +63,19 @@ public class QueueCommand extends BotCommand {
     @Override
     public String description() {
         return "Display the upcoming songs";
+    }
+
+    private ReplyCallbackAction createReply(ReplyCallbackAction reply, boolean buttons) {
+
+        if (buttons) {
+            reply.addActionRow(
+                    Button.secondary("button:queue:previous:0", Emoji.fromUnicode("◀️")).asDisabled(),
+                    Button.secondary("button:queue:next:1", Emoji.fromUnicode("▶️"))
+            );
+        }
+
+        return reply;
+
     }
 
 }

@@ -20,11 +20,12 @@ public class HelpCommand extends BotCommand {
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setTitle("About lobster Bot", "https://github.com/lundylizard/lobster");
         embedBuilder.setDescription("Developed by lundylizard\n\n");
+        embedBuilder.setColor(event.getGuild().getSelfMember().getColor());
 
         Map<String, BotCommand> commands = Lobster.getInstance().getCommandManager().getCommands();
 
         commands.entrySet().stream()
-                .sorted(Comparator.comparingInt(entry -> entry.getKey().length()))
+                .sorted(Comparator.comparingInt(entry -> -entry.getKey().length()))
                 .forEach(entry -> {
                     BotCommand command = entry.getValue();
                     String commandString = String.format("`/%s` - %s\n", command.name(), command.description());
@@ -32,7 +33,6 @@ public class HelpCommand extends BotCommand {
                 }
         );
 
-        embedBuilder.setColor(event.getGuild().getSelfMember().getColor());
         event.replyEmbeds(embedBuilder.build()).addActionRow(
                 Button.link(Lobster.DISCORD_URL, "Discord"),
                 Button.link(Lobster.INVITE_URL, "Invite")
