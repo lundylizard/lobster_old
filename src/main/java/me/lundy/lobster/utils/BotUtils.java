@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.entities.Guild;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.TimeUnit;
 
@@ -30,6 +31,14 @@ public class BotUtils {
             return String.format("%02d:%02d", minutes, seconds);
         }
 
+    }
+
+    public static String convertMillisecondsToHoursMinutes(long milliseconds) {
+        long minutes = milliseconds / 60000;
+        long hours = minutes / 60;
+        return String.format("%d hour%s, %d minute%s",
+                hours, (hours != 1 ? "s" : ""),
+                minutes % 60, (minutes % 60 != 1 ? "s" : ""));
     }
 
     public static String getTrackPosition(AudioTrack track) {
@@ -100,6 +109,25 @@ public class BotUtils {
             }
 
         }
+    }
+
+    public static String randomFooter() {
+        List<String> footers = new ArrayList<>();
+        footers.add("\uD83E\uDD9E Made in Germany");
+        footers.add("\uD83E\uDD9E Bugs? Suggestions? Join the discord!");
+        footers.add("\uD83E\uDD9E Did you know lobsters used to be prison food?");
+        footers.add("\uD83E\uDD9E dont settle for imitation");
+        footers.add("\uD83E\uDD9E Pepsi Max Jumpscare");
+        footers.add("\uD83E\uDD9E lobsters taste better than crabs");
+        return footers.get(new Random().nextInt(footers.size()));
+    }
+
+    public static int countLetters(String str) {
+        int count = 0;
+        for (int i = 0; i < str.length(); i++) {
+            count += (str.charAt(i) == 'l' || str.charAt(i) == 'i' || str.charAt(i) == 'j') ? 1 : 2;
+        }
+        return count + str.length();
     }
 
 }

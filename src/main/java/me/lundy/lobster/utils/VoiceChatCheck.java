@@ -20,7 +20,7 @@ public class VoiceChatCheck {
             return CheckResult.SELF_NOT_IN_VOICE;
         }
 
-        if (self.getVoiceState().getChannel() != executor.getVoiceState().getChannel()) {
+        if (!Objects.equals(self.getVoiceState().getChannel(), executor.getVoiceState().getChannel())) {
             return CheckResult.NOT_IN_SAME_VOICE;
         }
 

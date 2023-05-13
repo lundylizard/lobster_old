@@ -1,6 +1,7 @@
 package me.lundy.lobster.listeners;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
+import me.lundy.lobster.Lobster;
 import me.lundy.lobster.lavaplayer.GuildMusicManager;
 import me.lundy.lobster.lavaplayer.PlayerManager;
 import me.lundy.lobster.utils.BotUtils;
@@ -25,9 +26,16 @@ public class QueueButtonListener extends ListenerAdapter {
         if (buttonId.startsWith("button:queue")) {
 
             GuildMusicManager musicManager = PlayerManager.getInstance().getMusicManager(event.getGuild());
+            int queueSize = musicManager.scheduler.queue.size();
+
+            if (queueSize < 16) {
+                long queueCommandId = Lobster.getInstance().getCommandManager().getCommands().get("queue").getId();
+                event.reply(":warning: The queue list is outdated by now. Please run </queue:" + queueCommandId + ">again.").setEphemeral(true).queue();
+                return;
+            }
+
             int currentPage = Integer.parseInt(buttonId.substring(buttonId.lastIndexOf(":") + 1));
             AudioTrack[] trackGroup = BotUtils.splitTracksIntoGroups(musicManager.scheduler.queue)[currentPage];
-            int queueSize = musicManager.scheduler.queue.size();
             int trackCount = 15;
             int pagesTotal = BotUtils.splitTracksIntoGroups(musicManager.scheduler.queue).length;
 

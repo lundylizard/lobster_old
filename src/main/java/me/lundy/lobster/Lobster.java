@@ -1,12 +1,12 @@
 package me.lundy.lobster;
 
-import me.lundy.lobster.commands.CommandManager;
+import me.lundy.lobster.command.console.ConsoleCommandManager;
+import me.lundy.lobster.command.CommandManager;
 import me.lundy.lobster.config.BotConfig;
 import me.lundy.lobster.config.ConfigValues;
-import me.lundy.lobster.listeners.GuildJoinListener;
-import me.lundy.lobster.listeners.GuildLeaveListener;
-import me.lundy.lobster.listeners.QueueButtonListener;
+import me.lundy.lobster.listeners.*;
 import me.lundy.lobster.utils.BotUtils;
+import me.lundy.lobster.utils.TextChannelCollector;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -29,24 +30,33 @@ import java.util.concurrent.TimeUnit;
 public class Lobster {
 
     private static final Activity SERVER_COUNT_ACTIVITY = Activity.playing("on %d servers.");
-    private static final int SHARD_COUNT = 4;
+    private static final int SHARD_COUNT = 5;
 
     public static final String INVITE_URL = "https://discord.com/api/oauth2/authorize?" +
             "client_id=891760327522394183" +
             "&permissions=2150647808" +
             "&scope=bot%20applications.commands";
     public static final String DISCORD_URL = "https://discord.gg/Hk5YP5AWhW";
-    public static boolean debug;
 
     private static Lobster instance;
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     private final Logger logger = LoggerFactory.getLogger(Lobster.class);
     private BotConfig config;
     private CommandManager commandManager;
+    private Scanner scanner;
+    private ConsoleCommandManager consoleCommandManager;
+    private TextChannelCollector channelCollector;
+
+    // TODOS:
+    // -
+    // - First and last page buttons for queue
+    // - Display current song in queue list (including who requested it?)
+    // - Clear queue and stop playing when forced to disconnect
 
     public static void main(String[] args) {
 
         instance = new Lobster();
+        instance.scanner = new Scanner(System.in);
 
         try {
             instance.config = BotConfig.getInstance();
@@ -55,13 +65,13 @@ public class Lobster {
             return;
         }
 
-        debug = false; //Boolean.parseBoolean(instance.config.getProperty(ConfigValues.DEBUG_MODE));
+        instance.commandManager = new CommandManager();
+        instance.consoleCommandManager = new ConsoleCommandManager();
+        instance.channelCollector = new TextChannelCollector();
 
-        Lobster.instance.commandManager = new CommandManager();
+        DefaultShardManagerBuilder shardBuilder = DefaultShardManagerBuilder.createLight(instance.config.getProperty(ConfigValues.BOT_TOKEN));
 
-        DefaultShardManagerBuilder shardBuilder = DefaultShardManagerBuilder.createLight(Lobster.instance.config.getProperty(ConfigValues.BOT_TOKEN));
-
-        // shardBuilder.setShardsTotal(SHARD_COUNT);
+        shardBuilder.setShardsTotal(SHARD_COUNT);
         shardBuilder.enableIntents(GatewayIntent.GUILD_VOICE_STATES);
         shardBuilder.enableCache(CacheFlag.VOICE_STATE);
         shardBuilder.setMemberCachePolicy(MemberCachePolicy.VOICE);
@@ -69,29 +79,28 @@ public class Lobster {
         shardBuilder.addEventListeners(new GuildJoinListener());
         shardBuilder.addEventListeners(new GuildLeaveListener());
         shardBuilder.addEventListeners(new QueueButtonListener());
-        shardBuilder.addEventListeners(Lobster.instance.commandManager);
+        shardBuilder.addEventListeners(new ReadyListener());
+        shardBuilder.addEventListeners(new VcLeaveListener());
+        shardBuilder.addEventListeners(instance.commandManager);
 
         ShardManager shardManager = shardBuilder.build();
 
-        List<SlashCommandData> commands = new ArrayList<>(Lobster.instance.commandManager.getCommandDataList());
+        List<SlashCommandData> commands = new ArrayList<>(instance.commandManager.getCommandDataList());
         shardManager.getShards().forEach(shard -> shard.updateCommands().addCommands(commands).complete());
 
-        Lobster.instance.scheduler.scheduleWithFixedDelay(() -> {
+        instance.scheduler.scheduleWithFixedDelay(() -> {
             Lobster.instance.tick(shardManager);
         }, 0, 1, TimeUnit.MINUTES);
 
+        instance.handleConsoleInput(shardManager);
+
     }
 
-    public BotConfig getConfig() {
-        return config;
-    }
-
-    public CommandManager getCommandManager() {
-        return commandManager;
-    }
-
-    public static Lobster getInstance() {
-        return Lobster.instance;
+    private void handleConsoleInput(ShardManager shardManager) {
+        while (scanner.hasNextLine()) {
+            String input = scanner.nextLine();
+            consoleCommandManager.handleCommand(input, shardManager);
+        }
     }
 
     private void tick(ShardManager shardManager) {
@@ -116,4 +125,25 @@ public class Lobster {
     public Logger getLogger() {
         return logger;
     }
+
+    public BotConfig getConfig() {
+        return config;
+    }
+
+    public CommandManager getCommandManager() {
+        return commandManager;
+    }
+
+    public ConsoleCommandManager getConsoleCommandManager() {
+        return consoleCommandManager;
+    }
+
+    public TextChannelCollector getChannelCollector() {
+        return channelCollector;
+    }
+
+    public static Lobster getInstance() {
+        return Lobster.instance;
+    }
+
 }

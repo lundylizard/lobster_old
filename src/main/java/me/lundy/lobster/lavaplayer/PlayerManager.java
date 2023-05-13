@@ -16,7 +16,6 @@ import net.dv8tion.jda.api.interactions.InteractionHook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,13 +25,12 @@ public class PlayerManager {
     private static PlayerManager instance;
     private final Map<Long, GuildMusicManager> musicManagers;
     private final AudioPlayerManager audioPlayerManager;
-    private final Logger logger;
 
     public PlayerManager() {
 
         this.musicManagers = new ConcurrentHashMap<>();
         this.audioPlayerManager = new DefaultAudioPlayerManager();
-        this.logger = LoggerFactory.getLogger(PlayerManager.class);
+        Logger logger = LoggerFactory.getLogger(PlayerManager.class);
 
         // Register external source managers
         String spotifyClientId = Lobster.getInstance().getConfig().getProperty(ConfigValues.SPOTIFY_CLIENT_ID);
@@ -101,7 +99,6 @@ public class PlayerManager {
                 }
 
                 interactionHook.editOriginal(String.format("Added `%d` songs to the queue.", trackList.size())).queue();
-
             }
 
             @Override
