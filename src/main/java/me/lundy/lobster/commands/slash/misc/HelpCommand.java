@@ -3,7 +3,6 @@ package me.lundy.lobster.commands.slash.misc;
 import me.lundy.lobster.Lobster;
 import me.lundy.lobster.command.Command;
 import me.lundy.lobster.command.CommandInfo;
-import me.lundy.lobster.command.IgnoreChecks;
 import me.lundy.lobster.utils.BotUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -16,7 +15,6 @@ import java.util.Map;
 public class HelpCommand extends Command {
 
     @Override
-    @IgnoreChecks
     public void onCommand(SlashCommandInteractionEvent event) {
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setTitle("About lobster Bot", "https://github.com/lundylizard/lobster");

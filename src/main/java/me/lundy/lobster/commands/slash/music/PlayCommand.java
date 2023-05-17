@@ -3,7 +3,6 @@ package me.lundy.lobster.commands.slash.music;
 import me.lundy.lobster.command.Command;
 import me.lundy.lobster.command.CommandInfo;
 import me.lundy.lobster.command.CommandOptions;
-import me.lundy.lobster.command.IgnoreChecks;
 import me.lundy.lobster.lavaplayer.PlayerManager;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
@@ -23,7 +22,6 @@ import java.util.List;
 public class PlayCommand extends Command implements CommandOptions {
 
     @Override
-    @IgnoreChecks
     public void onCommand(SlashCommandInteractionEvent event) {
 
         event.deferReply().queue();

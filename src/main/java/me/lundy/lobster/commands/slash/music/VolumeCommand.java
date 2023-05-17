@@ -1,8 +1,8 @@
 package me.lundy.lobster.commands.slash.music;
 
-import me.lundy.lobster.command.Command;
-import me.lundy.lobster.command.CommandInfo;
-import me.lundy.lobster.command.CommandOptions;
+import me.lundy.lobster.command.*;
+import me.lundy.lobster.command.checks.CommandCheck;
+import me.lundy.lobster.command.checks.RunCheck;
 import me.lundy.lobster.lavaplayer.GuildMusicManager;
 import me.lundy.lobster.lavaplayer.PlayerManager;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -16,6 +16,7 @@ import java.util.List;
 public class VolumeCommand extends Command implements CommandOptions {
 
     @Override
+    @RunCheck(check = CommandCheck.IN_SAME_VOICE)
     public void onCommand(SlashCommandInteractionEvent event) {
         GuildMusicManager musicManager = PlayerManager.getInstance().getMusicManager(event.getGuild());
         OptionMapping volumeOption = event.getOption("amount");

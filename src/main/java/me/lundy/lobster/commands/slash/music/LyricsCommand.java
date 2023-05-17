@@ -3,12 +3,13 @@ package me.lundy.lobster.commands.slash.music;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import core.GLA;
 import genius.SongSearch;
-import me.lundy.lobster.command.Command;
-import me.lundy.lobster.command.CommandInfo;
-import me.lundy.lobster.command.CommandOptions;
+import me.lundy.lobster.command.*;
+import me.lundy.lobster.command.checks.CommandCheck;
+import me.lundy.lobster.command.checks.RunCheck;
 import me.lundy.lobster.lavaplayer.GuildMusicManager;
 import me.lundy.lobster.lavaplayer.PlayerManager;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -25,10 +26,14 @@ public class LyricsCommand extends Command implements CommandOptions {
     private final GLA gla = new GLA();
 
     @Override
+    @RunCheck(check = CommandCheck.IN_SAME_VOICE)
     public void onCommand(SlashCommandInteractionEvent event) {
 
+        Guild guild = event.getGuild();
+        if (guild == null) return;
+
         Optional<OptionMapping> searchOption = Optional.ofNullable(event.getOption("search"));
-        GuildMusicManager musicManager = PlayerManager.getInstance().getMusicManager(event.getGuild());
+        GuildMusicManager musicManager = PlayerManager.getInstance().getMusicManager(guild);
         AudioTrack playingTrack = musicManager.audioPlayer.getPlayingTrack();
 
         if (!playingTrack.getSourceManager().getSourceName().equalsIgnoreCase("spotify")) {

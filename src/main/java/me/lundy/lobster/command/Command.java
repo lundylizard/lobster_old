@@ -22,4 +22,5 @@ public abstract class Command {
     public Logger getLogger() {
         return logger;
     }
+
 }

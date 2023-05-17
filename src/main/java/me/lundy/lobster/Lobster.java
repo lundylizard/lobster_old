@@ -5,6 +5,8 @@ import me.lundy.lobster.command.CommandManager;
 import me.lundy.lobster.config.BotConfig;
 import me.lundy.lobster.config.ConfigValues;
 import me.lundy.lobster.listeners.*;
+import me.lundy.lobster.listeners.buttons.HelpButtonListener;
+import me.lundy.lobster.listeners.buttons.QueueButtonListener;
 import me.lundy.lobster.utils.BotUtils;
 import me.lundy.lobster.utils.TextChannelCollector;
 import net.dv8tion.jda.api.OnlineStatus;
@@ -30,7 +32,7 @@ import java.util.concurrent.TimeUnit;
 public class Lobster {
 
     private static final Activity SERVER_COUNT_ACTIVITY = Activity.playing("on %d servers.");
-    private static final int SHARD_COUNT = 5;
+    private static final int SHARD_COUNT = 1;
 
     public static final String INVITE_URL = "https://discord.com/api/oauth2/authorize?" +
             "client_id=891760327522394183" +
@@ -48,10 +50,8 @@ public class Lobster {
     private TextChannelCollector channelCollector;
 
     // TODOS:
-    // -
-    // - First and last page buttons for queue
-    // - Display current song in queue list (including who requested it?)
-    // - Clear queue and stop playing when forced to disconnect
+    // - Lyrics can be over 4k characters, split them up into multiple embeds
+    // TODO fix bug with last page track count at me.lundy.lobster.listeners.buttons.QueueButtonListener.onButtonInteraction(QueueButtonListener.java:64)
 
     public static void main(String[] args) {
 
@@ -76,11 +76,10 @@ public class Lobster {
         shardBuilder.enableCache(CacheFlag.VOICE_STATE);
         shardBuilder.setMemberCachePolicy(MemberCachePolicy.VOICE);
 
-        shardBuilder.addEventListeners(new GuildJoinListener());
-        shardBuilder.addEventListeners(new GuildLeaveListener());
-        shardBuilder.addEventListeners(new QueueButtonListener());
+        shardBuilder.addEventListeners(new GuildJoinListener(), new GuildLeaveListener());
+        shardBuilder.addEventListeners(new QueueButtonListener(), new HelpButtonListener());
         shardBuilder.addEventListeners(new ReadyListener());
-        shardBuilder.addEventListeners(new VcLeaveListener());
+        shardBuilder.addEventListeners(new VoiceDisconnectListener());
         shardBuilder.addEventListeners(instance.commandManager);
 
         ShardManager shardManager = shardBuilder.build();

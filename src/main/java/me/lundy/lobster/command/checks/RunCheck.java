@@ -1,8 +1,9 @@
-package me.lundy.lobster.command;
+package me.lundy.lobster.command.checks;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 @Retention(RetentionPolicy.RUNTIME)
-public @interface IgnoreChecks {
+public @interface RunCheck {
+    CommandCheck check();
 }

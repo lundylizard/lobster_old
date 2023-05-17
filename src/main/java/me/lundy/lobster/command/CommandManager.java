@@ -1,20 +1,25 @@
 package me.lundy.lobster.command;
 
 import me.lundy.lobster.Lobster;
+import me.lundy.lobster.command.checks.CheckHandler;
+import me.lundy.lobster.command.checks.CommandCheck;
+import me.lundy.lobster.command.checks.RunCheck;
 import me.lundy.lobster.commands.slash.misc.HelpCommand;
 import me.lundy.lobster.commands.slash.misc.InviteCommand;
 import me.lundy.lobster.commands.slash.music.*;
-import me.lundy.lobster.utils.VoiceChatCheck;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -51,40 +56,46 @@ public class CommandManager extends ListenerAdapter {
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
 
         Guild guild = event.getGuild();
-        if (guild == null) return;
-        Member executor = event.getMember();
-        if (executor == null) return;
-
-        Command command = this.commands.get(event.getName());
-        if (command == null) return;
-
-        try {
-
-            if (!command.getClass().getMethod("onCommand", SlashCommandInteractionEvent.class).isAnnotationPresent(IgnoreChecks.class)) {
-
-                VoiceChatCheck.CheckResult voiceChatCheck = VoiceChatCheck.runCheck(event.getHook());
-
-                if (!voiceChatCheck.hasPassed()) {
-                    event.reply(voiceChatCheck.getMessage()).setEphemeral(true).queue();
-                    return;
-                }
-
-            }
-
-        } catch (NoSuchMethodException e) {
-            logger.error("There is no onCommand() method in " + command.getClass().getName(), e);
+        if (guild == null) {
+            event.reply(":warning: Unexpected error: GUILD_IS_NULL").setEphemeral(true).queue();
+            return;
         }
 
-        handleCommand(event);
+        Member executor = event.getMember();
+        if (executor == null) {
+            event.reply(":warning: Unexpected error: EXECUTOR_IS_NULL").setEphemeral(true).queue();
+            return;
+        }
+
+        Command command = this.commands.get(event.getName());
+        if (command == null) {
+            event.reply(":warning: Unexpected error: COMMAND_IS_NULL").setEphemeral(true).queue();
+            return;
+        }
+
+        Method onCommand;
+
+        try {
+            onCommand = command.getClass().getMethod("onCommand", SlashCommandInteractionEvent.class);
+        } catch (NoSuchMethodException e) {
+            logger.error("There is no onCommand() method in " + command.getClass().getName(), e);
+            event.reply(":warning: Unexpected error: COMMAND_METHOD_NOT_FOUND").setEphemeral(true).queue();
+            return;
+        }
+
+        if (onCommand.isAnnotationPresent(RunCheck.class)) {
+            CommandCheck commandCheck = onCommand.getAnnotation(RunCheck.class).check();
+            if (!CheckHandler.runCheck(commandCheck, guild.getSelfMember(), executor)) {
+                Button helpButton = Button.secondary("help:sameVoice", Emoji.fromUnicode("❔"));
+                event.reply(commandCheck.getFailMessage()).setActionRow(helpButton).setEphemeral(true).queue();
+                return;
+            }
+        }
+
+        command.onCommand(event);
         logger.info("({}) {} -> {}", guild.getName(), executor.getUser().getAsTag(), event.getCommandString());
         Lobster.getInstance().getChannelCollector().addTextChannel(event.getChannel().asTextChannel());
 
-    }
-
-    private void handleCommand(SlashCommandInteractionEvent event) {
-        Command command = commands.get(event.getName());
-        if (command == null) return;
-        command.onCommand(event);
     }
 
     private void registerCommand(Command command) {

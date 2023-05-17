@@ -10,17 +10,11 @@ import net.dv8tion.jda.api.entities.Guild;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.TimeUnit;
 
 public class BotUtils {
 
-    private BotUtils() {
-        throw new IllegalStateException("Utility class");
-    }
-
     public static String formatTime(long millis) {
-
         long hours = TimeUnit.MILLISECONDS.toHours(millis);
         long minutes = TimeUnit.MILLISECONDS.toMinutes(millis) % 60;
         long seconds = TimeUnit.MILLISECONDS.toSeconds(millis) % 60;
@@ -30,7 +24,6 @@ public class BotUtils {
         } else {
             return String.format("%02d:%02d", minutes, seconds);
         }
-
     }
 
     public static String convertMillisecondsToHoursMinutes(long milliseconds) {
@@ -48,49 +41,16 @@ public class BotUtils {
     }
 
 
-    public static String endStringWithEllipsis(String input, int length) {
+    public static String shortenString(String input, int length) {
         if (input.length() > length) {
+            int lastIndex = input.substring(0, length).lastIndexOf(' ');
+            if (lastIndex != -1) {
+                return input.substring(0, lastIndex) + "...";
+            }
             return input.substring(0, length) + "...";
         } else {
             return input;
         }
-    }
-
-    public static AudioTrack[][] splitTracksIntoGroups(BlockingDeque<AudioTrack> audioTracks) {
-
-        // Calculate the total number of pages
-        int totalPages = (int) Math.ceil((double) audioTracks.size() / 15);
-
-        // Create an array to store the groups of tracks
-        List<AudioTrack>[] trackGroups = new List[totalPages];
-
-        // Loop through each track in the deque
-        int i = 0;
-        for (AudioTrack track : audioTracks) {
-            // Calculate the index of the group for this track
-            int groupIndex = i / 15;
-
-            // If this is the first track for a new group, create the group
-            if (trackGroups[groupIndex] == null) {
-                trackGroups[groupIndex] = new ArrayList<>();
-            }
-
-            // Add the current track to the current group
-            trackGroups[groupIndex].add(track);
-
-            // Increment the track count
-            i++;
-        }
-
-        // Convert each group of tracks to an array
-        AudioTrack[][] trackArrays = new AudioTrack[totalPages][];
-        for (int j = 0; j < totalPages; j++) {
-            List<AudioTrack> group = trackGroups[j];
-            AudioTrack[] groupArray = group.toArray(new AudioTrack[0]);
-            trackArrays[j] = groupArray;
-        }
-
-        return trackArrays;
     }
 
     public static void handleInactivity(Guild guild) {
@@ -105,7 +65,7 @@ public class BotUtils {
                 guild.getAudioManager().closeAudioConnection();
                 audioPlayer.stopTrack();
                 musicManager.scheduler.queue.clear();
-                Lobster.getInstance().getLogger().info("Left voice chat in {} due to inactivity.", guild.getName());
+                Lobster.getInstance().getLogger().info("Left voice chat in guild {} due to inactivity.", guild.getName());
             }
 
         }
