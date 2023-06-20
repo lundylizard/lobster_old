@@ -1,11 +1,11 @@
-package me.lundy.lobster.commands.slash.misc;
+package me.lundy.lobster.commands;
 
 import me.lundy.lobster.Lobster;
 import me.lundy.lobster.command.Command;
+import me.lundy.lobster.command.CommandContext;
 import me.lundy.lobster.command.CommandInfo;
-import me.lundy.lobster.utils.BotUtils;
+import me.lundy.lobster.utils.StringUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 
 import java.util.Comparator;
@@ -15,16 +15,15 @@ import java.util.Map;
 public class HelpCommand extends Command {
 
     @Override
-    public void onCommand(SlashCommandInteractionEvent event) {
+    public void onCommand(CommandContext context) {
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setTitle("About lobster Bot", "https://github.com/lundylizard/lobster");
         embedBuilder.setDescription("Developed by lundylizard\n\n");
-        embedBuilder.setColor(event.getGuild().getSelfMember().getColor());
-        embedBuilder.setFooter(BotUtils.randomFooter());
+        embedBuilder.setColor(context.getGuild().getSelfMember().getColor());
 
         Map<String, Command> commands = Lobster.getInstance().getCommandManager().getCommands();
         commands.entrySet().stream()
-                .sorted(Comparator.comparingInt(entry -> -BotUtils.countLetters(entry.getKey())))
+                .sorted(Comparator.comparingInt(entry -> -StringUtils.countLetters(entry.getKey())))
                 .forEach(entry -> {
                     Command command = entry.getValue();
                     CommandInfo commandInfo = command.getClass().getAnnotation(CommandInfo.class);
@@ -35,7 +34,7 @@ public class HelpCommand extends Command {
 
         Button discord = Button.link(Lobster.DISCORD_URL, "Discord");
         Button invite = Button.link(Lobster.INVITE_URL, "Invite");
-        event.replyEmbeds(embedBuilder.build()).addActionRow(discord, invite).queue();
+        context.getEvent().replyEmbeds(embedBuilder.build()).addActionRow(discord, invite).queue();
     }
 
 }

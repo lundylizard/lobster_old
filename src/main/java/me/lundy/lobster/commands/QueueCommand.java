@@ -1,27 +1,30 @@
-package me.lundy.lobster.commands.slash.music;
+package me.lundy.lobster.commands;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import me.lundy.lobster.command.Command;
-import me.lundy.lobster.command.checks.CommandCheck;
+import me.lundy.lobster.command.CommandContext;
 import me.lundy.lobster.command.CommandInfo;
-import me.lundy.lobster.command.checks.RunCheck;
 import me.lundy.lobster.lavaplayer.GuildMusicManager;
 import me.lundy.lobster.lavaplayer.PlayerManager;
-import me.lundy.lobster.utils.BotUtils;
 import me.lundy.lobster.utils.QueueUtils;
+import me.lundy.lobster.utils.StringUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
 @CommandInfo(name = "queue", description = "Display a list of upcoming songs")
 public class QueueCommand extends Command {
 
     @Override
-    @RunCheck(check = CommandCheck.IN_SAME_VOICE)
-    public void onCommand(SlashCommandInteractionEvent event) {
-        GuildMusicManager musicManager = PlayerManager.getInstance().getMusicManager(event.getGuild());
+    public void onCommand(CommandContext context) {
+
+        if (!context.selfInVoice()) {
+            context.getEvent().reply(":warning: I am not in a voice channel").setEphemeral(true).queue();
+            return;
+        }
+
+        GuildMusicManager musicManager = PlayerManager.getInstance().getMusicManager(context.getGuild());
 
         if (musicManager.scheduler.queue.isEmpty()) {
-            event.reply(":warning: The queue is currently empty.").setEphemeral(true).queue();
+            context.getEvent().reply(":warning: The queue is currently empty").setEphemeral(true).queue();
             return;
         }
 
@@ -32,9 +35,9 @@ public class QueueCommand extends Command {
         AudioTrack currentTrack = musicManager.audioPlayer.getPlayingTrack();
 
         EmbedBuilder embedBuilder = new EmbedBuilder();
-        embedBuilder.setColor(event.getGuild().getSelfMember().getColor());
+        embedBuilder.setColor(context.getGuild().getSelfMember().getColor());
         embedBuilder.setTitle("Current Queue");
-        embedBuilder.setFooter(QueueUtils.generateFooter(0, pagesTotal, queueSize, BotUtils.convertMillisecondsToHoursMinutes(totalLength)));
+        embedBuilder.setFooter(QueueUtils.generateFooter(0, pagesTotal, queueSize, StringUtils.convertMsToHoursAndMinutes(totalLength)));
         if (currentTrack != null) embedBuilder.appendDescription(QueueUtils.generateCurrentTrack(currentTrack));
 
         int trackIndex = 0;
@@ -44,6 +47,6 @@ public class QueueCommand extends Command {
             embedBuilder.appendDescription("\n");
         }
 
-        event.replyEmbeds(embedBuilder.build()).addActionRow(QueueUtils.generateButtons(pagesTotal, 0)).queue();
+        context.getEvent().replyEmbeds(embedBuilder.build()).addActionRow(QueueUtils.generateButtons(pagesTotal, 0)).queue();
     }
 }

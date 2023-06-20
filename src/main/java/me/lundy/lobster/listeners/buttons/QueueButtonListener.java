@@ -4,8 +4,8 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import me.lundy.lobster.Lobster;
 import me.lundy.lobster.lavaplayer.GuildMusicManager;
 import me.lundy.lobster.lavaplayer.PlayerManager;
-import me.lundy.lobster.utils.BotUtils;
 import me.lundy.lobster.utils.QueueUtils;
+import me.lundy.lobster.utils.StringUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -52,7 +52,7 @@ public class QueueButtonListener extends ListenerAdapter {
             embedBuilder.setColor(event.getGuild().getSelfMember().getColor());
             embedBuilder.setTitle("Current Queue");
             long totalLength = musicManager.scheduler.queue.stream().mapToLong(AudioTrack::getDuration).sum();
-            embedBuilder.setFooter(QueueUtils.generateFooter(currentPage, pagesTotal, queueSize, BotUtils.convertMillisecondsToHoursMinutes(totalLength)));
+            embedBuilder.setFooter(QueueUtils.generateFooter(currentPage, pagesTotal, queueSize, StringUtils.convertMsToHoursAndMinutes(totalLength)));
             if (currentTrack != null) embedBuilder.appendDescription(QueueUtils.generateCurrentTrack(currentTrack));
 
             int trackIndex = QueueUtils.TRACKS_PER_PAGE * currentPage;

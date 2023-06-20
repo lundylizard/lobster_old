@@ -9,6 +9,7 @@ public class VoiceDisconnectListener extends ListenerAdapter {
 
     @Override
     public void onGuildVoiceUpdate(GuildVoiceUpdateEvent event) {
+
         if (event.getEntity().getUser().equals(event.getJDA().getSelfUser())) {
             if (event.getNewValue() == null) {
                 GuildMusicManager musicManager = PlayerManager.getInstance().getMusicManager(event.getGuild());
@@ -17,4 +18,5 @@ public class VoiceDisconnectListener extends ListenerAdapter {
             }
         }
     }
+
 }

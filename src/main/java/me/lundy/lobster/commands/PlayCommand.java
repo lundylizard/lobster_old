@@ -1,14 +1,11 @@
-package me.lundy.lobster.commands.slash.music;
+package me.lundy.lobster.commands;
 
 import me.lundy.lobster.command.Command;
+import me.lundy.lobster.command.CommandContext;
 import me.lundy.lobster.command.CommandInfo;
 import me.lundy.lobster.command.CommandOptions;
 import me.lundy.lobster.lavaplayer.PlayerManager;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.GuildVoiceState;
-import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -22,42 +19,31 @@ import java.util.List;
 public class PlayCommand extends Command implements CommandOptions {
 
     @Override
-    public void onCommand(SlashCommandInteractionEvent event) {
+    public void onCommand(CommandContext context) {
 
-        event.deferReply().queue();
-        OptionMapping searchOption = event.getOption("search");
-        OptionMapping topOption = event.getOption("top");
-
-        Guild guild = event.getGuild();
-        Member member = event.getMember();
-        GuildVoiceState memberVoiceState = member.getVoiceState();
-        GuildVoiceState selfVoiceState = guild.getSelfMember().getVoiceState();
-
-        if (!memberVoiceState.inAudioChannel()) {
-            event.reply(":warning: You are not in a voice channel.").setEphemeral(true).queue();
+        if (!context.executorInVoice()) {
+            context.getEvent().reply(":warning: You are not in a voice channel").setEphemeral(true).queue();
             return;
         }
 
-        String searchTerm = searchOption.getAsString();
+        OptionMapping topOption = context.getEvent().getOption("top");
+        String searchTerm = context.getEvent().getOption("search").getAsString();
         boolean isSearchTermValidUrl = isValidUrl(searchTerm);
         String searchQuery = (isSearchTermValidUrl ? searchTerm : "ytsearch:" + searchTerm);
 
-        if (!selfVoiceState.inAudioChannel()) {
-
-            AudioManager audioManager = event.getGuild().getAudioManager();
-            AudioChannel audioChannel = member.getVoiceState().getChannel();
+        if (!context.selfInVoice()) {
+            AudioManager audioManager = context.getGuild().getAudioManager();
+            AudioChannel audioChannel = context.getExecutorVoiceState().getChannel();
 
             try {
                 audioManager.openAudioConnection(audioChannel);
             } catch (InsufficientPermissionException e) {
-                event.reply(":warning: I do not have enough permissions to join that channel.").setEphemeral(true).queue();
+                context.getEvent().reply(":warning: I do not have enough permissions to join that channel").queue();
                 return;
             }
-
         }
 
-        PlayerManager.getInstance().loadAndPlay(event.getHook(), searchQuery, topOption != null && topOption.getAsBoolean());
-
+        PlayerManager.getInstance().loadAndPlay(context, searchQuery, topOption != null && topOption.getAsBoolean());
     }
 
     private boolean isValidUrl(String urlString) {

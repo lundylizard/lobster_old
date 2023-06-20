@@ -10,9 +10,9 @@ import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioReference;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import me.lundy.lobster.Lobster;
+import me.lundy.lobster.command.CommandContext;
 import me.lundy.lobster.config.ConfigValues;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.interactions.InteractionHook;
 
 import java.util.List;
 import java.util.Map;
@@ -25,19 +25,13 @@ public class PlayerManager {
     private final AudioPlayerManager audioPlayerManager;
 
     public PlayerManager() {
-
         this.musicManagers = new ConcurrentHashMap<>();
         this.audioPlayerManager = new DefaultAudioPlayerManager();
-
-        // Register external source managers
         String spotifyClientId = Lobster.getInstance().getConfig().getProperty(ConfigValues.SPOTIFY_CLIENT_ID);
         String spotifyClientSecret = Lobster.getInstance().getConfig().getProperty(ConfigValues.SPOTIFY_CLIENT_SECRET);
         audioPlayerManager.registerSourceManager(new SpotifySourceManager(null, spotifyClientId, spotifyClientSecret, "US", this.audioPlayerManager));
-
-        // LavaPlayer default sources
         AudioSourceManagers.registerRemoteSources(this.audioPlayerManager);
         AudioSourceManagers.registerLocalSource(this.audioPlayerManager);
-
     }
 
     public static PlayerManager getInstance() {
@@ -55,20 +49,14 @@ public class PlayerManager {
         });
     }
 
-    public void loadAndPlay(InteractionHook interactionHook, String trackUrl, boolean top) {
-
-        if (interactionHook == null) return;
-        if (interactionHook.getInteraction().getGuild() == null) return;
-
-        GuildMusicManager musicManager = this.getMusicManager(interactionHook.getInteraction().getGuild());
+    public void loadAndPlay(CommandContext context, String trackUrl, boolean top) {
+        GuildMusicManager musicManager = this.getMusicManager(context.getGuild());
 
         this.audioPlayerManager.loadItemOrdered(musicManager, new AudioReference(trackUrl, ""), new AudioLoadResultHandler() {
 
             @Override
             public void trackLoaded(AudioTrack track) {
-                track.setUserData(interactionHook.getInteraction().getMember().getAsMention());
-                musicManager.scheduler.queueSong(track, top);
-                interactionHook.editOriginal(String.format("Added `%s` by `%s`", track.getInfo().title, track.getInfo().author)).queue();
+                // Not needed because search is an AudioPlaylist which takes the first song as result
             }
 
             @Override
@@ -76,37 +64,31 @@ public class PlayerManager {
 
                 if (audioPlaylist.isSearchResult()) {
                     AudioTrack track = audioPlaylist.getTracks().get(0);
-                    track.setUserData(interactionHook.getInteraction().getMember().getAsMention());
+                    track.setUserData(context.getExecutor().getAsMention());
                     musicManager.scheduler.queueSong(track, top);
-                    interactionHook.editOriginal(String.format("Added to the queue: `%s` by `%s`", track.getInfo().title, track.getInfo().author)).queue();
+                    context.getEvent().replyFormat("Added `%s` by `%s`", track.getInfo().title, track.getInfo().author).queue();
                     return;
                 }
 
                 List<AudioTrack> trackList = audioPlaylist.getTracks();
 
                 for (AudioTrack track : trackList) {
-                    if (musicManager.scheduler.queue.contains(track)) {
-                        return;
-                    }
-                    track.setUserData(interactionHook.getInteraction().getMember().getAsMention());
+                    track.setUserData(context.getExecutor().getAsMention());
                     musicManager.scheduler.queueSong(track, top);
                 }
 
-                interactionHook.editOriginal(String.format("Added `%d` songs to the queue.", trackList.size())).queue();
+                context.getEvent().replyFormat("Added `%d` songs to the queue.", trackList.size()).queue();
             }
 
             @Override
             public void noMatches() {
-                interactionHook.editOriginal(":warning: Could not find specified song.").queue();
+                context.getEvent().reply(":warning: Could not find specified song").queue();
             }
 
             @Override
             public void loadFailed(FriendlyException e) {
-                interactionHook.editOriginal(":warning: Could not load specified song: " + e.getMessage()).queue();
+                context.getEvent().reply(":warning: Could not load specified song: " + e.getMessage()).queue();
             }
-
         });
-
     }
-
 }

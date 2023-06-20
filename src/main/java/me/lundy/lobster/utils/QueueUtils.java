@@ -55,13 +55,13 @@ public class QueueUtils {
     }
 
     public static String generateCurrentTrack(AudioTrack currentTrack) {
-        return String.format("\uD83D\uDD0A **%s** from %s `\uD83D\uDD52%s`\n\n", currentTrack.getInfo().title, currentTrack.getUserData().toString(), BotUtils.getTrackPosition(currentTrack));
+        return String.format("\uD83D\uDD0A **%s** from %s `\uD83D\uDD52%s`\n\n", currentTrack.getInfo().title, currentTrack.getUserData().toString(), StringUtils.getTrackPosition(currentTrack));
     }
 
     public static String generateQueueTrack(int trackIndex, AudioTrack track) {
-        String shortenedTitle = BotUtils.shortenString(track.getInfo().title, 22);
+        String shortenedTitle = StringUtils.shortenString(track.getInfo().title, 22);
         String shortenedArtist = track.getInfo().author;
-        return String.format("`#%02d` [%s](%s) | %s `\uD83D\uDD52%s`", trackIndex, shortenedTitle, track.getInfo().uri, shortenedArtist, BotUtils.formatTime(track.getDuration()));
+        return String.format("`#%02d` [%s](%s) | %s `\uD83D\uDD52%s`", trackIndex, shortenedTitle, track.getInfo().uri, shortenedArtist, StringUtils.formatTime(track.getDuration()));
     }
 
     public static List<Button> generateButtons(int pagesTotal, int currentPage) {
