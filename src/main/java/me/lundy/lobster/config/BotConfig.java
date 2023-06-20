@@ -17,7 +17,6 @@ public class BotConfig {
     private static final Logger logger = LoggerFactory.getLogger(BotConfig.class);
     private static BotConfig instance;
     private final String absoluteConfigPath;
-    private final List<ConfigProperty> propertyList = new ArrayList<>();
     private final Properties properties;
 
     private BotConfig(File configFile) throws IOException {
@@ -32,13 +31,14 @@ public class BotConfig {
             throw e;
         }
 
+        List<ConfigProperty> propertyList = new ArrayList<>();
         for (ConfigValues values : ConfigValues.values()) {
-            this.propertyList.add(new ConfigProperty(values.propertyPath, values.defaultValue));
+            propertyList.add(new ConfigProperty(values.propertyPath, values.defaultValue));
         }
 
-        for (ConfigProperty property : this.propertyList) {
-            if (!properties.containsKey(property.getPath())) {
-                properties.put(property.getPath(), property.getDefaultValue());
+        for (ConfigProperty property : propertyList) {
+            if (!properties.containsKey(property.path())) {
+                properties.put(property.path(), property.defaultValue());
             }
         }
 

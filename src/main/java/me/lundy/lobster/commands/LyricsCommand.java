@@ -1,45 +1,55 @@
-package me.lundy.lobster.commands.impl.music;
+package me.lundy.lobster.commands;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
 import core.GLA;
 import genius.SongSearch;
-import me.lundy.lobster.commands.BotCommand;
-import me.lundy.lobster.commands.IgnoreChecks;
+import me.lundy.lobster.command.Command;
+import me.lundy.lobster.command.CommandContext;
+import me.lundy.lobster.command.CommandInfo;
+import me.lundy.lobster.command.CommandOptions;
 import me.lundy.lobster.lavaplayer.GuildMusicManager;
 import me.lundy.lobster.lavaplayer.PlayerManager;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
 
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
-@IgnoreChecks
-public class LyricsCommand extends BotCommand {
+@CommandInfo(name = "lyrics", description = "Retrieve lyrics of a song")
+public class LyricsCommand extends Command implements CommandOptions {
 
     private final GLA gla = new GLA();
 
     @Override
-    public void onCommand(SlashCommandInteractionEvent event) {
+    public void onCommand(CommandContext context) {
 
-        Optional<OptionMapping> searchOption = Optional.ofNullable(event.getOption("search"));
-        GuildMusicManager musicManager = PlayerManager.getInstance().getMusicManager(event.getGuild());
+        if (!context.executorInVoice()) {
+            context.getEvent().reply(":warning: You are not in a voice channel").setEphemeral(true).queue();
+            return;
+        }
+
+        if (!context.selfInVoice()) {
+            context.getEvent().reply(":warning: I am not in a voice channel").setEphemeral(true).queue();
+            return;
+        }
+
+        if (!context.inSameVoice()) {
+            context.getEvent().reply(":warning: We are not in the same voice channel").setEphemeral(true).queue();
+            return;
+        }
+
+        Optional<OptionMapping> searchOption = Optional.ofNullable(context.getEvent().getOption("search"));
+        GuildMusicManager musicManager = PlayerManager.getInstance().getMusicManager(context.getGuild());
         AudioTrack playingTrack = musicManager.audioPlayer.getPlayingTrack();
+
         String searchString = "";
 
         if (searchOption.isEmpty()) {
-            if (playingTrack == null) {
-                event.reply(":warning: There is currently no track playing.").queue();
-                return;
-            } else {
-                searchString = playingTrack.getInfo().title;
-            }
+            searchString = playingTrack.getInfo().title;
         }
 
         if (searchOption.isPresent()) {
@@ -52,7 +62,7 @@ public class LyricsCommand extends BotCommand {
             LinkedList<SongSearch.Hit> hits = search.getHits();
 
             if (hits.isEmpty()) {
-                event.reply(":warning: Could not find lyrics for song, please try to search manually.").queue();
+                context.getEvent().reply(":warning: Could not find lyrics for song, please try to search manually.").setEphemeral(true).queue();
                 return;
             }
 
@@ -60,27 +70,17 @@ public class LyricsCommand extends BotCommand {
             String lyrics = song.fetchLyrics();
 
             EmbedBuilder embedBuilder = new EmbedBuilder()
-                    .setColor(event.getGuild().getSelfMember().getColor())
+                    .setColor(context.getSelf().getColor())
                     .setDescription(lyrics)
                     .setTitle(String.format("%s %s Lyrics", song.getArtist().getName(), song.getTitle()), song.getUrl())
                     .setFooter("Powered by genius.com");
 
-            event.replyEmbeds(embedBuilder.build()).queue();
+            context.getEvent().replyEmbeds(embedBuilder.build()).queue();
 
         } catch (IOException e) {
-            event.reply(":warning: An error occurred while fetching the lyrics.").queue();
+            context.getEvent().reply(":warning: An error occurred while fetching the lyrics.").queue();
             getLogger().error("An error occurred while fetching the lyrics", e);
         }
-    }
-
-    @Override
-    public String name() {
-        return "lyrics";
-    }
-
-    @Override
-    public String description() {
-        return "Retrieve lyrics of a song";
     }
 
     @Override
