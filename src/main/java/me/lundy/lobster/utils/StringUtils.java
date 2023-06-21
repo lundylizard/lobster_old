@@ -1,8 +1,12 @@
 package me.lundy.lobster.utils;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
+import net.dv8tion.jda.api.utils.SplitUtil;
 
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class StringUtils {
 
@@ -51,6 +55,35 @@ public class StringUtils {
 
     private static boolean isNarrowCharacter(char c) {
         return c == 'l' || c == 'i' || c == 'j';
+    }
+
+    public static SplitUtil.Strategy onTwoNewLinesStrategy() {
+        Predicate<Character> twoNewLinesPredicate = new Predicate<>() {
+            private boolean isNewLine = false;
+
+            @Override
+            public boolean test(Character c) {
+                if (c == '\n') {
+                    if (isNewLine) {
+                        isNewLine = false;
+                        return true;
+                    }
+                    isNewLine = true;
+                } else {
+                    isNewLine = false;
+                }
+
+                return false;
+            }
+        };
+
+        return SplitUtil.Strategy.onChar(twoNewLinesPredicate);
+    }
+
+    public static String sanitizeTrackTitle(String trackTitle) {
+        Pattern pattern = Pattern.compile("\\b(official|song|lyrics|music|video|\\(|\\)|\\-|ft\\.|feat\\.|\\[|\\]|\\.|\\(|\\))", Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(trackTitle);
+        return matcher.replaceAll("");
     }
 
 }
