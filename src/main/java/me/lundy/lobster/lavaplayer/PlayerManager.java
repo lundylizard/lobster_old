@@ -56,7 +56,10 @@ public class PlayerManager {
 
             @Override
             public void trackLoaded(AudioTrack track) {
-                // Not needed because search is an AudioPlaylist which takes the first song as result
+                AudioTrackUserData audioTrackUserData = new AudioTrackUserData(track.getInfo().title, context.getExecutor().getAsMention());
+                track.setUserData(audioTrackUserData);
+                musicManager.scheduler.queueSong(track, top);
+                context.getEvent().replyFormat("Added `%s` by `%s`", track.getInfo().title, track.getInfo().author).queue();
             }
 
             @Override
@@ -64,7 +67,8 @@ public class PlayerManager {
 
                 if (audioPlaylist.isSearchResult()) {
                     AudioTrack track = audioPlaylist.getTracks().get(0);
-                    track.setUserData(context.getExecutor().getAsMention());
+                    AudioTrackUserData audioTrackUserData = new AudioTrackUserData(trackUrl.replace("ytsearch:", ""), context.getExecutor().getAsMention());
+                    track.setUserData(audioTrackUserData);
                     musicManager.scheduler.queueSong(track, top);
                     context.getEvent().replyFormat("Added `%s` by `%s`", track.getInfo().title, track.getInfo().author).queue();
                     return;
@@ -73,7 +77,8 @@ public class PlayerManager {
                 List<AudioTrack> trackList = audioPlaylist.getTracks();
 
                 for (AudioTrack track : trackList) {
-                    track.setUserData(context.getExecutor().getAsMention());
+                    AudioTrackUserData audioTrackUserData = new AudioTrackUserData(track.getInfo().title, context.getExecutor().getAsMention());
+                    track.setUserData(audioTrackUserData);
                     musicManager.scheduler.queueSong(track, top);
                 }
 
