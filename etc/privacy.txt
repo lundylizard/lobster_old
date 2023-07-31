@@ -1,0 +1,35 @@
+Privacy Policy
+
+Last Updated: 07/31/2023
+
+lundylizard ("we", "our", or "us") respects your privacy and is committed to protecting any personal information you provide while using our services. This Privacy Policy outlines our practices concerning the collection and processing of your data.
+
+Data Collection and Use
+
+We want to assure you that we do not collect any personal data from our users. When you use our service, we do not gather, store, or process any information that could personally identify you.
+
+Data Processing for Service Functionality
+
+All data that is generated or processed while using our service is solely for the purpose of ensuring the proper functioning of the service. This includes temporary session data, such as preferences and settings that are necessary to provide you with a seamless experience while using our service.
+
+Cookies and Similar Technologies
+
+Our service does not employ cookies or any other tracking technologies.
+
+Data Security
+
+While we do not collect any personal data, we still take appropriate measures to ensure the security of the data generated and processed within our service. We employ standard security practices to protect against unauthorized access, alteration, disclosure, or destruction of the data.
+
+Data Retention
+
+Since we do not collect personal data, there is no data retention period applicable to our service.
+
+Changes to the Privacy Policy
+
+We reserve the right to make changes to this Privacy Policy from time to time. Any updates to the policy will be posted on this page, and the "Last Updated" date will be revised accordingly. We recommend reviewing this Privacy Policy periodically to stay informed about how we protect your privacy.
+
+Contact Us
+
+If you have any questions or concerns about our Privacy Policy, please feel free to contact us at [your contact email].
+
+Thank you for using lobster. We appreciate your trust in our commitment to your privacy.
