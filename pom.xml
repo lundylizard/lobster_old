@@ -19,7 +19,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.2.4</version>
+                <version>3.5.0</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -28,13 +28,10 @@
                         </goals>
                         <configuration>
                             <transformers>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>me.lundy.lobster.Lobster</mainClass>
                                 </transformer>
                             </transformers>
-                            <createDependencyReducedPom>false</createDependencyReducedPom>
-                            <finalName>lobster</finalName>
                         </configuration>
                     </execution>
                 </executions>
@@ -43,36 +40,59 @@
     </build>
 
     <dependencies>
+
+        <!--
+
         <dependency>
             <groupId>net.dv8tion</groupId>
             <artifactId>JDA</artifactId>
-            <version>5.0.0-beta.11</version>
+            <version>5.0.0-beta.12</version>
         </dependency>
+
+        -->
+
+        <dependency>
+            <groupId>com.github.discord-jda</groupId>
+            <artifactId>JDA</artifactId>
+            <version>2c36ba7e2a</version>
+        </dependency>
+
         <dependency>
             <groupId>com.github.walkyst</groupId>
             <artifactId>lavaplayer-fork</artifactId>
-            <version>1.4.2</version>
+            <version>1.4.3</version>
         </dependency>
+
         <dependency>
             <groupId>com.github.TopiSenpai.LavaSrc</groupId>
             <artifactId>lavasrc</artifactId>
-            <version>3.2.4</version>
+            <version>3.2.9</version>
         </dependency>
+
         <dependency>
             <groupId>com.github.LowLevelSubmarine</groupId>
             <artifactId>GeniusLyricsAPI</artifactId>
             <version>1.0.3</version>
         </dependency>
+
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>2.0.5</version>
+            <version>2.0.7</version>
         </dependency>
+
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.4.6</version>
+            <version>1.4.8</version>
         </dependency>
+
+        <dependency>
+            <groupId>club.minnced</groupId>
+            <artifactId>discord-webhooks</artifactId>
+            <version>0.8.2</version>
+        </dependency>
+
     </dependencies>
 
     <repositories>
@@ -82,7 +102,7 @@
             <url>https://m2.dv8tion.net/releases</url>
         </repository>
         <repository>
-            <id>jitpack</id>
+            <id>jitpack.io</id>
             <url>https://jitpack.io</url>
         </repository>
     </repositories>

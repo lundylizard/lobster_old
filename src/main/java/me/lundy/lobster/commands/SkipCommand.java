@@ -1,30 +1,31 @@
 package me.lundy.lobster.commands;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import me.lundy.lobster.command.Command;
+import me.lundy.lobster.command.BotCommand;
 import me.lundy.lobster.command.CommandContext;
-import me.lundy.lobster.command.CommandInfo;
 import me.lundy.lobster.lavaplayer.GuildMusicManager;
 import me.lundy.lobster.lavaplayer.PlayerManager;
+import me.lundy.lobster.utils.Reply;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
-@CommandInfo(name = "skip", description = "Skip the current song")
-public class SkipCommand extends Command {
+public class SkipCommand extends BotCommand {
 
     @Override
     public void onCommand(CommandContext context) {
 
         if (!context.executorInVoice()) {
-            context.getEvent().reply(":warning: You are not in a voice channel").setEphemeral(true).queue();
+            context.getEvent().reply(Reply.EXECUTOR_NOT_IN_VOICE.getMessage()).setEphemeral(true).queue();
             return;
         }
 
         if (!context.selfInVoice()) {
-            context.getEvent().reply(":warning: I am not in a voice channel").setEphemeral(true).queue();
+            context.getEvent().reply(Reply.SELF_NOT_IN_VOICE.getMessage()).setEphemeral(true).queue();
             return;
         }
 
         if (!context.inSameVoice()) {
-            context.getEvent().reply(":warning: We are not in the same voice channel").setEphemeral(true).queue();
+            context.getEvent().reply(Reply.NOT_IN_SAME_VOICE.getMessage()).setEphemeral(true).queue();
             return;
         }
 
@@ -32,19 +33,23 @@ public class SkipCommand extends Command {
         AudioTrack oldTrack = musicManager.audioPlayer.getPlayingTrack();
 
         if (oldTrack == null) {
-            context.getEvent().reply(":warning: There is currently no track playing").setEphemeral(true).queue();
+            context.getEvent().reply(Reply.NO_TRACK_PLAYING.getMessage()).setEphemeral(true).queue();
             return;
         }
 
         musicManager.scheduler.nextTrack();
         AudioTrack newTrack = musicManager.audioPlayer.getPlayingTrack();
-        String message = String.format("Skipping `%s`...", oldTrack.getInfo().title);
+        String message = String.format(Reply.TRACK_SKIPPED.getMessage(), oldTrack.getInfo().title, oldTrack.getInfo().author);
 
         if (newTrack != null) {
-            message += String.format("\n:musical_note: Now Playing: `%s`", newTrack.getInfo().title);
-            message = "> " + message;
+            message += String.format(Reply.SKIP_NEXT_SONG.getMessage(), newTrack.getInfo().title, newTrack.getInfo().author);
         }
 
         context.getEvent().reply(message).queue();
+    }
+
+    @Override
+    public SlashCommandData getCommandData() {
+        return Commands.slash("skip", "Skip the current song");
     }
 }

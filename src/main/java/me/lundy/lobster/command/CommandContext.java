@@ -71,4 +71,5 @@ public class CommandContext {
     public Member getSelf() {
         return self;
     }
+
 }

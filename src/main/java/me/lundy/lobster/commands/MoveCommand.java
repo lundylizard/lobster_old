@@ -1,44 +1,48 @@
 package me.lundy.lobster.commands;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import me.lundy.lobster.command.Command;
+import me.lundy.lobster.command.BotCommand;
 import me.lundy.lobster.command.CommandContext;
-import me.lundy.lobster.command.CommandInfo;
-import me.lundy.lobster.command.CommandOptions;
 import me.lundy.lobster.lavaplayer.GuildMusicManager;
 import me.lundy.lobster.lavaplayer.PlayerManager;
+import me.lundy.lobster.utils.Reply;
+import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
-@CommandInfo(name = "move", description = "Move songs in the queue")
-public class MoveCommand extends Command implements CommandOptions {
+public class MoveCommand extends BotCommand {
 
     @Override
     public void onCommand(CommandContext context) {
 
         if (!context.executorInVoice()) {
-            context.getEvent().reply(":warning: You are not in a voice channel").setEphemeral(true).queue();
+            context.getEvent().reply(Reply.EXECUTOR_NOT_IN_VOICE.getMessage()).setEphemeral(true).queue();
             return;
         }
 
         if (!context.selfInVoice()) {
-            context.getEvent().reply(":warning: I am not in a voice channel").setEphemeral(true).queue();
+            context.getEvent().reply(Reply.SELF_NOT_IN_VOICE.getMessage()).setEphemeral(true).queue();
             return;
         }
 
         if (!context.inSameVoice()) {
-            context.getEvent().reply(":warning: We are not in the same voice channel").setEphemeral(true).queue();
+            context.getEvent().reply(Reply.NOT_IN_SAME_VOICE.getMessage()).setEphemeral(true).queue();
             return;
         }
 
-        int from = context.getEvent().getOption("from").getAsInt(); // No null check because required
-        int to = context.getEvent().getOption("to").getAsInt(); // No null check because required
+        int from = context.getEvent().getOption("song").getAsInt();
+        int to = context.getEvent().getOption("to").getAsInt();
 
         if (from <= 0 || to <= 0) {
-            context.getEvent().reply("The new position has to be higher than 0").setEphemeral(true).queue();
+            context.getEvent().reply(Reply.MOVE_POSITION_INVALID.getMessage()).setEphemeral(true).queue();
             return;
         }
 
@@ -46,18 +50,33 @@ public class MoveCommand extends Command implements CommandOptions {
         from = Math.min(from, musicManager.scheduler.queue.size());
         to = Math.min(to, musicManager.scheduler.queue.size());
         List<AudioTrack> trackList = new ArrayList<>(musicManager.scheduler.queue);
+        AudioTrack movedTrack = trackList.get(from - 1);
         trackList.add(to - 1, trackList.get(from - 1));
         trackList.remove(from);
         musicManager.scheduler.queue.clear();
         musicManager.scheduler.queue.addAll(trackList);
-        context.getEvent().reply(String.format("Successfully moved track `#%d` to `#%d`", from, to)).queue();
+        context.getEvent().replyFormat(Reply.MOVE_SUCCESSFUL.getMessage(), movedTrack.getInfo().title, to).queue();
     }
 
     @Override
-    public List<OptionData> options() {
-        OptionData optionDataFrom = new OptionData(OptionType.INTEGER, "from", "What song you want to move", true);
-        OptionData optionDataTo = new OptionData(OptionType.INTEGER, "to", "Where the song should be moved to", true);
-        return List.of(optionDataFrom, optionDataTo);
+    public SlashCommandData getCommandData() {
+        OptionData optionTo = new OptionData(OptionType.INTEGER, "to", "Where the song should be moved to", true);
+        OptionData optionFrom = new OptionData(OptionType.INTEGER, "song", "What song you want to move", true, true);
+        return Commands.slash("move", "Move songs in the queue").addOptions(optionTo, optionFrom);
     }
 
+    @Override
+    public List<net.dv8tion.jda.api.interactions.commands.Command.Choice> onAutocomplete(CommandAutoCompleteInteractionEvent event) {
+        if (event.getFocusedOption().getName().equals("song")) {
+            GuildMusicManager musicManager = PlayerManager.getInstance().getMusicManager(event.getGuild());
+            List<AudioTrack> trackList = new ArrayList<>(musicManager.scheduler.queue);
+            return trackList.stream()
+                    .filter(audioTrack -> (audioTrack.getInfo().author + " - " + audioTrack.getInfo().title).toLowerCase().contains(event.getFocusedOption().getValue().toLowerCase()))
+                    .limit(25)
+                    .map(audioTrack -> new Command.Choice(audioTrack.getInfo().author + " - " + audioTrack.getInfo().title, trackList.indexOf(audioTrack) + 1))
+                    .sorted(Comparator.comparingInt(a -> a.getName().charAt(0)))
+                    .collect(Collectors.toList());
+        }
+        return null;
+    }
 }

@@ -1,29 +1,30 @@
 package me.lundy.lobster.commands;
 
-import me.lundy.lobster.command.Command;
+import me.lundy.lobster.command.BotCommand;
 import me.lundy.lobster.command.CommandContext;
-import me.lundy.lobster.command.CommandInfo;
 import me.lundy.lobster.lavaplayer.GuildMusicManager;
 import me.lundy.lobster.lavaplayer.PlayerManager;
+import me.lundy.lobster.utils.Reply;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
-@CommandInfo(name = "leave", description = "Make lobster leave your voice channel")
-public class LeaveCommand extends Command {
+public class LeaveCommand extends BotCommand {
 
     @Override
     public void onCommand(CommandContext context) {
 
         if (!context.executorInVoice()) {
-            context.getEvent().reply(":warning: You are not in a voice channel").setEphemeral(true).queue();
+            context.getEvent().reply(Reply.EXECUTOR_NOT_IN_VOICE.getMessage()).setEphemeral(true).queue();
             return;
         }
 
         if (!context.selfInVoice()) {
-            context.getEvent().reply(":warning: I am not in a voice channel").setEphemeral(true).queue();
+            context.getEvent().reply(Reply.SELF_NOT_IN_VOICE.getMessage()).setEphemeral(true).queue();
             return;
         }
 
         if (!context.inSameVoice()) {
-            context.getEvent().reply(":warning: We are not in the same voice channel").setEphemeral(true).queue();
+            context.getEvent().reply(Reply.NOT_IN_SAME_VOICE.getMessage()).setEphemeral(true).queue();
             return;
         }
 
@@ -36,6 +37,11 @@ public class LeaveCommand extends Command {
         musicManager.audioPlayer.destroy();
 
         context.getGuild().getAudioManager().closeAudioConnection();
-        context.getEvent().reply("Left the voice channel").queue();
+        context.getEvent().reply(Reply.LEFT_VOICE.getMessage()).queue();
+    }
+
+    @Override
+    public SlashCommandData getCommandData() {
+        return Commands.slash("leave", "Make lobster leave your voice channel");
     }
 }

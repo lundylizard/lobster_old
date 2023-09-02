@@ -1,35 +1,42 @@
 package me.lundy.lobster.commands;
 
-import me.lundy.lobster.command.Command;
+import me.lundy.lobster.command.BotCommand;
 import me.lundy.lobster.command.CommandContext;
-import me.lundy.lobster.command.CommandInfo;
-import me.lundy.lobster.command.CommandOptions;
 import me.lundy.lobster.lavaplayer.GuildMusicManager;
 import me.lundy.lobster.lavaplayer.PlayerManager;
+import me.lundy.lobster.utils.Reply;
+import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
-@CommandInfo(name = "volume", description = "Change the volume")
-public class VolumeCommand extends Command implements CommandOptions {
+public class VolumeCommand extends BotCommand {
+
+    private static final int VOLUME_MAX = 100;
+    private static final int VOLUME_MIN = 10;
 
     @Override
     public void onCommand(CommandContext context) {
 
         if (!context.executorInVoice()) {
-            context.getEvent().reply(":warning: You are not in a voice channel").setEphemeral(true).queue();
+            context.getEvent().reply(Reply.EXECUTOR_NOT_IN_VOICE.getMessage()).setEphemeral(true).queue();
             return;
         }
 
         if (!context.selfInVoice()) {
-            context.getEvent().reply(":warning: I am not in a voice channel").setEphemeral(true).queue();
+            context.getEvent().reply(Reply.SELF_NOT_IN_VOICE.getMessage()).setEphemeral(true).queue();
             return;
         }
 
         if (!context.inSameVoice()) {
-            context.getEvent().reply(":warning: We are not in the same voice channel").setEphemeral(true).queue();
+            context.getEvent().reply(Reply.NOT_IN_SAME_VOICE.getMessage()).setEphemeral(true).queue();
             return;
         }
 
@@ -37,30 +44,35 @@ public class VolumeCommand extends Command implements CommandOptions {
         OptionMapping volumeOption = context.getEvent().getOption("amount");
 
         if (volumeOption == null) {
-            int currentVolume = musicManager.audioPlayer.getVolume();
-            context.getEvent().replyFormat("The current volume is `%d%`", currentVolume).queue();
+            context.getEvent().replyFormat(Reply.CURRENT_VOLUME.getMessage(), musicManager.audioPlayer.getVolume()).queue();
             return;
         }
 
         int newVolume = volumeOption.getAsInt();
-
-        if (newVolume < 10) {
-            context.getEvent().reply("Volume cannot be lower than `10%`").queue();
+        if (newVolume < VOLUME_MIN) {
+            context.getEvent().replyFormat(Reply.VOLUME_LOWER.getMessage(), VOLUME_MIN).queue();
             return;
         }
 
-        if (newVolume > 100) {
-            context.getEvent().reply("Volume cannot be higher than `100%`").queue();
+        if (newVolume > VOLUME_MAX) {
+            context.getEvent().replyFormat(Reply.VOLUME_HIGHER.getMessage(), VOLUME_MAX).queue();
             return;
         }
 
         musicManager.audioPlayer.setVolume(newVolume);
-        context.getEvent().replyFormat("Changed volume to `%d%`", newVolume).queue();
+        context.getEvent().replyFormat(Reply.VOLUME_CHANGED.getMessage(), newVolume).queue();
     }
 
     @Override
-    public List<OptionData> options() {
-        return List.of(new OptionData(OptionType.INTEGER, "amount", "Amount of volume"));
+    public SlashCommandData getCommandData() {
+        OptionData optionAmount = new OptionData(OptionType.INTEGER, "amount", "Amount of volume", false, true);
+        return Commands.slash("volume", "Change the volume").addOptions(optionAmount);
     }
 
+    @Override
+    public List<Command.Choice> onAutocomplete(CommandAutoCompleteInteractionEvent event) {
+        return IntStream.of(10, 25, 50, 75, 100)
+                .mapToObj(choice -> new Command.Choice(String.valueOf(choice), choice))
+                .collect(Collectors.toList());
+    }
 }

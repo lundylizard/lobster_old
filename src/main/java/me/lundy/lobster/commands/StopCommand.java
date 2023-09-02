@@ -1,36 +1,42 @@
 package me.lundy.lobster.commands;
 
-import me.lundy.lobster.command.Command;
+import me.lundy.lobster.command.BotCommand;
 import me.lundy.lobster.command.CommandContext;
-import me.lundy.lobster.command.CommandInfo;
 import me.lundy.lobster.lavaplayer.GuildMusicManager;
 import me.lundy.lobster.lavaplayer.PlayerManager;
+import me.lundy.lobster.utils.Reply;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
-@CommandInfo(name = "stop", description = "Stop the music and clear the queue")
-public class StopCommand extends Command {
+public class StopCommand extends BotCommand {
 
     @Override
     public void onCommand(CommandContext context) {
 
         if (!context.executorInVoice()) {
-            context.getEvent().reply(":warning: You are not in a voice channel").setEphemeral(true).queue();
+            context.getEvent().reply(Reply.EXECUTOR_NOT_IN_VOICE.getMessage()).setEphemeral(true).queue();
             return;
         }
 
         if (!context.selfInVoice()) {
-            context.getEvent().reply(":warning: I am not in a voice channel").setEphemeral(true).queue();
+            context.getEvent().reply(Reply.SELF_NOT_IN_VOICE.getMessage()).setEphemeral(true).queue();
             return;
         }
 
         if (!context.inSameVoice()) {
-            context.getEvent().reply(":warning: We are not in the same voice channel").setEphemeral(true).queue();
+            context.getEvent().reply(Reply.NOT_IN_SAME_VOICE.getMessage()).setEphemeral(true).queue();
             return;
         }
 
         GuildMusicManager musicManager = PlayerManager.getInstance().getMusicManager(context.getGuild());
         musicManager.scheduler.queue.clear();
         musicManager.scheduler.player.stopTrack();
-        context.getEvent().reply("Stopped the playback.").queue();
+        context.getEvent().reply(Reply.STOPPED_PLAYBACK.getMessage()).queue();
+    }
+
+    @Override
+    public SlashCommandData getCommandData() {
+        return Commands.slash("stop", "Stop the playback");
     }
 
 }

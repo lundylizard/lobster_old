@@ -50,7 +50,7 @@ public class BotConfig {
 
     }
 
-    public static BotConfig getInstance() throws IOException {
+    public static BotConfig getInstance() {
 
         if (instance != null) {
             return instance;
@@ -59,12 +59,21 @@ public class BotConfig {
         File configFile = new File("bot.properties");
 
         if (!configFile.exists()) {
-            if (configFile.createNewFile()) {
-                logger.info("Created bot.properties file");
+            try {
+                if (configFile.createNewFile()) {
+                    logger.info("Created bot.properties file");
+                }
+            } catch (IOException e) {
+                logger.error("An error occurred while creating a config file", e);
+                return null;
             }
         }
 
-        instance = new BotConfig(configFile);
+        try {
+            instance = new BotConfig(configFile);
+        } catch (IOException e) {
+            logger.error("Could not create config object instance", e);
+        }
         return instance;
     }
 
