@@ -11,7 +11,9 @@ import com.sedmelluq.discord.lavaplayer.track.AudioReference;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import me.lundy.lobster.Lobster;
 import me.lundy.lobster.command.CommandContext;
+import me.lundy.lobster.config.BotConfig;
 import me.lundy.lobster.config.ConfigValues;
+import me.lundy.lobster.utils.Reply;
 import net.dv8tion.jda.api.entities.Guild;
 
 import java.util.List;
@@ -27,9 +29,11 @@ public class PlayerManager {
     public PlayerManager() {
         this.musicManagers = new ConcurrentHashMap<>();
         this.audioPlayerManager = new DefaultAudioPlayerManager();
-        String spotifyClientId = Lobster.getInstance().getConfig().getProperty(ConfigValues.SPOTIFY_CLIENT_ID);
-        String spotifyClientSecret = Lobster.getInstance().getConfig().getProperty(ConfigValues.SPOTIFY_CLIENT_SECRET);
-        audioPlayerManager.registerSourceManager(new SpotifySourceManager(null, spotifyClientId, spotifyClientSecret, "US", this.audioPlayerManager));
+        BotConfig config = Lobster.getInstance().getConfig();
+        String spotifyClientId = config.getProperty(ConfigValues.SPOTIFY_CLIENT_ID);
+        String spotifyClientSecret = config.getProperty(ConfigValues.SPOTIFY_CLIENT_SECRET);
+        SpotifySourceManager spotifySourceManager = new SpotifySourceManager(null, spotifyClientId, spotifyClientSecret, "US", this.audioPlayerManager);
+        audioPlayerManager.registerSourceManager(spotifySourceManager);
         AudioSourceManagers.registerRemoteSources(this.audioPlayerManager);
         AudioSourceManagers.registerLocalSource(this.audioPlayerManager);
     }
@@ -49,17 +53,17 @@ public class PlayerManager {
         });
     }
 
-    public void loadAndPlay(CommandContext context, String trackUrl, boolean top) {
-        GuildMusicManager musicManager = this.getMusicManager(context.getGuild());
+    public void loadAndPlay(CommandContext context, String query, boolean top) {
 
-        this.audioPlayerManager.loadItemOrdered(musicManager, new AudioReference(trackUrl, ""), new AudioLoadResultHandler() {
+        GuildMusicManager musicManager = this.getMusicManager(context.getGuild());
+        this.audioPlayerManager.loadItemOrdered(musicManager, new AudioReference(query, ""), new AudioLoadResultHandler() {
 
             @Override
             public void trackLoaded(AudioTrack track) {
                 AudioTrackUserData audioTrackUserData = new AudioTrackUserData(track.getInfo().title, context.getExecutor().getAsMention());
                 track.setUserData(audioTrackUserData);
                 musicManager.scheduler.queueSong(track, top);
-                context.getEvent().replyFormat("Added `%s` by `%s`", track.getInfo().title, track.getInfo().author).queue();
+                context.getEvent().replyFormat(Reply.PLAYER_TRACK_ADDED.getMessage(), track.getInfo().title, track.getInfo().author).queue();
             }
 
             @Override
@@ -67,10 +71,10 @@ public class PlayerManager {
 
                 if (audioPlaylist.isSearchResult()) {
                     AudioTrack track = audioPlaylist.getTracks().get(0);
-                    AudioTrackUserData audioTrackUserData = new AudioTrackUserData(trackUrl.replace("ytsearch:", ""), context.getExecutor().getAsMention());
+                    AudioTrackUserData audioTrackUserData = new AudioTrackUserData(query.replace("ytsearch:", ""), context.getExecutor().getAsMention());
                     track.setUserData(audioTrackUserData);
                     musicManager.scheduler.queueSong(track, top);
-                    context.getEvent().replyFormat("Added `%s` by `%s`", track.getInfo().title, track.getInfo().author).queue();
+                    context.getEvent().replyFormat(Reply.PLAYER_TRACK_ADDED.getMessage(), track.getInfo().title, track.getInfo().author).queue();
                     return;
                 }
 
@@ -82,18 +86,19 @@ public class PlayerManager {
                     musicManager.scheduler.queueSong(track, top);
                 }
 
-                context.getEvent().replyFormat("Added `%d` songs to the queue.", trackList.size()).queue();
+                context.getEvent().replyFormat(Reply.PLAYER_PLAYLIST_ADDED.getMessage(), audioPlaylist.getName(), audioPlaylist.getTracks().size()).queue();
             }
 
             @Override
             public void noMatches() {
-                context.getEvent().reply(":warning: Could not find specified song").queue();
+                context.getEvent().reply(Reply.PLAYER_TRACK_NOT_FOUND.getMessage()).queue();
             }
 
             @Override
             public void loadFailed(FriendlyException e) {
-                context.getEvent().reply(":warning: Could not load specified song: " + e.getMessage()).queue();
+                context.getEvent().replyFormat(Reply.PLAYER_LOAD_FAILED.getMessage(), e.getMessage()).queue();
             }
         });
     }
+
 }

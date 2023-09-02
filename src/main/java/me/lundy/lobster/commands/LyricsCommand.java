@@ -3,19 +3,20 @@ package me.lundy.lobster.commands;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import core.GLA;
 import genius.SongSearch;
-import me.lundy.lobster.command.Command;
+import me.lundy.lobster.command.BotCommand;
 import me.lundy.lobster.command.CommandContext;
-import me.lundy.lobster.command.CommandInfo;
-import me.lundy.lobster.command.CommandOptions;
 import me.lundy.lobster.lavaplayer.AudioTrackUserData;
 import me.lundy.lobster.lavaplayer.GuildMusicManager;
 import me.lundy.lobster.lavaplayer.PlayerManager;
+import me.lundy.lobster.utils.Reply;
 import me.lundy.lobster.utils.StringUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.utils.SplitUtil;
 
 import java.io.IOException;
@@ -24,10 +25,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
-@CommandInfo(name = "lyrics", description = "Retrieve lyrics of a song")
-public class LyricsCommand extends Command implements CommandOptions {
+public class LyricsCommand extends BotCommand {
 
-    private final GLA gla = new GLA();
+    private static final GLA gla = new GLA();
 
     @Override
     public void onCommand(CommandContext context) {
@@ -41,17 +41,17 @@ public class LyricsCommand extends Command implements CommandOptions {
         if (searchOption.isEmpty()) {
 
             if (playingTrack == null) {
-                context.getEvent().reply(":warning: There is currently no track playing").setEphemeral(true).queue();
+                context.getEvent().reply(Reply.NO_TRACK_PLAYING.getMessage()).setEphemeral(true).queue();
                 return;
             }
 
             if (!context.selfInVoice()) {
-                context.getEvent().reply(":warning: I am not in a voice channel").setEphemeral(true).queue();
+                context.getEvent().reply(Reply.SELF_NOT_IN_VOICE.getMessage()).setEphemeral(true).queue();
                 return;
             }
 
             if (!context.inSameVoice()) {
-                context.getEvent().reply(":warning: We are not in the same voice channel").setEphemeral(true).queue();
+                context.getEvent().reply(Reply.NOT_IN_SAME_VOICE.getMessage()).setEphemeral(true).queue();
                 return;
             }
 
@@ -62,7 +62,6 @@ public class LyricsCommand extends Command implements CommandOptions {
             searchString = searchOption.get().getAsString();
         }
 
-        System.out.println(searchString + " = " + StringUtils.sanitizeTrackTitle(searchString));
         context.getEvent().deferReply().queue();
 
         try {
@@ -71,7 +70,7 @@ public class LyricsCommand extends Command implements CommandOptions {
             LinkedList<SongSearch.Hit> hits = search.getHits();
 
             if (hits.isEmpty()) {
-                context.getEvent().getHook().editOriginal(":warning: Could not find lyrics for song, please try to search manually.").queue();
+                context.getEvent().getHook().editOriginalFormat(Reply.COULD_NOT_FIND_LYRICS.getMessage(), searchString).queue();
                 return;
             }
 
@@ -81,7 +80,7 @@ public class LyricsCommand extends Command implements CommandOptions {
             lyrics = "## " + song.getArtist().getName() + " - " + song.getTitleWithFeatured() + "\n" + lyrics;
 
             if (lyrics.length() > 6000) {
-                context.getEvent().getHook().editOriginal("Lyrics is too long to be displayed: " + song.getUrl()).queue();
+                context.getEvent().getHook().editOriginalFormat(Reply.LYRICS_TOO_LONG.getMessage(), song.getUrl()).queue();
                 return;
             }
 
@@ -89,24 +88,25 @@ public class LyricsCommand extends Command implements CommandOptions {
             List<MessageEmbed> embeds = new ArrayList<>();
 
             for (String lyricsPart : embedText) {
-                EmbedBuilder embedBuilder = new EmbedBuilder()
-                        .setColor(context.getSelf().getColor())
-                        .setDescription(lyricsPart)
-                        .setThumbnail(song.getThumbnailUrl());
+                EmbedBuilder embedBuilder = new EmbedBuilder();
+                embedBuilder.setColor(context.getSelf().getColor());
+                embedBuilder.setDescription(lyricsPart);
+                embedBuilder.setThumbnail(song.getThumbnailUrl());
                 embeds.add(embedBuilder.build());
             }
 
             context.getEvent().getHook().editOriginalEmbeds(embeds).queue();
 
         } catch (IOException e) {
-            context.getEvent().reply(":warning: An error occurred while fetching the lyrics.").queue();
-            getLogger().error("An error occurred while fetching the lyrics", e);
+            context.getEvent().reply(Reply.ERROR_FETCHING_LYRICS.getMessage()).queue();
+            // getLogger().error("An error occurred while fetching the lyrics", e);
         }
     }
 
     @Override
-    public List<OptionData> options() {
-        OptionData searchOption = new OptionData(OptionType.STRING, "search", "Search for a specific song", false);
-        return List.of(searchOption);
+    public SlashCommandData getCommandData() {
+        OptionData optionSearch = new OptionData(OptionType.STRING, "search", "Search for a specific song", false);
+        return Commands.slash("lyrics", "Retrieve lyrics of a song").addOptions(optionSearch);
     }
+
 }

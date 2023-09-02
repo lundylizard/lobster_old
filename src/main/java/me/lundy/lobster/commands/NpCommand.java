@@ -2,21 +2,22 @@ package me.lundy.lobster.commands;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackInfo;
-import me.lundy.lobster.command.Command;
+import me.lundy.lobster.command.BotCommand;
 import me.lundy.lobster.command.CommandContext;
-import me.lundy.lobster.command.CommandInfo;
 import me.lundy.lobster.lavaplayer.GuildMusicManager;
 import me.lundy.lobster.lavaplayer.PlayerManager;
+import me.lundy.lobster.utils.Reply;
 import me.lundy.lobster.utils.StringUtils;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
-@CommandInfo(name = "np", description = "See what song is playing right now")
-public class NpCommand extends Command {
+public class NpCommand extends BotCommand {
 
     @Override
     public void onCommand(CommandContext context) {
 
         if (!context.selfInVoice()) {
-            context.getEvent().reply(":warning: I am not in a voice channel").setEphemeral(true).queue();
+            context.getEvent().reply(Reply.SELF_NOT_IN_VOICE.getMessage()).setEphemeral(true).queue();
             return;
         }
 
@@ -24,7 +25,7 @@ public class NpCommand extends Command {
         AudioTrack track = musicManager.audioPlayer.getPlayingTrack();
 
         if (track == null) {
-            context.getEvent().reply(":warning: There is currently no track playing").setEphemeral(true).queue();
+            context.getEvent().reply(Reply.NO_TRACK_PLAYING.getMessage()).setEphemeral(true).queue();
             return;
         }
 
@@ -32,6 +33,12 @@ public class NpCommand extends Command {
         String trackUrl = trackInfo.uri;
         String position = StringUtils.getTrackPosition(track);
         String repeatingString = musicManager.scheduler.isRepeating() ? " :repeat:" : "";
-        context.getEvent().reply(String.format("%s | `%s`%s", trackUrl, position, repeatingString)).queue();
+        String pauseString = musicManager.audioPlayer.isPaused() ? " :pause_button:" : "";
+        context.getEvent().reply(String.format("%s | `%s`%s%s", trackUrl, position, repeatingString, pauseString)).queue();
+    }
+
+    @Override
+    public SlashCommandData getCommandData() {
+        return Commands.slash("np", "Find out what's playing right now");
     }
 }

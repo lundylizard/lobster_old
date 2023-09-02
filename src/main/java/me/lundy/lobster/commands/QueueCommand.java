@@ -1,30 +1,31 @@
 package me.lundy.lobster.commands;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import me.lundy.lobster.command.Command;
+import me.lundy.lobster.command.BotCommand;
 import me.lundy.lobster.command.CommandContext;
-import me.lundy.lobster.command.CommandInfo;
 import me.lundy.lobster.lavaplayer.GuildMusicManager;
 import me.lundy.lobster.lavaplayer.PlayerManager;
 import me.lundy.lobster.utils.QueueUtils;
+import me.lundy.lobster.utils.Reply;
 import me.lundy.lobster.utils.StringUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 
-@CommandInfo(name = "queue", description = "Display a list of upcoming songs")
-public class QueueCommand extends Command {
+public class QueueCommand extends BotCommand {
 
     @Override
     public void onCommand(CommandContext context) {
 
         if (!context.selfInVoice()) {
-            context.getEvent().reply(":warning: I am not in a voice channel").setEphemeral(true).queue();
+            context.getEvent().reply(Reply.SELF_NOT_IN_VOICE.getMessage()).setEphemeral(true).queue();
             return;
         }
 
         GuildMusicManager musicManager = PlayerManager.getInstance().getMusicManager(context.getGuild());
 
         if (musicManager.scheduler.queue.isEmpty()) {
-            context.getEvent().reply(":warning: The queue is currently empty").setEphemeral(true).queue();
+            context.getEvent().reply(Reply.QUEUE_EMPTY.getMessage()).setEphemeral(true).queue();
             return;
         }
 
@@ -48,5 +49,10 @@ public class QueueCommand extends Command {
         }
 
         context.getEvent().replyEmbeds(embedBuilder.build()).addActionRow(QueueUtils.generateButtons(pagesTotal, 0)).queue();
+    }
+
+    @Override
+    public SlashCommandData getCommandData() {
+        return Commands.slash("queue", "Display upcoming songs");
     }
 }

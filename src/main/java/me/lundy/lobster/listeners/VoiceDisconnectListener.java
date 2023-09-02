@@ -13,6 +13,7 @@ public class VoiceDisconnectListener extends ListenerAdapter {
         if (event.getEntity().getUser().equals(event.getJDA().getSelfUser())) {
             if (event.getNewValue() == null) {
                 GuildMusicManager musicManager = PlayerManager.getInstance().getMusicManager(event.getGuild());
+                musicManager.audioPlayer.setPaused(false);
                 musicManager.scheduler.queue.clear();
                 musicManager.scheduler.player.stopTrack();
             }

@@ -1,12 +1,13 @@
 package me.lundy.lobster.command;
 
 import me.lundy.lobster.commands.*;
+import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,10 +15,10 @@ import java.util.stream.Collectors;
 
 public class CommandManager extends ListenerAdapter {
 
-    private final Map<String, Command> commands;
+    private final Map<String, BotCommand> commands = new HashMap<>();
+    private final Logger logger = LoggerFactory.getLogger(CommandManager.class);
 
     public CommandManager() {
-        this.commands = new HashMap<>();
         registerCommand(new HelpCommand());
         registerCommand(new JoinCommand());
         registerCommand(new LeaveCommand());
@@ -34,48 +35,36 @@ public class CommandManager extends ListenerAdapter {
         registerCommand(new SkipCommand());
         registerCommand(new StopCommand());
         registerCommand(new VolumeCommand());
+        // registerCommand(new PlaylistCommand());
     }
 
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
-        Command command = this.commands.get(event.getName());
-
-        if (command == null) {
-            event.reply(":warning: Unexpected error: `Command is null`").setEphemeral(true).queue();
-            return;
-        }
-
+        BotCommand command = this.commands.get(event.getName());
         CommandContext commandContext = new CommandContext(event);
         command.onCommand(commandContext);
+        logger.info("[{}] {}: {}", event.getGuild().getName(), event.getUser().getEffectiveName(), event.getCommandString());
     }
 
-    private void registerCommand(Command command) {
-        CommandInfo commandInfo = command.getClass().getAnnotation(CommandInfo.class);
-
-        if (commandInfo == null) {
-            throw new IllegalArgumentException(command.getClass().getName() + " is missing CommandInfo annotation");
-        }
-
-        commands.putIfAbsent(commandInfo.name(), command);
+    @Override
+    public void onCommandAutoCompleteInteraction(CommandAutoCompleteInteractionEvent event) {
+        BotCommand commandAutoCompletion = commands.get(event.getName());
+        event.replyChoices(commandAutoCompletion.onAutocomplete(event)).queue();
     }
 
-    public Map<String, Command> getCommands() {
-        return this.commands;
+    private void registerCommand(BotCommand command) {
+        commands.putIfAbsent(command.getCommandData().getName(), command);
+    }
+
+    public Map<String, BotCommand> getCommands() {
+        return commands;
     }
 
     public List<SlashCommandData> getCommandDataList() {
-        return this.commands.values().stream().map(this::createCommandData).collect(Collectors.toList());
+        return this.commands.values().stream()
+                .map(BotCommand::getCommandData)
+                .map(command -> command.setGuildOnly(true))
+                .collect(Collectors.toList());
     }
 
-    private SlashCommandData createCommandData(Command command) {
-        CommandInfo commandInfo = command.getClass().getAnnotation(CommandInfo.class);
-
-        if (commandInfo == null) {
-            throw new IllegalArgumentException(command.getClass().getName() + " is missing CommandInfo annotation");
-        }
-
-        return Commands.slash(commandInfo.name(), commandInfo.description())
-                .setGuildOnly(true)
-                .addOptions(command instanceof CommandOptions ? ((CommandOptions) command).options() : Collections.emptyList());
-    }
 }

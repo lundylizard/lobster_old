@@ -1,10 +1,10 @@
 package me.lundy.lobster.listeners.buttons;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import me.lundy.lobster.Lobster;
 import me.lundy.lobster.lavaplayer.GuildMusicManager;
 import me.lundy.lobster.lavaplayer.PlayerManager;
 import me.lundy.lobster.utils.QueueUtils;
+import me.lundy.lobster.utils.Reply;
 import me.lundy.lobster.utils.StringUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
@@ -36,13 +36,12 @@ public class QueueButtonListener extends ListenerAdapter {
             }
 
             if (musicManager.scheduler.queue.isEmpty()) {
-                event.reply(":warning: The queue is now empty.").setEphemeral(true).queue();
+                event.reply(Reply.QUEUE_EMPTY.getMessage()).setEphemeral(true).queue();
                 return;
             }
 
             if (queueSize <= QueueUtils.TRACKS_PER_PAGE) {
-                long queueCommandId = Lobster.getInstance().getCommandManager().getCommands().get("queue").getId();
-                event.reply(":warning: The queue list is outdated by now. Please run </queue:" + queueCommandId + "> again.").setEphemeral(true).queue();
+                event.reply(Reply.QUEUE_OUTDATED.getMessage()).setEphemeral(true).queue();
                 return;
             }
 
