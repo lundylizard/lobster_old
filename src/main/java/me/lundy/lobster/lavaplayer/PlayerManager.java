@@ -12,7 +12,6 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import me.lundy.lobster.Lobster;
 import me.lundy.lobster.command.CommandContext;
 import me.lundy.lobster.config.BotConfig;
-import me.lundy.lobster.config.ConfigValues;
 import me.lundy.lobster.utils.Reply;
 import net.dv8tion.jda.api.entities.Guild;
 
@@ -30,10 +29,14 @@ public class PlayerManager {
         this.musicManagers = new ConcurrentHashMap<>();
         this.audioPlayerManager = new DefaultAudioPlayerManager();
         BotConfig config = Lobster.getInstance().getConfig();
-        String spotifyClientId = config.getProperty(ConfigValues.SPOTIFY_CLIENT_ID);
-        String spotifyClientSecret = config.getProperty(ConfigValues.SPOTIFY_CLIENT_SECRET);
-        SpotifySourceManager spotifySourceManager = new SpotifySourceManager(null, spotifyClientId, spotifyClientSecret, "US", this.audioPlayerManager);
-        audioPlayerManager.registerSourceManager(spotifySourceManager);
+        SpotifySourceManager spotifySourceManager = new SpotifySourceManager(
+                null,
+                config.getSpotifyConfig().getClientId(),
+                config.getSpotifyConfig().getClientSecret(),
+                config.getSpotifyConfig().getCountryCode(),
+                this.audioPlayerManager
+        );
+        this.audioPlayerManager.registerSourceManager(spotifySourceManager);
         AudioSourceManagers.registerRemoteSources(this.audioPlayerManager);
         AudioSourceManagers.registerLocalSource(this.audioPlayerManager);
     }

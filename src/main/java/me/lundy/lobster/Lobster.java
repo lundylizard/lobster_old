@@ -2,7 +2,7 @@ package me.lundy.lobster;
 
 import me.lundy.lobster.command.CommandManager;
 import me.lundy.lobster.config.BotConfig;
-import me.lundy.lobster.config.ConfigValues;
+import me.lundy.lobster.config.ConfigManager;
 import me.lundy.lobster.internal.InactivityHandler;
 import me.lundy.lobster.internal.PresenceHandler;
 import me.lundy.lobster.listeners.VoiceDisconnectListener;
@@ -14,6 +14,8 @@ import net.dv8tion.jda.api.sharding.DefaultShardManagerBuilder;
 import net.dv8tion.jda.api.sharding.ShardManager;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -30,29 +32,32 @@ public class Lobster {
 
     private static Lobster instance;
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-    private BotConfig config;
-    private CommandManager commandManager;
+    private static CommandManager commandManager;
+    private ConfigManager configManager;
+    private BotConfig botConfig;
+    private final Logger logger = LoggerFactory.getLogger(Lobster.class);
 
     // TODO
-    // - Update config system (use json instead)
     // - Better pagination system for queue command
 
     public static void main(String[] args) {
         instance = new Lobster();
-        instance.config = BotConfig.getInstance();
-        instance.commandManager = new CommandManager();
-        String botToken = instance.config.getProperty(ConfigValues.BOT_TOKEN);
-        DefaultShardManagerBuilder shardManagerBuilder = DefaultShardManagerBuilder.createLight(botToken);
+        commandManager = new CommandManager();
+        instance.configManager = ConfigManager.getInstance();
+        if (instance.configManager.createEmptyFile()) instance.logger.info("Created empty config file!");
+        instance.botConfig = instance.configManager.getBotConfig();
+        instance.logger.info("Successfully instantiated config from file");
+        DefaultShardManagerBuilder shardManagerBuilder = DefaultShardManagerBuilder.createLight(instance.botConfig.getBotToken());
         shardManagerBuilder.enableIntents(GatewayIntent.GUILD_VOICE_STATES);
         shardManagerBuilder.enableCache(CacheFlag.VOICE_STATE);
         shardManagerBuilder.setMemberCachePolicy(MemberCachePolicy.VOICE);
         shardManagerBuilder.addEventListeners(new QueueButtonListener());
         shardManagerBuilder.addEventListeners(new PresenceHandler());
         shardManagerBuilder.addEventListeners(new VoiceDisconnectListener());
-        shardManagerBuilder.addEventListeners(instance.commandManager);
+        shardManagerBuilder.addEventListeners(commandManager);
         ShardManager shardManager = shardManagerBuilder.build();
         JDA rootShard = shardManager.getShards().get(0);
-        rootShard.updateCommands().addCommands(instance.commandManager.getCommandDataList()).queue(Lobster::setCommandIds);
+        rootShard.updateCommands().addCommands(commandManager.getCommandDataList()).queue(Lobster::setCommandIds);
         instance.scheduler.scheduleWithFixedDelay(() -> instance.tick(shardManager), 0, 1, TimeUnit.MINUTES);
     }
 
@@ -65,14 +70,14 @@ public class Lobster {
     }
 
     private static void setCommandIds(List<Command> commands) {
-        commands.forEach(command -> instance.commandManager.getCommands().get(command.getName()).setId(command.getIdLong()));
+        commands.forEach(command -> commandManager.getCommands().get(command.getName()).setId(command.getIdLong()));
     }
 
     public BotConfig getConfig() {
-        return config;
+        return botConfig;
     }
 
-    public CommandManager getCommandManager() {
+    public static CommandManager getCommandManager() {
         return commandManager;
     }
 

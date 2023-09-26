@@ -7,6 +7,7 @@ import me.lundy.lobster.lavaplayer.GuildMusicManager;
 import me.lundy.lobster.lavaplayer.PlayerManager;
 import me.lundy.lobster.utils.Reply;
 import me.lundy.lobster.utils.StringUtils;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
@@ -74,6 +75,8 @@ public class SeekCommand extends BotCommand {
 
     @Override
     public List<net.dv8tion.jda.api.interactions.commands.Command.Choice> onAutocomplete(CommandAutoCompleteInteractionEvent event) {
+        Guild guild = event.getGuild();
+        if (guild == null) return null;
         GuildMusicManager musicManager = PlayerManager.getInstance().getMusicManager(event.getGuild());
         AudioTrack track = musicManager.audioPlayer.getPlayingTrack();
         if (track == null) return Collections.emptyList();

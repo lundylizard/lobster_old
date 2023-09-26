@@ -22,7 +22,7 @@ public class HelpCommand extends BotCommand {
         embedBuilder.setDescription("Developed by lundylizard\n\n");
         embedBuilder.setColor(context.getGuild().getSelfMember().getColor());
 
-        Map<String, BotCommand> commands = Lobster.getInstance().getCommandManager().getCommands();
+        Map<String, BotCommand> commands = Lobster.getCommandManager().getCommands();
         commands.entrySet().stream()
                 .sorted(Comparator.comparingInt(entry -> -StringUtils.countLetters(entry.getKey())))
                 .forEach(entry -> {

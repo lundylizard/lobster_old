@@ -6,6 +6,7 @@ import me.lundy.lobster.command.CommandContext;
 import me.lundy.lobster.lavaplayer.GuildMusicManager;
 import me.lundy.lobster.lavaplayer.PlayerManager;
 import me.lundy.lobster.utils.Reply;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
@@ -65,7 +66,9 @@ public class RemoveCommand extends BotCommand {
 
     @Override
     public List<net.dv8tion.jda.api.interactions.commands.Command.Choice> onAutocomplete(CommandAutoCompleteInteractionEvent event) {
-        GuildMusicManager musicManager = PlayerManager.getInstance().getMusicManager(event.getGuild());
+        Guild guild = event.getGuild();
+        if (guild == null) return null;
+        GuildMusicManager musicManager = PlayerManager.getInstance().getMusicManager(guild);
         List<AudioTrack> trackList = new ArrayList<>(musicManager.scheduler.queue);
         return trackList.stream()
                 .filter(audioTrack -> (audioTrack.getInfo().author + " - " + audioTrack.getInfo().title).toLowerCase().contains(event.getFocusedOption().getValue().toLowerCase()))
