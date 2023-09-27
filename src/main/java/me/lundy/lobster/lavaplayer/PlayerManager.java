@@ -15,6 +15,9 @@ import me.lundy.lobster.config.BotConfig;
 import me.lundy.lobster.utils.Reply;
 import net.dv8tion.jda.api.entities.Guild;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -41,21 +44,6 @@ public class PlayerManager {
         AudioSourceManagers.registerLocalSource(this.audioPlayerManager);
     }
 
-    public static PlayerManager getInstance() {
-        if (instance == null) {
-            instance = new PlayerManager();
-        }
-        return instance;
-    }
-
-    public GuildMusicManager getMusicManager(Guild guild) {
-        return this.musicManagers.computeIfAbsent(guild.getIdLong(), guildId -> {
-            GuildMusicManager guildMusicManager = new GuildMusicManager(this.audioPlayerManager);
-            guild.getAudioManager().setSendingHandler(guildMusicManager.getSendHandler());
-            return guildMusicManager;
-        });
-    }
-
     public void loadAndPlay(CommandContext context, String query, boolean top) {
 
         GuildMusicManager musicManager = this.getMusicManager(context.getGuild());
@@ -63,10 +51,21 @@ public class PlayerManager {
 
             @Override
             public void trackLoaded(AudioTrack track) {
-                AudioTrackUserData audioTrackUserData = new AudioTrackUserData(track.getInfo().title, context.getExecutor().getAsMention());
-                track.setUserData(audioTrackUserData);
+                setUserData(track, query, context);
+                String trackTitle = track.getInfo().title;
+
+                if (track.getSourceManager().getSourceName().equals("http")) {
+                    try {
+                        URL url = new URL(track.getInfo().uri);
+                        if (trackTitle.isEmpty()) trackTitle = Paths.get(url.getPath()).getFileName().toString();
+                    } catch (MalformedURLException e) {
+                        // This could technically never happen, given the URL is being validated before trying to play a track
+                        return;
+                    }
+                }
+
                 musicManager.scheduler.queueSong(track, top);
-                context.getEvent().replyFormat(Reply.PLAYER_TRACK_ADDED.getMessage(), track.getInfo().title, track.getInfo().author).queue();
+                context.getEvent().replyFormat(Reply.PLAYER_TRACK_ADDED.getMessage(), trackTitle, track.getInfo().author).queue();
             }
 
             @Override
@@ -74,19 +73,14 @@ public class PlayerManager {
 
                 if (audioPlaylist.isSearchResult()) {
                     AudioTrack track = audioPlaylist.getTracks().get(0);
-                    AudioTrackUserData audioTrackUserData = new AudioTrackUserData(query.replace("ytsearch:", ""), context.getExecutor().getAsMention());
-                    track.setUserData(audioTrackUserData);
-                    musicManager.scheduler.queueSong(track, top);
-                    context.getEvent().replyFormat(Reply.PLAYER_TRACK_ADDED.getMessage(), track.getInfo().title, track.getInfo().author).queue();
+                    trackLoaded(track);
                     return;
                 }
 
                 List<AudioTrack> trackList = audioPlaylist.getTracks();
 
                 for (AudioTrack track : trackList) {
-                    AudioTrackUserData audioTrackUserData = new AudioTrackUserData(track.getInfo().title, context.getExecutor().getAsMention());
-                    track.setUserData(audioTrackUserData);
-                    musicManager.scheduler.queueSong(track, top);
+                    trackLoaded(track);
                 }
 
                 context.getEvent().replyFormat(Reply.PLAYER_PLAYLIST_ADDED.getMessage(), audioPlaylist.getName(), audioPlaylist.getTracks().size()).queue();
@@ -102,6 +96,26 @@ public class PlayerManager {
                 context.getEvent().replyFormat(Reply.PLAYER_LOAD_FAILED.getMessage(), e.getMessage()).queue();
             }
         });
+    }
+
+    public static PlayerManager getInstance() {
+        if (instance == null) {
+            instance = new PlayerManager();
+        }
+        return instance;
+    }
+
+    public GuildMusicManager getMusicManager(Guild guild) {
+        return this.musicManagers.computeIfAbsent(guild.getIdLong(), guildId -> {
+            GuildMusicManager guildMusicManager = new GuildMusicManager(this.audioPlayerManager);
+            guild.getAudioManager().setSendingHandler(guildMusicManager.getSendHandler());
+            return guildMusicManager;
+        });
+    }
+
+    public void setUserData(AudioTrack track, String query, CommandContext context) {
+        AudioTrackUserData audioTrackUserData = new AudioTrackUserData(query, context.getExecutor().getAsMention());
+        track.setUserData(audioTrackUserData);
     }
 
 }

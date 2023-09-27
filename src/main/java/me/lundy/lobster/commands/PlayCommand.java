@@ -49,9 +49,6 @@ public class PlayCommand extends BotCommand {
     public SlashCommandData getCommandData() {
         OptionData optionSearch = new OptionData(OptionType.STRING, "search", "Search term or url of the song", true);
         OptionData optionTop = new OptionData(OptionType.BOOLEAN, "top", "Add this song to the top of the queue");
-        // SubcommandData attachmentSubcommand = new SubcommandData("attachment", "Play a file")
-        //         .addOptions(new OptionData(OptionType.ATTACHMENT, "file", "File to play", true))
-        //         .addOptions(new OptionData(OptionType.BOOLEAN, "top", "Add this song to the top of the queue"));
         return Commands.slash("play", "Add a song to the queue").addOptions(optionSearch, optionTop);
     }
 

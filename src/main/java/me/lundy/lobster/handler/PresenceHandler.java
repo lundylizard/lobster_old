@@ -1,4 +1,4 @@
-package me.lundy.lobster.internal;
+package me.lundy.lobster.handler;
 
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;

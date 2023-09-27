@@ -1,4 +1,4 @@
-package me.lundy.lobster.internal;
+package me.lundy.lobster.handler;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import me.lundy.lobster.lavaplayer.GuildMusicManager;
