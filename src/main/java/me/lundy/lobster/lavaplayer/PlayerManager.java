@@ -54,13 +54,14 @@ public class PlayerManager {
                 setUserData(track, query, context);
                 String trackTitle = track.getInfo().title;
 
+                // If track is from an HTTP source
                 if (track.getSourceManager().getSourceName().equals("http")) {
                     try {
                         URL url = new URL(track.getInfo().uri);
+                        // Set the track title to the file name if it's empty
                         if (trackTitle.isEmpty()) trackTitle = Paths.get(url.getPath()).getFileName().toString();
                     } catch (MalformedURLException e) {
-                        // This could technically never happen, given the URL is being validated before trying to play a track
-                        return;
+                        throw new IllegalStateException("There was an error parsing the URL of an HTTP Source", e);
                     }
                 }
 
@@ -112,6 +113,7 @@ public class PlayerManager {
             return guildMusicManager;
         });
     }
+
 
     public void setUserData(AudioTrack track, String query, CommandContext context) {
         AudioTrackUserData audioTrackUserData = new AudioTrackUserData(query, context.getExecutor().getAsMention());
