@@ -24,7 +24,7 @@ public abstract class BotCommand {
     }
 
     public long getId() {
-        return id;
+        return this.id;
     }
 
 }

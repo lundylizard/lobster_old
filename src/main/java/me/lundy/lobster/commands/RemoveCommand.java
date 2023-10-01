@@ -45,7 +45,7 @@ public class RemoveCommand extends BotCommand {
             return;
         }
 
-        int index = Integer.parseInt(context.getEvent().getOption("index").getAsString());
+        int index = context.getEvent().getOption("index").getAsInt();
         List<AudioTrack> trackList = new ArrayList<>(musicManager.scheduler.queue);
 
         if (trackList.get(index) == null) {
@@ -60,7 +60,7 @@ public class RemoveCommand extends BotCommand {
 
     @Override
     public SlashCommandData getCommandData() {
-        OptionData optionIndex = new OptionData(OptionType.STRING, "index", "What song should be removed", true, true);
+        OptionData optionIndex = new OptionData(OptionType.INTEGER, "index", "What song should be removed", true, true);
         return Commands.slash("remove", "Remove a song from the queue").addOptions(optionIndex);
     }
 

@@ -39,7 +39,7 @@ public class ConfigManager {
     public BotConfig getBotConfig() {
         File configFile = new File(this.fileName);
         try {
-            return objectMapper.readValue(configFile, BotConfig.class);
+            return this.objectMapper.readValue(configFile, BotConfig.class);
         } catch (IOException e) {
             this.logger.error("Could not instantiate bot config from config file", e);
             return new BotConfig();
@@ -47,9 +47,7 @@ public class ConfigManager {
     }
 
     public static ConfigManager getInstance() {
-        if (instance == null) {
-            instance = new ConfigManager();
-        }
+        if (instance == null) instance = new ConfigManager();
         return instance;
     }
 

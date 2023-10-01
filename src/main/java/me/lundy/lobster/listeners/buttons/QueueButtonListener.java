@@ -56,7 +56,7 @@ public class QueueButtonListener extends ListenerAdapter {
 
             int trackIndex = QueueUtils.TRACKS_PER_PAGE * currentPage;
             int tracksOnLastPage = queueSize % QueueUtils.TRACKS_PER_PAGE;
-            int trackCountToDisplay = currentPage == pagesTotal ? tracksOnLastPage : QueueUtils.TRACKS_PER_PAGE;
+            int trackCountToDisplay = (currentPage == pagesTotal - 1) ? tracksOnLastPage : QueueUtils.TRACKS_PER_PAGE;
 
             AudioTrack[] trackGroup = QueueUtils.splitTracksIntoGroups(musicManager.scheduler.queue)[currentPage];
             for (int i = 0; i < trackCountToDisplay; i++) {

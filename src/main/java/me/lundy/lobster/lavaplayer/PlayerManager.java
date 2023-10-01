@@ -81,7 +81,8 @@ public class PlayerManager {
                 List<AudioTrack> trackList = audioPlaylist.getTracks();
 
                 for (AudioTrack track : trackList) {
-                    trackLoaded(track);
+                    setUserData(track, query, context);
+                    musicManager.scheduler.queueSong(track, top);
                 }
 
                 context.getEvent().replyFormat(Reply.PLAYER_PLAYLIST_ADDED.getMessage(), audioPlaylist.getName(), audioPlaylist.getTracks().size()).queue();
@@ -116,7 +117,7 @@ public class PlayerManager {
 
 
     public void setUserData(AudioTrack track, String query, CommandContext context) {
-        AudioTrackUserData audioTrackUserData = new AudioTrackUserData(query, context.getExecutor().getAsMention());
+        AudioTrackUserData audioTrackUserData = new AudioTrackUserData(query.replace("ytsearch:", ""), context.getExecutor().getAsMention());
         track.setUserData(audioTrackUserData);
     }
 

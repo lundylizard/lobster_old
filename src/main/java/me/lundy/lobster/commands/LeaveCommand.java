@@ -29,13 +29,8 @@ public class LeaveCommand extends BotCommand {
         }
 
         GuildMusicManager musicManager = PlayerManager.getInstance().getMusicManager(context.getGuild());
-
-        if (!musicManager.scheduler.queue.isEmpty()) {
-            musicManager.scheduler.queue.clear();
-        }
-
+        musicManager.scheduler.queue.clear();
         musicManager.audioPlayer.destroy();
-
         context.getGuild().getAudioManager().closeAudioConnection();
         context.getEvent().reply(Reply.LEFT_VOICE.getMessage()).queue();
     }

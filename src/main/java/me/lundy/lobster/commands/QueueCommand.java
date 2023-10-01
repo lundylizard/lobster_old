@@ -34,7 +34,6 @@ public class QueueCommand extends BotCommand {
         int queueSize = musicManager.scheduler.queue.size();
         long totalLength = musicManager.scheduler.queue.stream().mapToLong(AudioTrack::getDuration).sum();
         AudioTrack currentTrack = musicManager.audioPlayer.getPlayingTrack();
-
         EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setColor(context.getGuild().getSelfMember().getColor());
         embedBuilder.setTitle("Current Queue");

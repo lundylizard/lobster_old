@@ -36,6 +36,7 @@ public class CommandManager extends ListenerAdapter {
         registerCommand(new StopCommand());
         registerCommand(new VolumeCommand());
         // registerCommand(new PlaylistCommand());
+        this.logger.info("Registered {} commands", this.commands.size());
     }
 
     @Override
@@ -43,21 +44,21 @@ public class CommandManager extends ListenerAdapter {
         BotCommand command = this.commands.get(event.getName());
         CommandContext commandContext = new CommandContext(event);
         command.onCommand(commandContext);
-        logger.info("[{}] {}: {}", event.getGuild().getName(), event.getUser().getEffectiveName(), event.getCommandString());
+        this.logger.info("[{}] {}: {}", event.getGuild().getName(), event.getUser().getName(), event.getCommandString());
     }
 
     @Override
     public void onCommandAutoCompleteInteraction(CommandAutoCompleteInteractionEvent event) {
-        BotCommand commandAutoCompletion = commands.get(event.getName());
+        BotCommand commandAutoCompletion = this.commands.get(event.getName());
         event.replyChoices(commandAutoCompletion.onAutocomplete(event)).queue();
     }
 
     private void registerCommand(BotCommand command) {
-        commands.putIfAbsent(command.getCommandData().getName(), command);
+        this.commands.putIfAbsent(command.getCommandData().getName(), command);
     }
 
     public Map<String, BotCommand> getCommands() {
-        return commands;
+        return this.commands;
     }
 
     public List<SlashCommandData> getCommandDataList() {

@@ -69,11 +69,7 @@ public class MoveCommand extends BotCommand {
     @Override
     public List<net.dv8tion.jda.api.interactions.commands.Command.Choice> onAutocomplete(CommandAutoCompleteInteractionEvent event) {
         Guild guild = event.getGuild();
-
-        if (guild == null) {
-            return null;
-        }
-
+        if (guild == null) return null;
         if (event.getFocusedOption().getName().equals("song")) {
             GuildMusicManager musicManager = PlayerManager.getInstance().getMusicManager(guild);
             List<AudioTrack> trackList = new ArrayList<>(musicManager.scheduler.queue);
