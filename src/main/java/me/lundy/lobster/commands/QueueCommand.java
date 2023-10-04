@@ -5,9 +5,9 @@ import me.lundy.lobster.command.BotCommand;
 import me.lundy.lobster.command.CommandContext;
 import me.lundy.lobster.lavaplayer.GuildMusicManager;
 import me.lundy.lobster.lavaplayer.PlayerManager;
+import me.lundy.lobster.utils.Pagination;
 import me.lundy.lobster.utils.QueueUtils;
 import me.lundy.lobster.utils.Reply;
-import me.lundy.lobster.utils.StringUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
@@ -29,25 +29,10 @@ public class QueueCommand extends BotCommand {
             return;
         }
 
-        AudioTrack[][] trackGroups = QueueUtils.splitTracksIntoGroups(musicManager.scheduler.queue);
-        int pagesTotal = trackGroups.length;
-        int queueSize = musicManager.scheduler.queue.size();
-        long totalLength = musicManager.scheduler.queue.stream().mapToLong(AudioTrack::getDuration).sum();
+        Pagination<AudioTrack> pagination = musicManager.scheduler.getPagination();
         AudioTrack currentTrack = musicManager.audioPlayer.getPlayingTrack();
-        EmbedBuilder embedBuilder = new EmbedBuilder();
-        embedBuilder.setColor(context.getGuild().getSelfMember().getColor());
-        embedBuilder.setTitle("Current Queue");
-        embedBuilder.setFooter(QueueUtils.generateFooter(0, pagesTotal, queueSize, StringUtils.convertMsToHoursAndMinutes(totalLength)));
-        if (currentTrack != null) embedBuilder.appendDescription(QueueUtils.generateCurrentTrack(currentTrack));
-
-        int trackIndex = 0;
-        for (AudioTrack track : trackGroups[0]) {
-            trackIndex++;
-            embedBuilder.appendDescription(QueueUtils.generateQueueTrack(trackIndex, track));
-            embedBuilder.appendDescription("\n");
-        }
-
-        context.getEvent().replyEmbeds(embedBuilder.build()).addActionRow(QueueUtils.generateButtons(pagesTotal, 0)).queue();
+        EmbedBuilder embedBuilder = QueueUtils.generateEmbedFromCurrentPage(pagination, currentTrack);
+        context.getEvent().replyEmbeds(embedBuilder.build()).addActionRow(QueueUtils.generateButtons(pagination)).queue();
     }
 
     @Override
