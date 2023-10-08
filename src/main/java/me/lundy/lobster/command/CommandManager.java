@@ -35,7 +35,7 @@ public class CommandManager extends ListenerAdapter {
         registerCommand(new SkipCommand());
         registerCommand(new StopCommand());
         registerCommand(new VolumeCommand());
-        // registerCommand(new PlaylistCommand());
+        registerCommand(new SettingsCommand());
         this.logger.info("Registered {} commands", this.commands.size());
     }
 

@@ -16,6 +16,7 @@ import me.lundy.lobster.utils.Reply;
 import net.dv8tion.jda.api.entities.Guild;
 
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.util.List;
@@ -57,8 +58,8 @@ public class PlayerManager {
                 // If track is from an HTTP source
                 if (track.getSourceManager().getSourceName().equals("http")) {
                     try {
-                        URL url = new URL(track.getInfo().uri);
-                        // Set the track title to the file name if it's empty
+                        URL url = URI.create(track.getInfo().uri).toURL();
+                        // Set the track title to the file name if it's metadata is empty
                         if (trackTitle.isEmpty()) trackTitle = Paths.get(url.getPath()).getFileName().toString();
                     } catch (MalformedURLException e) {
                         throw new IllegalStateException("There was an error parsing the URL of an HTTP Source", e);

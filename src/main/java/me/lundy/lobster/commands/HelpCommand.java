@@ -5,6 +5,7 @@ import me.lundy.lobster.command.BotCommand;
 import me.lundy.lobster.command.CommandContext;
 import me.lundy.lobster.utils.StringUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
@@ -32,8 +33,9 @@ public class HelpCommand extends BotCommand {
                 }
         );
 
+        String inviteUrl = context.getEvent().getJDA().getInviteUrl(Permission.getPermissions(2150647808L));
         Button discord = Button.link(Lobster.DISCORD_URL, "Discord");
-        Button invite = Button.link(Lobster.INVITE_URL, "Invite");
+        Button invite = Button.link(inviteUrl, "Invite");
         context.getEvent().replyEmbeds(embedBuilder.build()).addActionRow(discord, invite).queue();
     }
 

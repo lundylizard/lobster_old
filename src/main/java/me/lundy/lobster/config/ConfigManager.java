@@ -1,7 +1,6 @@
 package me.lundy.lobster.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,10 +15,18 @@ public class ConfigManager {
     private final ObjectMapper objectMapper;
     private final String fileName = "config.json";
     private final Logger logger = LoggerFactory.getLogger(ConfigManager.class);
+    public static final int CURRENT_VERSION = 1;
 
     public ConfigManager() {
         this.objectMapper = new ObjectMapper();
-        this.objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+    }
+
+    // Incubating
+    public void updateFileIfOutdated() {
+        BotConfig botConfig = getBotConfig();
+        if (botConfig.getConfigVersion() < CURRENT_VERSION) {
+            createEmptyFile();
+        }
     }
 
     public boolean createEmptyFile() {
