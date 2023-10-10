@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 import java.sql.SQLException;
 
 
-// Incubating Settings: Find better name for class
+// Incubating Settings: Find better name for this class
 public class PresenceHandler extends ListenerAdapter {
 
     private static final Logger logger = LoggerFactory.getLogger(PresenceHandler.class);
@@ -34,7 +34,7 @@ public class PresenceHandler extends ListenerAdapter {
 
     public void createSettings(long guildId) {
         try {
-            settingsManager.createSettingsForGuild(guildId, 0L);
+            settingsManager.initializeSettings(guildId);
         } catch (SQLException e) {
             logger.error("Could not create settings for guild with ID " + guildId, e);
         }

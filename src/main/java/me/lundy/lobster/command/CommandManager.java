@@ -1,6 +1,9 @@
 package me.lundy.lobster.command;
 
+import me.lundy.lobster.Lobster;
 import me.lundy.lobster.commands.*;
+import me.lundy.lobster.settings.GuildSettings;
+import me.lundy.lobster.settings.SettingsManager;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -8,6 +11,7 @@ import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,8 +21,10 @@ public class CommandManager extends ListenerAdapter {
 
     private final Map<String, BotCommand> commands = new HashMap<>();
     private final Logger logger = LoggerFactory.getLogger(CommandManager.class);
+    private final SettingsManager settingsManager;
 
     public CommandManager() {
+        this.settingsManager = Lobster.getInstance().getSettingsManager();
         registerCommand(new HelpCommand());
         registerCommand(new JoinCommand());
         registerCommand(new LeaveCommand());
@@ -31,11 +37,11 @@ public class CommandManager extends ListenerAdapter {
         registerCommand(new QueueCommand());
         registerCommand(new RemoveCommand());
         registerCommand(new SeekCommand());
+        registerCommand(new SettingsCommand());
         registerCommand(new ShuffleCommand());
         registerCommand(new SkipCommand());
         registerCommand(new StopCommand());
         registerCommand(new VolumeCommand());
-        registerCommand(new SettingsCommand());
         this.logger.info("Registered {} commands", this.commands.size());
     }
 
@@ -44,7 +50,14 @@ public class CommandManager extends ListenerAdapter {
         BotCommand command = this.commands.get(event.getName());
         CommandContext commandContext = new CommandContext(event);
         command.onCommand(commandContext);
-        this.logger.info("[{}] {}: {}", event.getGuild().getName(), event.getUser().getName(), event.getCommandString());
+        try {
+            GuildSettings guildSettings = settingsManager.getSettings(commandContext.getGuild().getIdLong());
+            guildSettings.setLastChannelUsedId(event.getChannel().getIdLong());
+            settingsManager.updateSettings(commandContext.getGuild().getIdLong(), guildSettings);
+        } catch (SQLException e) {
+            this.logger.error("Could not update lastChannelUsedId", e);
+        }
+        this.logger.info("[{}] {}: {}", commandContext.getGuild().getName(), event.getUser().getName(), event.getCommandString());
     }
 
     @Override

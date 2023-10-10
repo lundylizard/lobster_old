@@ -35,10 +35,10 @@ public class Lobster {
 
     public static void main(String[] args) {
         instance = new Lobster();
-        commandManager = new CommandManager();
         instance.configManager = ConfigManager.getInstance();
         instance.database = new DatabaseManager();
         instance.settingsManager = new SettingsManager(instance.database.getDataSource());
+        commandManager = new CommandManager();
         DefaultShardManagerBuilder shardManagerBuilder = DefaultShardManagerBuilder.createLight(instance.getConfig().getBotToken());
         shardManagerBuilder.enableIntents(GatewayIntent.GUILD_VOICE_STATES);
         shardManagerBuilder.enableCache(CacheFlag.VOICE_STATE);

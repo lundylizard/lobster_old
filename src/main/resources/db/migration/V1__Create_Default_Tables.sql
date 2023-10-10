@@ -1,7 +1,8 @@
 CREATE TABLE settings(
     guildId BIGINT NOT NULL PRIMARY KEY,
-    lastChannelUsedId BIGINT,
+    lastChannelUsedId BIGINT NOT NULL DEFAULT 0,
     keepVolume BOOLEAN NOT NULL DEFAULT FALSE,
+    volume SMALLINT NOT NULL DEFAULT 100,
     embedColor TEXT NOT NULL DEFAULT 'role',
     betaFeatures BOOLEAN NOT NULL DEFAULT FALSE,
     collectStatistics BOOLEAN NOT NULL DEFAULT TRUE,

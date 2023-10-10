@@ -3,7 +3,7 @@ package me.lundy.lobster.commands;
 import me.lundy.lobster.Lobster;
 import me.lundy.lobster.command.BotCommand;
 import me.lundy.lobster.command.CommandContext;
-import me.lundy.lobster.settings.Settings;
+import me.lundy.lobster.settings.GuildSettings;
 import me.lundy.lobster.settings.SettingsManager;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.Command;
@@ -18,41 +18,68 @@ import java.util.*;
 
 public class SettingsCommand extends BotCommand {
 
-    private final List<Command.Choice> ERROR_CHOICE = Collections.singletonList(new Command.Choice("An error occurred, please report this to lundy.", "-"));
-
     @Override
     public void onCommand(CommandContext context) {
-        String setting = context.getEvent().getOption("setting").getAsString();
-        String value = context.getEvent().getOption("value").getAsString();
+
+        String settingToUpdate = context.getEvent().getOption("setting").getAsString();
+        String newValue = context.getEvent().getOption("value").getAsString();
         SettingsManager settingsManager = Lobster.getInstance().getSettingsManager();
-        Settings settingSelected = Arrays.stream(Settings.values()).filter(s -> s.getName().equals(setting)).toList().get(0);
+        GuildSettings guildSettings;
         try {
-            settingsManager.updateSettingOfGuild(context.getGuild().getIdLong(), settingSelected, value);
+            guildSettings = settingsManager.getSettings(context.getGuild().getIdLong());
         } catch (SQLException e) {
-            context.getEvent().reply("Could not change setting").queue();
-            e.printStackTrace();
+            context.getEvent().replyFormat("Could not get settings from this guild. %s", e.getMessage()).setEphemeral(true).queue();
             return;
         }
-        context.getEvent().reply("Updated setting " + setting).setEphemeral(true).queue();
+
+        updateSetting(guildSettings, settingToUpdate, newValue);
+
+        try {
+            settingsManager.updateSettings(context.getGuild().getIdLong(), guildSettings);
+        } catch (SQLException e) {
+            context.getEvent().reply("Could not change setting. " + e.getMessage()).queue();
+            return;
+        }
+
+        context.getEvent().reply("Updated setting **" + settingToUpdate + "** to `" + newValue + "`").setEphemeral(true).queue();
     }
+
+    private void updateSetting(GuildSettings settings, String settingToUpdate, String newValue) {
+        switch (settingToUpdate) {
+            case "lastChannelUsedId":
+                settings.setLastChannelUsedId(Long.parseLong(newValue));
+                break;
+            case "keepVolume":
+                settings.setKeepVolume(Boolean.parseBoolean(newValue));
+                break;
+            case "embedColor":
+                settings.setEmbedColor(newValue);
+                break;
+            case "betaFeatures":
+                settings.setBetaFeatures(Boolean.parseBoolean(newValue));
+                break;
+            case "collectStatistics":
+                settings.setCollectStatistics(Boolean.parseBoolean(newValue));
+                break;
+            case "updateNotifications":
+                settings.setUpdateNotifications(Boolean.parseBoolean(newValue));
+                break;
+            default:
+                break;
+        }
+    }
+
 
     @Override
     public List<Command.Choice> onAutocomplete(CommandAutoCompleteInteractionEvent event) {
 
         String option = event.getFocusedOption().getName();
         List<Command.Choice> settings = new ArrayList<>();
-        SettingsManager settingsManager = Lobster.getInstance().getSettingsManager();
-        Map<String, Object> guildSettings;
-
-        try {
-            guildSettings = settingsManager.getSettingsFromGuild(event.getGuild().getIdLong());
-        } catch (SQLException e) {
-            return ERROR_CHOICE;
-        }
-
-        for (Settings setting : Settings.values()) {
-            settings.add(new Command.Choice(setting.getFriendlyName(), setting.getName()));
-        }
+        settings.add(new Command.Choice("Keep Volume", "keepVolume"));
+        settings.add(new Command.Choice("[Not Implemented Yet] Embed Color", "embedColor"));
+        settings.add(new Command.Choice("[Not Implemented Yet] Beta Features", "betaFeatures"));
+        settings.add(new Command.Choice("[Not Implemented Yet] Collect Statistics", "collectStatistics"));
+        settings.add(new Command.Choice("[Not Implemented Yet] Update Notifications", "updateNotifications"));
 
         if (option.equals("setting")) {
             return settings;
@@ -60,25 +87,24 @@ public class SettingsCommand extends BotCommand {
 
         if (option.equals("value")) {
             Optional<OptionMapping> settingOption = Optional.ofNullable(event.getOption("setting"));
-            if (settingOption.isPresent()) {
-                Object requiredObject = guildSettings.get(settingOption.get().getAsString());
-                return getChoicesFromObjectType(requiredObject);
-            } else {
-                return List.of(new Command.Choice("Please select a setting", "-"));
+            if (settingOption.isEmpty()) {
+                return List.of(new Command.Choice("Please select a setting first!", "-"));
             }
+            if (settingOption.get().getAsString().equals("embedColor")) {
+                settings = List.of(
+                        new Command.Choice("Role", "role"),
+                        new Command.Choice("#000000", "#000000")
+                );
+            } else {
+                settings = List.of(
+                        new Command.Choice("No", "false"),
+                        new Command.Choice("Yes", "true")
+                );
+            }
+            return settings;
         }
 
         return super.onAutocomplete(event);
-    }
-
-    private List<Command.Choice> getChoicesFromObjectType(Object o) {
-        if (o instanceof String) return Collections.emptyList();
-        if (o instanceof Long) return Collections.emptyList();
-        List<Command.Choice> booleanChoices = new ArrayList<>();
-        booleanChoices.add(new Command.Choice("On", "TRUE"));
-        booleanChoices.add(new Command.Choice("Off", "FALSE"));
-        if (o instanceof Boolean) return booleanChoices;
-        return Collections.emptyList();
     }
 
     @Override
