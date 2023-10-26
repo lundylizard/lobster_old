@@ -1,6 +1,6 @@
 package me.lundy.lobster.handler;
 
-import me.lundy.lobster.settings.SettingsManager;
+import me.lundy.lobster.database.settings.SettingsManager;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.ISnowflake;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
@@ -14,14 +14,12 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
 
+public class BotActivityManager extends ListenerAdapter {
 
-// Incubating Settings: Find better name for this class
-public class PresenceHandler extends ListenerAdapter {
-
-    private static final Logger logger = LoggerFactory.getLogger(PresenceHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(BotActivityManager.class);
     private final SettingsManager settingsManager;
 
-    public PresenceHandler(SettingsManager settingsManager) {
+    public BotActivityManager(SettingsManager settingsManager) {
         this.settingsManager = settingsManager;
     }
 

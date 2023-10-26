@@ -1,4 +1,4 @@
-package me.lundy.lobster.settings;
+package me.lundy.lobster.database.settings;
 
 public class GuildSettings {
 

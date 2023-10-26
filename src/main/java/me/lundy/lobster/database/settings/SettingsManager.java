@@ -1,18 +1,56 @@
-package me.lundy.lobster.settings;
+package me.lundy.lobster.database.settings;
 
 import com.zaxxer.hikari.HikariDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class SettingsManager {
 
     private final HikariDataSource dataSource;
+    private final long guildId;
     private final Logger logger = LoggerFactory.getLogger(SettingsManager.class);
+    private final Map<String, Setting<?>> settings = new HashMap<>();
 
-    public SettingsManager(HikariDataSource dataSource) {
+    public SettingsManager(HikariDataSource dataSource, long guildId) {
         this.dataSource = dataSource;
+        this.guildId = guildId;
+        createSetting(new Setting<>("keepVolume", "Keep Volume", ""), Boolean.class);
+        createSetting(new Setting<>("collectStatistics", "Collect Statistics", ""), Boolean.class);
+        createSetting(new Setting<>("embedColor", "Embed Color", ""), String.class);
+    }
+
+    public Map<String, Setting<?>> getSettings() {
+        return settings;
+    }
+
+    private <T> void createSetting(Setting<T> setting, T type) {
+        setting.setType(type);
+        this.settings.put(setting.getPath(), setting);
+    }
+
+    public Setting<?> getSetting(String path) throws SQLException {
+        Setting<?> setting = this.settings.get(path);
+        if (setting == null) {
+            throw new IllegalStateException("Tried to get setting " + path + " but it doesn't exist?");
+        }
+        String sql = String.format("SELECT %s FROM settings WHERE guildId = ?", path);
+        try (Connection connection = this.dataSource.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, this.guildId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    setting.setValue(resultSet.getObject(path));
+                    return setting;
+                }
+            }
+        }
+        return null;
     }
 
     public void initializeSettings(long guildId) throws SQLException {

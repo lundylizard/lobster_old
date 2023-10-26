@@ -1,7 +1,7 @@
 package me.lundy.lobster.command;
 
 import me.lundy.lobster.Lobster;
-import me.lundy.lobster.settings.SettingsManager;
+import me.lundy.lobster.database.settings.SettingsManager;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
@@ -20,7 +20,7 @@ public class CommandContext {
     private Logger logger = LoggerFactory.getLogger(CommandContext.class);
 
     public CommandContext(SlashCommandInteractionEvent event) {
-        this.settingsManager = Lobster.getInstance().getSettingsManager();
+        this.settingsManager = new SettingsManager(Lobster.getInstance().getDatabase().getDataSource(), event.getGuild().getIdLong());
         this.event = event;
 
         Guild guild = event.getGuild();
