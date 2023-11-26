@@ -13,40 +13,52 @@ public class GuildSettingsManager {
     private static final String CREATE_TABLE_QUERY = "CREATE TABLE IF NOT EXISTS guildSettings(guildId BIGINT NOT NULL PRIMARY KEY, lastChannelUsedId BIGINT NOT NULL DEFAULT -1);";
     private static final String UPSERT_CHANNEL_ID_QUERY = "INSERT INTO guildsettings (guildid, lastchannelusedid) VALUES (?, ?) ON CONFLICT (guildid) DO UPDATE SET lastchannelusedid = ?";
     private static final String GET_CHANNEL_FROM_GUILD_QUERY = "SELECT lastchannelusedid FROM guildsettings WHERE guildid = ?";
+    private final PreparedStatement upsertStatement;
+    private final PreparedStatement getChannelStatement;
 
     public GuildSettingsManager(HikariDataSource dataSource) {
         this.dataSource = dataSource;
-        this.createGuildSettings();
+        this.createGuildSettingsTable();
+        this.upsertStatement = prepareStatement(UPSERT_CHANNEL_ID_QUERY);
+        this.getChannelStatement = prepareStatement(GET_CHANNEL_FROM_GUILD_QUERY);
     }
 
-    private void createGuildSettings() {
+    private PreparedStatement prepareStatement(String query) {
+        try {
+            Connection connection = dataSource.getConnection();
+            return connection.prepareStatement(query);
+        } catch (SQLException e) {
+            logger.error("Error preparing statement: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to prepare statement", e);
+        }
+    }
+
+    private void createGuildSettingsTable() {
         try (Connection connection = dataSource.getConnection()) {
-            try (PreparedStatement statement = connection.prepareStatement(CREATE_TABLE_QUERY)) {
-                statement.executeUpdate();
+            try (Statement statement = connection.createStatement()) {
+                statement.executeUpdate(CREATE_TABLE_QUERY);
             }
         } catch (SQLException e) {
             logger.error("Error creating guild settings table: {}", e.getMessage(), e);
         }
     }
 
-    public boolean upsertLastChannelUsedId(long guildId, long lastUsedChannelId) {
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement statement = connection.prepareStatement(UPSERT_CHANNEL_ID_QUERY)) {
-            statement.setLong(1, guildId);
-            statement.setLong(2, lastUsedChannelId);
-            statement.setLong(3, lastUsedChannelId);
-            return statement.executeUpdate() > 0;
+    public void upsertLastChannelUsedId(long guildId, long lastUsedChannelId) {
+        try {
+            upsertStatement.setLong(1, guildId);
+            upsertStatement.setLong(2, lastUsedChannelId);
+            upsertStatement.setLong(3, lastUsedChannelId);
+            upsertStatement.executeUpdate();
         } catch (SQLException e) {
             logger.error("Error upserting last channel used id: {}", e.getMessage(), e);
-            return false;
         }
     }
 
+
     public long getLastChannelUsedId(long guildId) {
-        try (Connection connection = dataSource.getConnection();
-             PreparedStatement statement = connection.prepareStatement(GET_CHANNEL_FROM_GUILD_QUERY)) {
-            statement.setLong(1, guildId);
-            try (ResultSet resultSet = statement.executeQuery()) {
+        try {
+            getChannelStatement.setLong(1, guildId);
+            try (ResultSet resultSet = getChannelStatement.executeQuery()) {
                 return resultSet.next() ? resultSet.getLong("lastchannelusedid") : 0L;
             }
         } catch (SQLException e) {

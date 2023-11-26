@@ -3,6 +3,7 @@ package me.lundy.lobster.command;
 import com.zaxxer.hikari.HikariDataSource;
 import me.lundy.lobster.Lobster;
 import me.lundy.lobster.commands.*;
+import me.lundy.lobster.database.settings.CommandHistoryManager;
 import me.lundy.lobster.database.settings.GuildSettingsManager;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -21,7 +22,8 @@ public class CommandManager extends ListenerAdapter {
     private final Map<String, BotCommand> commands = new HashMap<>();
     private final Logger logger = LoggerFactory.getLogger(CommandManager.class);
     private static final HikariDataSource dataSource = Lobster.getInstance().getDatabase().getDataSource();
-    private static final GuildSettingsManager guildSettingsManager = new GuildSettingsManager(dataSource);
+    private static final GuildSettingsManager GUILD_SETTINGS = new GuildSettingsManager(dataSource);
+    private static final CommandHistoryManager COMMAND_HISTORY = new CommandHistoryManager(dataSource);
 
     public CommandManager() {
         registerCommand(new HelpCommand());
@@ -52,9 +54,8 @@ public class CommandManager extends ListenerAdapter {
         command.onCommand(commandContext);
         long guildId = commandContext.getGuild().getIdLong();
         long channelId = event.getChannelIdLong();
-        if (guildSettingsManager.upsertLastChannelUsedId(guildId, channelId)) {
-            this.logger.info("[{}] {}: Updated last channel used ID to {}", commandContext.getGuild().getName(), event.getUser().getName(), channelId);
-        }
+        GUILD_SETTINGS.upsertLastChannelUsedId(guildId, channelId);
+        COMMAND_HISTORY.insertCommandHistory(new CommandHistoryManager.CommandHistory(commandContext));
         this.logger.info("[{}] {}: {}", commandContext.getGuild().getName(), event.getUser().getName(), event.getCommandString());
     }
 

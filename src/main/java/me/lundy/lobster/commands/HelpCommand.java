@@ -36,8 +36,8 @@ public class HelpCommand extends BotCommand {
         String inviteUrl = context.getEvent().getJDA().getInviteUrl(Permission.getPermissions(2150647808L));
         Button discord = Button.link(Lobster.DISCORD_URL, "Discord");
         Button invite = Button.link(inviteUrl, "Invite");
-        // Button credits = Button.success("credits", "Credits");
-        context.getEvent().replyEmbeds(embedBuilder.build()).addActionRow(discord, invite).queue();
+        Button data = Button.secondary("data", "[BETA] Data");
+        context.getEvent().replyEmbeds(embedBuilder.build()).addActionRow(discord, invite, data).queue();
     }
 
     @Override
