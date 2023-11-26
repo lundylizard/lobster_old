@@ -52,22 +52,29 @@ public class PlayerManager {
 
             @Override
             public void trackLoaded(AudioTrack track) {
+
                 setUserData(track, query, context);
                 String trackTitle = track.getInfo().title;
+                String trackAuthor = track.getInfo().author;
 
                 // If track is from an HTTP source
                 if (track.getSourceManager().getSourceName().equals("http")) {
                     try {
                         URL url = URI.create(track.getInfo().uri).toURL();
-                        // Set the track title to the file name if it's metadata is empty
+                        // Set the track title to the file name if it's metadata does not contain a title
                         if (trackTitle.isEmpty()) trackTitle = Paths.get(url.getPath()).getFileName().toString();
+                        // Set the track author to "File" if it's metadata does not contain an author
+                        if (trackAuthor.isEmpty()) trackAuthor = "File";
                     } catch (MalformedURLException e) {
                         throw new IllegalStateException("There was an error parsing the URL of an HTTP Source", e);
                     }
                 }
 
-                musicManager.scheduler.queueSong(track, top);
-                context.getEvent().replyFormat(Reply.PLAYER_TRACK_ADDED.getMessage(), trackTitle, track.getInfo().author).queue();
+                if (musicManager.scheduler.queueSong(track, top)) {
+                    context.getEvent().replyFormat(Reply.PLAYER_TRACK_ADDED.getMessage(), trackTitle, trackAuthor).queue();
+                } else {
+                    context.getEvent().reply("Error").queue();
+                }
             }
 
             @Override

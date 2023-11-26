@@ -1,26 +1,19 @@
 package me.lundy.lobster.command;
 
-import me.lundy.lobster.Lobster;
-import me.lundy.lobster.database.settings.SettingsManager;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.channel.unions.AudioChannelUnion;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class CommandContext {
 
     private final SlashCommandInteractionEvent event;
-    private final SettingsManager settingsManager;
     private Guild guild;
     private Member executor;
     private Member self;
-    private Logger logger = LoggerFactory.getLogger(CommandContext.class);
 
     public CommandContext(SlashCommandInteractionEvent event) {
-        this.settingsManager = new SettingsManager(Lobster.getInstance().getDatabase().getDataSource(), event.getGuild().getIdLong());
         this.event = event;
 
         Guild guild = event.getGuild();
@@ -50,11 +43,11 @@ public class CommandContext {
     }
 
     public boolean selfInVoice() {
-        return self.getVoiceState() != null && self.getVoiceState().inAudioChannel();
+        return self.getVoiceState() != null;
     }
 
     public boolean executorInVoice() {
-        return executor.getVoiceState() != null && executor.getVoiceState().inAudioChannel();
+        return executor.getVoiceState() != null;
     }
 
     public boolean inSameVoice() {

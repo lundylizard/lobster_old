@@ -2,7 +2,6 @@ package me.lundy.lobster.commands;
 
 import me.lundy.lobster.command.BotCommand;
 import me.lundy.lobster.command.CommandContext;
-import me.lundy.lobster.database.settings.GuildSettings;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.Command;
@@ -55,30 +54,30 @@ public class SettingsCommand extends BotCommand {
         //context.getEvent().reply("Updated setting **" + settingToUpdate + "** to `" + newValue + "`").setEphemeral(true).queue();
     }
 
-    private void updateSetting(GuildSettings settings, String settingToUpdate, String newValue) {
-        switch (settingToUpdate) {
-            case "lastChannelUsedId":
-                settings.setLastChannelUsedId(Long.parseLong(newValue));
-                break;
-            case "keepVolume":
-                settings.setKeepVolume(Boolean.parseBoolean(newValue));
-                break;
-            case "embedColor":
-                settings.setEmbedColor(newValue);
-                break;
-            case "betaFeatures":
-                settings.setBetaFeatures(Boolean.parseBoolean(newValue));
-                break;
-            case "collectStatistics":
-                settings.setCollectStatistics(Boolean.parseBoolean(newValue));
-                break;
-            case "updateNotifications":
-                settings.setUpdateNotifications(Boolean.parseBoolean(newValue));
-                break;
-            default:
-                break;
-        }
-    }
+    // private void updateSetting(GuildSettings settings, String settingToUpdate, String newValue) {
+    //     switch (settingToUpdate) {
+    //         case "lastChannelUsedId":
+    //             settings.setLastChannelUsedId(Long.parseLong(newValue));
+    //             break;
+    //         case "keepVolume":
+    //             settings.setKeepVolume(Boolean.parseBoolean(newValue));
+    //             break;
+    //         case "embedColor":
+    //             settings.setEmbedColor(newValue);
+    //             break;
+    //         case "betaFeatures":
+    //             settings.setBetaFeatures(Boolean.parseBoolean(newValue));
+    //             break;
+    //         case "collectStatistics":
+    //             settings.setCollectStatistics(Boolean.parseBoolean(newValue));
+    //             break;
+    //         case "updateNotifications":
+    //             settings.setUpdateNotifications(Boolean.parseBoolean(newValue));
+    //             break;
+    //         default:
+    //             break;
+    //     }
+    // }
 
 
     @Override

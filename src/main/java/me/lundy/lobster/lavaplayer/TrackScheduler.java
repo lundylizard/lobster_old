@@ -29,14 +29,9 @@ public class TrackScheduler extends AudioEventAdapter {
         return this.pagination;
     }
 
-    public void queueSong(AudioTrack track, boolean top) {
-        if (!this.player.startTrack(track, true)) {
-            if (top) {
-                this.queue.addFirst(track);
-                return;
-            }
-            this.queue.offerLast(track);
-        }
+    public boolean queueSong(AudioTrack track, boolean top) {
+        if (!this.player.startTrack(track, true)) return top ? this.queue.offerFirst(track) : this.queue.offerLast(track);
+        return false;
     }
 
     public void nextTrack() {
@@ -45,15 +40,13 @@ public class TrackScheduler extends AudioEventAdapter {
 
     @Override
     public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
-
         if (endReason.mayStartNext) {
             if (repeating) {
                 this.player.startTrack(track.makeClone(), false);
-                return;
+            } else {
+                nextTrack();
             }
-            nextTrack();
         }
-
     }
 
     public boolean isRepeating() {

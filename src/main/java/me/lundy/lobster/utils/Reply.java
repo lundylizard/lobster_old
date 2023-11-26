@@ -13,7 +13,7 @@ public enum Reply {
     LOOP_STATE("%s looping current song"),
     NO_TRACK_PLAYING("`⚠️` There is currently no track playing"),
     COULD_NOT_FIND_LYRICS("`⚠️` Could not find lyrics for song. Search query: `%s`"),
-    ERROR_FETCHING_LYRICS("`⚠️` An error occurred while fetching the lyrics"),
+    ERROR_FETCHING_LYRICS("`⚠️` An error occurred while fetching the lyrics: %s"),
     LYRICS_TOO_LONG("`⚠️` Lyrics are too long to be displayed: %s"),
     MOVE_POSITION_INVALID("`⚠️` The new position has to be higher than **0**"),
     MOVE_SUCCESSFUL("Successfully moved track **%s** to `#%d`"),

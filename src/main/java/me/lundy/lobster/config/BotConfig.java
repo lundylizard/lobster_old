@@ -1,15 +1,11 @@
 package me.lundy.lobster.config;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class BotConfig {
 
     private final String botToken;
     private final SpotifyConfig spotifyConfig;
     private final int configVersion;
     private final DatabaseConfig databaseConfig;
-    private final Logger logger = LoggerFactory.getLogger(BotConfig.class);
 
     public BotConfig() {
         this.botToken = "";

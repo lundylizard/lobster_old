@@ -19,9 +19,9 @@ public class HelpCommand extends BotCommand {
     public void onCommand(CommandContext context) {
 
         EmbedBuilder embedBuilder = new EmbedBuilder();
-        embedBuilder.setTitle("About lobster Bot", "https://github.com/lundylizard/lobster");
-        embedBuilder.setDescription("Developed by lundylizard\n\n");
+        embedBuilder.setTitle("About lobster");
         embedBuilder.setColor(context.getGuild().getSelfMember().getColor());
+        embedBuilder.setDescription("Developed by [lundylizard](discord://discord.com/users/251430066775392266)\n\n");
 
         Map<String, BotCommand> commands = Lobster.getCommandManager().getCommands();
         commands.entrySet().stream()
@@ -36,6 +36,7 @@ public class HelpCommand extends BotCommand {
         String inviteUrl = context.getEvent().getJDA().getInviteUrl(Permission.getPermissions(2150647808L));
         Button discord = Button.link(Lobster.DISCORD_URL, "Discord");
         Button invite = Button.link(inviteUrl, "Invite");
+        // Button credits = Button.success("credits", "Credits");
         context.getEvent().replyEmbeds(embedBuilder.build()).addActionRow(discord, invite).queue();
     }
 

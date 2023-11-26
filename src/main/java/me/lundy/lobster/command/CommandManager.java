@@ -1,6 +1,9 @@
 package me.lundy.lobster.command;
 
+import com.zaxxer.hikari.HikariDataSource;
+import me.lundy.lobster.Lobster;
 import me.lundy.lobster.commands.*;
+import me.lundy.lobster.database.settings.GuildSettingsManager;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -17,10 +20,10 @@ public class CommandManager extends ListenerAdapter {
 
     private final Map<String, BotCommand> commands = new HashMap<>();
     private final Logger logger = LoggerFactory.getLogger(CommandManager.class);
-    // private final SettingsManager settingsManager;
+    private static final HikariDataSource dataSource = Lobster.getInstance().getDatabase().getDataSource();
+    private static final GuildSettingsManager guildSettingsManager = new GuildSettingsManager(dataSource);
 
     public CommandManager() {
-        // this.settingsManager = new SettingsManager(Lobster.getInstance().getDatabase().getDataSource(), )
         registerCommand(new HelpCommand());
         registerCommand(new JoinCommand());
         registerCommand(new LeaveCommand());
@@ -33,13 +36,12 @@ public class CommandManager extends ListenerAdapter {
         registerCommand(new QueueCommand());
         registerCommand(new RemoveCommand());
         registerCommand(new SeekCommand());
-        registerCommand(new SettingsCommand());
+        // registerCommand(new SettingsCommand());
         registerCommand(new ShuffleCommand());
         registerCommand(new SkipCommand());
         registerCommand(new StopCommand());
         registerCommand(new VolumeCommand());
-        registerCommand(new StatsCommand());
-        // if (Lobster.getInstance().isDebugMode()) registerCommand(new DebugCommand());
+        // registerCommand(new StatsCommand());
         this.logger.info("Registered {} commands", this.commands.size());
     }
 
@@ -48,13 +50,11 @@ public class CommandManager extends ListenerAdapter {
         BotCommand command = this.commands.get(event.getName());
         CommandContext commandContext = new CommandContext(event);
         command.onCommand(commandContext);
-        // try {
-        //     GuildSettings guildSettings = settingsManager.getSettings(commandContext.getGuild().getIdLong());
-        //     guildSettings.setLastChannelUsedId(event.getChannel().getIdLong());
-        //     settingsManager.updateSettings(commandContext.getGuild().getIdLong(), guildSettings);
-        // } catch (SQLException e) {
-        //     this.logger.error("Could not update lastChannelUsedId", e);
-        // }
+        long guildId = commandContext.getGuild().getIdLong();
+        long channelId = event.getChannelIdLong();
+        if (guildSettingsManager.upsertLastChannelUsedId(guildId, channelId)) {
+            this.logger.info("[{}] {}: Updated last channel used ID to {}", commandContext.getGuild().getName(), event.getUser().getName(), channelId);
+        }
         this.logger.info("[{}] {}: {}", commandContext.getGuild().getName(), event.getUser().getName(), event.getCommandString());
     }
 
