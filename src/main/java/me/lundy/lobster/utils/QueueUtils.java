@@ -24,7 +24,7 @@ public class QueueUtils {
     }
 
     public static String generateCurrentTrack(AudioTrack currentTrack) {
-        return String.format("\uD83D\uDD0A **%s** from %s `\uD83D\uDD52%s`", currentTrack.getInfo().title, ((AudioTrackUserData) currentTrack.getUserData()).getUserMention(), StringUtils.getTrackPosition(currentTrack));
+        return String.format("\uD83D\uDD0A **%s** from %s `\uD83D\uDD52%s`", StringUtils.shortenString(currentTrack.getInfo().title, 35), ((AudioTrackUserData) currentTrack.getUserData()).getUserMention(), StringUtils.getTrackPosition(currentTrack));
     }
 
     public static String generateQueueTrack(int trackIndex, AudioTrack track) {

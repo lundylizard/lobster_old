@@ -70,11 +70,8 @@ public class PlayerManager {
                     }
                 }
 
-                if (musicManager.scheduler.queueSong(track, top)) {
-                    context.getEvent().replyFormat(Reply.PLAYER_TRACK_ADDED.getMessage(), trackTitle, trackAuthor).queue();
-                } else {
-                    context.getEvent().reply("Error").queue();
-                }
+                musicManager.scheduler.queueSong(track, top);
+                context.getEvent().replyFormat(Reply.PLAYER_TRACK_ADDED.getMessage(), trackTitle, trackAuthor).queue();
             }
 
             @Override

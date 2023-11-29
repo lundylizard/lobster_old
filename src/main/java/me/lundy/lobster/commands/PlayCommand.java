@@ -12,14 +12,10 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.managers.AudioManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.net.URL;
 
 public class PlayCommand extends BotCommand {
-
-    private final Logger logger = LoggerFactory.getLogger(PlayCommand.class);
 
     @Override
     public void onCommand(CommandContext context) {
@@ -44,17 +40,6 @@ public class PlayCommand extends BotCommand {
                 context.getEvent().reply(Reply.ERROR_NO_PERMISSIONS_VOICE.getMessage()).queue();
                 return;
             }
-
-            // try {
-            //     SettingsManager settingsManager = Lobster.getInstance().getSettingsManager();
-            //     GuildSettings guildSettings = settingsManager.getSettings(context.getGuild().getIdLong());
-            //     int volume = guildSettings.getVolume();
-            //     GuildMusicManager musicManager = PlayerManager.getInstance().getMusicManager(context.getGuild());
-            //     musicManager.audioPlayer.setVolume(volume);
-            // } catch (SQLException e) {
-            //     logger.error("Could not set volume on startup", e);
-            // }
-
         }
 
         PlayerManager.getInstance().loadAndPlay(context, searchQuery, topOption != null && topOption.getAsBoolean());

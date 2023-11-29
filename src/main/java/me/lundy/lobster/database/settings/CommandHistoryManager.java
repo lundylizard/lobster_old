@@ -20,7 +20,7 @@ public class CommandHistoryManager {
                     context.getGuild().getIdLong(),
                     context.getEvent().getChannel().getIdLong(),
                     context.getEvent().getName(),
-                    context.getEvent().getFullCommandName(),
+                    context.getEvent().getCommandString(),
                     System.currentTimeMillis()
             );
         }

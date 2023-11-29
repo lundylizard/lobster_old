@@ -16,22 +16,38 @@ public class TrackScheduler extends AudioEventAdapter {
     public final BlockingDeque<AudioTrack> queue;
     private boolean repeating = false;
     private Pagination<AudioTrack> pagination;
+    private boolean validPagination;
 
     public TrackScheduler(AudioPlayer player) {
         this.player = player;
         this.queue = new LinkedBlockingDeque<>();
+        this.validPagination = false;
     }
 
     public Pagination<AudioTrack> getPagination() {
-        if (this.pagination == null) {
+        if (this.validPagination) {
+            if (this.pagination == null) {
+                this.pagination = new Pagination<>(new ArrayList<>(this.queue));
+            }
+        } else {
             this.pagination = new Pagination<>(new ArrayList<>(this.queue));
+            this.validPagination = true;
         }
         return this.pagination;
     }
 
-    public boolean queueSong(AudioTrack track, boolean top) {
-        if (!this.player.startTrack(track, true)) return top ? this.queue.offerFirst(track) : this.queue.offerLast(track);
-        return false;
+    public void invalidatePagination() {
+        this.validPagination = false;
+    }
+
+    public void queueSong(AudioTrack track, boolean top) {
+        if (!this.player.startTrack(track, true)) {
+            if (top) {
+                this.queue.addFirst(track);
+                return;
+            }
+            this.queue.offerLast(track);
+        }
     }
 
     public void nextTrack() {

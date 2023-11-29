@@ -8,8 +8,7 @@ import me.lundy.lobster.database.DatabaseManager;
 import me.lundy.lobster.lavaplayer.GuildMusicManager;
 import me.lundy.lobster.lavaplayer.PlayerManager;
 import me.lundy.lobster.listeners.VoiceDisconnectListener;
-import me.lundy.lobster.listeners.buttons.DataButtonListener;
-import me.lundy.lobster.listeners.buttons.QueueButtonListener;
+import me.lundy.lobster.listeners.QueueButtonListener;
 import me.lundy.lobster.utils.ValueChangeDetector;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Activity;
@@ -44,12 +43,7 @@ public class Lobster {
         shardManagerBuilder.enableIntents(GatewayIntent.GUILD_VOICE_STATES);
         shardManagerBuilder.enableCache(CacheFlag.VOICE_STATE);
         shardManagerBuilder.setMemberCachePolicy(MemberCachePolicy.VOICE);
-        shardManagerBuilder.addEventListeners(
-                new QueueButtonListener(),
-                new VoiceDisconnectListener(),
-                new DataButtonListener(),
-                commandManager
-        );
+        shardManagerBuilder.addEventListeners(new QueueButtonListener(), new VoiceDisconnectListener(), commandManager);
         ShardManager shardManager = shardManagerBuilder.build();
         JDA rootShard = shardManager.getShards().get(0);
         rootShard.setRequiredScopes("applications.commands");

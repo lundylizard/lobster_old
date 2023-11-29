@@ -38,6 +38,7 @@ public class ShuffleCommand extends BotCommand {
         Collections.shuffle(trackList);
         musicManager.scheduler.queue.clear();
         musicManager.scheduler.queue.addAll(trackList);
+        musicManager.scheduler.invalidatePagination();
         context.getEvent().reply(Reply.QUEUE_SHUFFLED.getMessage()).queue();
     }
 

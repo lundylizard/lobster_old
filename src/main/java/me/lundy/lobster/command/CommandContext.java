@@ -43,7 +43,7 @@ public class CommandContext {
     }
 
     public boolean selfInVoice() {
-        return self.getVoiceState() != null;
+        return self.getVoiceState() != null && self.getVoiceState().inAudioChannel();
     }
 
     public boolean executorInVoice() {

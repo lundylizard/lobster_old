@@ -1,4 +1,4 @@
-package me.lundy.lobster.listeners.buttons;
+package me.lundy.lobster.listeners;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import me.lundy.lobster.lavaplayer.GuildMusicManager;

@@ -8,12 +8,8 @@ import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.managers.AudioManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class JoinCommand extends BotCommand {
-
-    private final Logger logger = LoggerFactory.getLogger(JoinCommand.class);
 
     @Override
     public void onCommand(CommandContext context) {

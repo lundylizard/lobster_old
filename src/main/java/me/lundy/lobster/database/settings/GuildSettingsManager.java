@@ -54,7 +54,6 @@ public class GuildSettingsManager {
         }
     }
 
-
     public long getLastChannelUsedId(long guildId) {
         try {
             getChannelStatement.setLong(1, guildId);
