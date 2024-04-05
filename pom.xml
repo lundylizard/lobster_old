@@ -6,11 +6,11 @@
 
     <groupId>de.lundy.lobster</groupId>
     <artifactId>lobster</artifactId>
-    <version>3.0-beta</version>
+    <version>2.0</version>
 
     <properties>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -27,6 +27,8 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <finalName>lobster</finalName>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>me.lundy.lobster.Lobster</mainClass>
@@ -40,9 +42,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>21</source>
-                    <target>21</target>
-                    <compilerArgs>--enable-preview</compilerArgs>
+                    <source>17</source>
+                    <target>17</target>
                 </configuration>
             </plugin>
         </plugins>
@@ -53,19 +54,19 @@
         <dependency>
             <groupId>net.dv8tion</groupId>
             <artifactId>JDA</artifactId>
-            <version>5.0.0-beta.18</version>
+            <version>5.0.0-beta.21</version>
         </dependency>
 
         <dependency>
             <groupId>dev.arbjerg</groupId>
             <artifactId>lavaplayer</artifactId>
-            <version>2.0.3</version>
+            <version>afec211f05c9dcf0b6ee44276a02f0316ea2458a-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>com.github.TopiSenpai.LavaSrc</groupId>
             <artifactId>lavasrc</artifactId>
-            <version>3.2.9</version>
+            <version>4.0.1</version>
         </dependency>
 
         <dependency>
@@ -83,26 +84,7 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.4.8</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>42.6.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.zaxxer</groupId>
-            <artifactId>HikariCP</artifactId>
-            <version>5.0.1</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>RELEASE</version>
-            <scope>test</scope>
+            <version>1.4.14</version>
         </dependency>
 
     </dependencies>
@@ -116,6 +98,11 @@
         <repository>
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
+        </repository>
+        <repository>
+            <id>arbjergDev-snapshots</id>
+            <name>Lavalink Repository</name>
+            <url>https://maven.lavalink.dev/snapshots</url>
         </repository>
     </repositories>
 

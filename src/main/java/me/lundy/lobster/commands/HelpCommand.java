@@ -2,41 +2,33 @@ package me.lundy.lobster.commands;
 
 import me.lundy.lobster.Lobster;
 import me.lundy.lobster.command.BotCommand;
-import me.lundy.lobster.command.CommandContext;
-import me.lundy.lobster.utils.StringUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 
-import java.util.Comparator;
-import java.util.Map;
-
 public class HelpCommand extends BotCommand {
 
     @Override
-    public void onCommand(CommandContext context) {
-
-        EmbedBuilder embedBuilder = new EmbedBuilder();
+    public void execute(SlashCommandInteractionEvent event) {
+        var embedBuilder = new EmbedBuilder();
         embedBuilder.setTitle("About lobster");
-        embedBuilder.setColor(context.getGuild().getSelfMember().getColor());
+        embedBuilder.setColor(event.getGuild().getSelfMember().getColor());
         embedBuilder.setDescription("Developed by [lundylizard](discord://discord.com/users/251430066775392266)\n\n");
 
-        Map<String, BotCommand> commands = Lobster.getCommandManager().getCommands();
-        commands.entrySet().stream()
-                .sorted(Comparator.comparingInt(entry -> -StringUtils.countLetters(entry.getKey())))
-                .forEach(entry -> {
-                    BotCommand command = entry.getValue();
-                    String commandString = String.format("</%s:%d> - %s\n", command.getCommandData().getName(), command.getId(), command.getCommandData().getDescription());
-                    embedBuilder.appendDescription(commandString);
-                }
-        );
+        var commands = Lobster.getCommandManager().getCommands();
+        commands.forEach((name, command) -> {
+            var description = command.getCommandData().getDescription();
+            var commandString = String.format("`/%s` - %s\n", name, description);
+            embedBuilder.appendDescription(commandString);
+        });
 
-        String inviteUrl = context.getEvent().getJDA().getInviteUrl(Permission.getPermissions(2150647808L));
-        Button discord = Button.link(Lobster.DISCORD_URL, "Discord");
-        Button invite = Button.link(inviteUrl, "Invite");
-        context.getEvent().replyEmbeds(embedBuilder.build()).addActionRow(discord, invite).queue();
+        var inviteUrl = event.getJDA().getInviteUrl(Permission.getPermissions(2150647808L));
+        var discord = Button.link(Lobster.DISCORD_URL, "Discord");
+        var invite = Button.link(inviteUrl, "Invite");
+        event.replyEmbeds(embedBuilder.build()).addActionRow(discord, invite).queue();
     }
 
     @Override

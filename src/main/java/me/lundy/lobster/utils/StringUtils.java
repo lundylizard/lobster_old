@@ -1,12 +1,10 @@
 package me.lundy.lobster.utils;
 
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import net.dv8tion.jda.api.utils.SplitUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -76,37 +74,8 @@ public class StringUtils {
         return input.substring(0, length) + "...";
     }
 
-    public static int countLetters(String str) {
-        int count = 0;
-        for (int i = 0; i < str.length(); i++) {
-            char c = str.charAt(i);
-            if (isNarrowCharacter(c)) {
-                count++;
-            } else {
-                count += 2;
-            }
-        }
-        return count + str.length();
-    }
-
     private static String pluralize(long value) {
         return value != 1 ? "s" : "";
-    }
-
-    private static boolean isNarrowCharacter(char c) {
-        return c == 'l' || c == 'i' || c == 'j';
-    }
-
-    public static SplitUtil.Strategy onTwoNewLinesStrategy() {
-        return SplitUtil.Strategy.onChar(new Predicate<>() {
-            private int newLineCount = 0;
-            @Override
-            public boolean test(Character c) {
-                boolean isTwoNewLines = (c == '\n') && (++newLineCount == 2);
-                newLineCount = (c == '\n') ? 0 : newLineCount;
-                return isTwoNewLines;
-            }
-        });
     }
 
 }

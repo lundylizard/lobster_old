@@ -19,11 +19,6 @@ public class ValueChangeDetector<T> {
         this.timer.schedule(new ValueChecker(initialValue, action), 0L, checkIntervalMillis);
     }
 
-    public void registerAndAccept(T initialValue, Consumer<T> action, long checkIntervalMillis) {
-        this.timer.schedule(new ValueChecker(initialValue, action), 0L, checkIntervalMillis);
-        action.accept(initialValue);
-    }
-
     private class ValueChecker extends TimerTask {
 
         private final Consumer<T> action;
